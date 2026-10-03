@@ -108,5 +108,17 @@ ownership, target, range, world, shot cadence and ammo, and applies fixed combat
 damage. Shot effects are illustrative rather than a ballistics simulation; zombie
 contact damage is simulated on the server. Visibility trusts the admin controller,
 so this prototype is not intended as a public NPC security boundary. Survivors do
-not yet loot, attack players, chase supplies or leave inventory on death. Existing
+not yet attack players or consume food/medical supplies. Existing
 zombies retain their player-targeting AI. Test with zombies near the survivor.
+
+
+Survivors now carry a 20-slot inventory containing their Winchester and remaining
+shotgun shells. With no nearby threats they seek ordinary ground-loot containers,
+landed airdrops or bodies within 35 metres. They collect shotgun shells (up to 70),
+beans, soda and bandages (up to two each), one server-validated transfer every 1.5
+seconds. Visibility comes from the admin controller, as with prototype combat.
+Private safes, tents and vehicle inventories are excluded. Targets that cannot be
+reached within 45 seconds are skipped temporarily. They do not consume supplies
+yet. Inspection lists carried supplies and occupied slots. Death exposes the same
+inventory as a lootable body; cleanup and the original 15-minute lifetime remove
+both body and inventory. Shotgun ammo is consumed from that inventory on each shot.

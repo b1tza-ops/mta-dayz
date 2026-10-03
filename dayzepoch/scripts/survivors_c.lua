@@ -19,11 +19,17 @@ setTimer(function()
                 if clear and getElementData(ped,"survivor:owner")==localPlayer then triggerServerEvent("dayz:survivorSight",localPlayer,ped,target) end
                 setPedControlState(ped,"aim_weapon",state=="combat")
                 setPedControlState(ped,"backwards",state=="retreat")
-            elseif not isPedDead(ped) and state=="patrol" then
+            elseif not isPedDead(ped) and (state=="patrol" or state=="loot") then
                 local wp=getElementData(ped,"survivor:waypoint")
                 if type(wp)=="table" then
                     local x,y,z=getElementPosition(ped)
-                    face(ped,wp[1],wp[2]);setPedControlState(ped,"forwards",true)
+                    local d=getDistanceBetweenPoints3D(x,y,z,wp[1],wp[2],wp[3])
+                    face(ped,wp[1],wp[2]);setPedControlState(ped,"forwards",d>1.2)
+                    local col=getElementData(ped,"survivor:lootTarget")
+                    if state=="loot" and d<=2 and isElement(col) and getElementData(ped,"survivor:owner")==localPlayer
+                        and isLineOfSightClear(x,y,z+0.5,wp[1],wp[2],wp[3]+0.5,true,true,false,true,false,false,false,ped) then
+                        triggerServerEvent("dayz:survivorLoot",localPlayer,ped,col)
+                    end
                     local old=previous[ped]
                     if not old or getDistanceBetweenPoints3D(x,y,z,old.x,old.y,old.z)>0.7 then previous[ped]={x=x,y=y,z=z,time=getTickCount()}
                     elseif getTickCount()-old.time>2500 then setPedControlState(ped,"jump",true) end

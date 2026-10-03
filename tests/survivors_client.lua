@@ -30,3 +30,8 @@ timers[#timers].fn();assert(not ped.controls.fire)
 ped.data['survivor:state']='retreat';timers[1].fn();assert(ped.controls.backwards and not ped.controls.aim_weapon)
 ped.data['survivor:state']='paused';timers[1].fn();assert(not ped.controls.backwards and not ped.controls.forwards)
 print('PASS survivor patrol, visibility, shot pulse, retreat and pause controls')
+
+ped.data['survivor:state']='loot';ped.data['survivor:waypoint']={1,0,0};ped.data['survivor:lootTarget']=target
+local n=#reports;clear=false;timers[1].fn();assert(#reports==n)
+clear=true;timers[1].fn();assert(reports[#reports][1]=='dayz:survivorLoot' and reports[#reports][4]==target)
+print('PASS survivor loot approach checks visibility before requesting transfer')

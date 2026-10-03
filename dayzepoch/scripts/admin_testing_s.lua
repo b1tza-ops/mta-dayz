@@ -210,7 +210,7 @@ addEventHandler("dayz:testAction",root,function(action,value)
     if action=="survivor" then
         if not outdoor(player) then return reply(player,"Spawn survivors on foot outdoors in dimension 0.") end
         local ped,message=DayZSpawnTestSurvivor(player)
-        if isElement(ped) then remember(player,{kind="survivor",elements={ped}},15*60000) end
+        if isElement(ped) then remember(player,{kind="survivor",elements={ped,getElementData(ped,"parent")}},15*60000) end
         return reply(player,message)
     end
     if action=="inspect" then return inspect(player) end

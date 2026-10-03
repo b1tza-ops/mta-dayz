@@ -67,6 +67,11 @@ function setElementHealth(e,h) e.health=h end
 function killPed(e) e.dead=true end
 local killedTarget
 function triggerEvent(name,target) if name=='onZombieGetsKilled' then killedTarget=target;destroyElement(target) end end
+function getRealTime() return {hour=12,minute=0} end
+function dayZRefreshInventory() end
+function setWeaponAmmo(e,w,a) e.ammo=a end
+dofile('dayzepoch/scripts/shared/inventory_items.lua')
+dofile('dayzepoch/scripts/shared/inventory_rules.lua')
 dofile('dayzepoch/scripts/survivors_s.lua')
 dofile('dayzepoch/scripts/admin_testing_s.lua')
 local function action(who,name,value,origin)
@@ -194,5 +199,35 @@ test('survivor limit and cleanup are bounded',function()
  local n=active('ped');action(admin,'survivor');assert(active('ped')==n)
  action(admin,'cleanup')
  for _,p in ipairs(getElementsByType('ped')) do assert(not p.data['survivor:active']) end
+end)
+local loot
+local function lootRequest(who,ped,col)
+ client=who;source=who;handlers['dayz:survivorLoot'][1](ped,col);client=nil;source=nil
+end
+test('survivor seeks real supplies and transfers only within reach',function()
+ action(admin,'survivor')
+ for _,p in ipairs(getElementsByType('ped')) do if p.data['survivor:active'] then survivor=p end end
+ loot=createColSphere(survivor.x+5,survivor.y,survivor.z);loot.data.itemloot=true;loot.data.mag7=14
+ tickSurvivors();assert(survivor.data['survivor:state']=='loot' and survivor.data['survivor:lootTarget']==loot)
+ lootRequest(admin,survivor,loot);assert(loot.data.mag7==14)
+ survivor.x=loot.x;survivor.y=loot.y;survivor.z=loot.z
+ lootRequest(ordinary,survivor,loot);assert(loot.data.mag7==14)
+ lootRequest(admin,survivor,loot);assert(loot.data.mag7==7 and survivor.data.parent.data.mag7==47 and survivor.data['survivor:ammo']==47)
+ lootRequest(admin,survivor,loot);assert(loot.data.mag7==7)
+ now=now+1600;lootRequest(admin,survivor,loot);assert(loot.data.mag7==0 and survivor.data.parent.data.mag7==54)
+end)
+test('loot requests reject different worlds and private containers',function()
+ loot.data.mag7=7;loot.dim=7;now=now+1600;lootRequest(admin,survivor,loot);assert(loot.data.mag7==7);loot.dim=0
+ loot.data.safe=true;lootRequest(admin,survivor,loot);assert(loot.data.mag7==7);loot.data.safe=false
+end)
+test('inventory capacity prevents item creation or overfilling',function()
+ survivor.data.parent.data.weapon12=3
+ now=now+1600;lootRequest(admin,survivor,loot);assert(loot.data.mag7==7 and survivor.data.parent.data.mag7==54)
+ survivor.data.parent.data.weapon12=0
+end)
+test('dead survivor exposes exactly its carried items and cleanup removes body',function()
+ local col=survivor.data.parent;assert(not col.data.deadman and col.data.weapon7==1 and col.data.mag7==54)
+ survivor.dead=true;tickSurvivors();assert(col.data.deadman and col.data.playername=='AI survivor' and col.data.mag7==54)
+ action(admin,'cleanup');assert(not isElement(col) and not isElement(survivor));destroyElement(loot)
 end)
 print(passed..' admin testing behaviour checks passed')
