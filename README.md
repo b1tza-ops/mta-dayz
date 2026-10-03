@@ -145,3 +145,24 @@ reduce left/right oscillation. It avoids sharp climbs and drops and applies the
 same steering to retreats. Inspection reports walking/detouring/blocked/waiting
 and the current waypoint. This is local steering, not full map pathfinding; closed
 rooms, mazes, interiors and large obstacles can still need authored routes.
+
+
+### Survivor decision system and memory
+
+Survivors score explore, restock, fight, retreat and recovery goals from server
+observations. Spawn order cycles cautious scavenger, balanced survivor and bold
+fighter personalities. They retreat at different health/crowd thresholds and when
+ammo cannot cover nearby threats. Retreats choose a patrol destination with more
+zombie clearance, then retain that goal briefly rather than instantly resuming a
+fight. Recovery is allowed when threats are beyond 18 metres.
+
+Nearby eligible loot sites are remembered for three minutes (maximum 64). Urgent
+shortages can send them back to remembered supplies up to 80 metres away. Current
+loot goals receive a commitment bonus to reduce switching. Failed loot approaches
+and patrol waypoints are avoided for two minutes. Recently visited patrol points
+receive lower exploration priority; danger areas remembered for a minute also
+reduce destination scores (maximum 32 areas). Inspections show personality, goal,
+reason, selected score, memory counts and nearby threat count. Server debug output
+records goal changes. This is deterministic game AI with local steering, not an
+LLM, full map pathfinding or player combat. Proximity is used for server threat
+assessment; the admin controller still verifies visibility for firing/looting.

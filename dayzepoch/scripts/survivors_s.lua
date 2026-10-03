@@ -47,6 +47,101 @@ local function wanted(r,col)
     end
     return chosen,quantity,best
 end
+-- Pure utility planner: inputs are server observations, never client scores.
+DayZSurvivorBrain={}
+local personalities={
+    {name="Cautious scavenger",maxEnemies=2,minHealth=45},
+    {name="Balanced survivor",maxEnemies=3,minHealth=35},
+    {name="Bold fighter",maxEnemies=4,minHealth=30},
+}
+function DayZSurvivorBrain.decide(view)
+    if view.paused then return {state="paused",goal="Wait",reason="Owner is too far away or in another world",score=1000} end
+    local goals={{state="patrol",goal="Explore",reason="Visit a less recently searched, safer waypoint",score=10}}
+    local close=view.nearest and view.nearest<=18
+    local risk=close and (view.enemies>=view.personality.maxEnemies or view.hp<view.personality.minHealth or view.ammo<math.max(4,view.enemies*4))
+    if risk or view.fleeing then
+        goals[#goals+1]={state="retreat",goal="Find safety",reason=risk and (view.ammo<4 and "Too little ammunition" or view.hp<view.personality.minHealth and "Injured; avoid another fight" or "Outnumbered for this personality") or "Keep retreating until safely clear",score=220}
+    end
+    if view.use and not close and not view.fleeing then
+        goals[#goals+1]={state=view.use,goal="Recover",reason="Use carried supplies while threats are distant",score=180}
+    end
+    if view.nearest and view.nearest<=25 then
+        goals[#goals+1]={state="combat",goal="Fight zombies",reason="Manageable threat with enough health and shells",score=close and 160 or 30}
+    end
+    if view.loot then
+        goals[#goals+1]={state="loot",goal="Find supplies",reason=view.loot.reason,score=view.loot.score}
+    end
+    local chosen=goals[1]
+    for _,goal in ipairs(goals) do if goal.score>chosen.score then chosen=goal end end
+    return chosen
+end
+local function dangerPenalty(r,x,y,now)
+    local penalty=0
+    for key,memory in pairs(r.danger) do
+        if now>memory.untilTime then r.danger[key]=nil
+        elseif ((x-memory.x)^2+(y-memory.y)^2)^0.5<22 then penalty=penalty+35 end
+    end
+    return penalty
+end
+local function nextExplore(ped,r,now)
+    local x,y=getElementPosition(ped);local chosen,best=nil,-math.huge
+    for index,wp in ipairs(r.route) do
+        if not r.blockedRoutes[index] or now>r.blockedRoutes[index] then
+            local age=r.visited[index] and math.min(120,(now-r.visited[index])/1000) or 150
+            local distance=((x-wp[1])^2+(y-wp[2])^2)^0.5
+            local score=age-distance*0.4-dangerPenalty(r,wp[1],wp[2],now)
+            if distance>3 and score>best then chosen=index;best=score end
+        end
+    end
+    return chosen or r.index%#r.route+1
+end
+local function safeWaypoint(ped,r,zombies,now)
+    local chosen,best=r.route[1],-math.huge
+    local x,y=getElementPosition(ped)
+    for _,wp in ipairs(r.route) do
+        local clearance=60
+        for _,zombie in ipairs(zombies) do
+            local zx,zy=getElementPosition(zombie)
+            clearance=math.min(clearance,((wp[1]-zx)^2+(wp[2]-zy)^2)^0.5)
+        end
+        local score=clearance-((x-wp[1])^2+(y-wp[2])^2)^0.5*0.25-dangerPenalty(r,wp[1],wp[2],now)
+        if score>best then best=score;chosen=wp end
+    end
+    return chosen
+end
+local function rememberLoot(ped,r,now)
+    for _,col in ipairs(getElementsByType("colshape")) do
+        if lootable(col) and world(ped,col) and range(ped,col)<=35 then
+            r.lootMemory[col]=now
+        end
+    end
+    local entries={}
+    for col,seen in pairs(r.lootMemory) do
+        if not isElement(col) or now-seen>180000 then r.lootMemory[col]=nil;r.ignored[col]=nil
+        else entries[#entries+1]={col=col,seen=seen} end
+    end
+    table.sort(entries,function(a,b) return a.seen>b.seen end)
+    for index=65,#entries do r.lootMemory[entries[index].col]=nil;r.ignored[entries[index].col]=nil end
+end
+local function lootGoal(ped,r,now)
+    local chosen,best=nil,-math.huge
+    for col in pairs(r.lootMemory) do
+        if world(ped,col) and (not r.ignored[col] or now>r.ignored[col]) then
+            local supply,_,priorityScore=wanted(r,col)
+            local distance=range(ped,col)
+            -- Return to remembered supplies only for a current shortage.
+            if supply and distance<=(priorityScore>1 and 80 or 35) then
+                local x,y=getElementPosition(col)
+                local score=40+priorityScore*0.6-distance*0.3-dangerPenalty(r,x,y,now)
+                if col==r.loot then score=score+8 end -- commitment prevents target thrashing
+                if score>best then
+                    best=score;chosen={col=col,score=score,reason=(priorityScore>1 and "Urgent: " or "Restock: ")..supply.name}
+                end
+            end
+        end
+    end
+    return chosen
+end
 local function syncNeeds(ped,r)
     data(ped,"food",r.food);data(ped,"water",r.water);data(ped,"bleeding",r.bleeding)
     data(ped,"health",r.hp);setElementHealth(ped,r.hp)
@@ -102,7 +197,7 @@ function DayZSpawnTestSurvivor(player)
     -- Eight waypoints around an 80-by-80-metre patrol area.
     local route={{x+4,y,z},{x+40,y,z},{x+40,y+40,z},{x,y+40,z},
         {x-40,y+40,z},{x-40,y,z},{x-40,y-40,z},{x,y-40,z}}
-    survivors[ped]={owner=player,col=col,ignored={},lastLoot=0,food=65,water=65,bleeding=false,lastNeeds=getTickCount(),route=route,index=2,routeStarted=getTickCount(),ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
+    survivors[ped]={owner=player,col=col,personality=personalities[count%#personalities+1],lootMemory={},visited={[1]=getTickCount()},blockedRoutes={},danger={},fleeUntil=0,ignored={},lastLoot=0,food=65,water=65,bleeding=false,lastNeeds=getTickCount(),route=route,index=2,routeStarted=getTickCount(),ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
     if not setElementSyncer(ped,player,true) then
         survivors[ped]=nil;destroyElement(col);destroyElement(ped)
         outputDebugString("[DayZ survivors] Could not assign survivor controller",2)
@@ -114,13 +209,18 @@ function DayZSpawnTestSurvivor(player)
     syncNeeds(ped,survivors[ped])
     data(ped,"state","patrol");data(ped,"waypoint",route[2])
     outputDebugString("[DayZ survivors] Spawned patrol survivor for "..getAccountName(getPlayerAccount(player)),3)
-    return ped,"Survivor spawned: shotgun, 40 shells, 20-slot inventory; searches nearby loot for shells, food, drinks, bandages and medic kits. Eats, drinks and heals automatically when safe. Expires in 15 minutes."
+    return ped,survivors[ped].personality.name.." spawned: shotgun, 40 shells, 20-slot inventory; searches nearby loot for shells, food, drinks, bandages and medic kits. Eats, drinks and heals automatically when safe. Expires in 15 minutes."
 end
 function DayZInspectTestSurvivors(player)
     local lines={}
     for ped,r in pairs(survivors) do
         if isElement(ped) and r.owner==player then
             lines[#lines+1]="Survivor: "..tostring(getElementData(ped,"survivor:state")).." | HP "..r.hp.." | shells "..r.ammo.." | distance "..math.floor(range(player,ped)).."m | inventory "..string.format("%.1f",getDayZSlots(r.col)).."/20 slots"
+            lines[#lines+1]="  Personality: "..r.personality.name
+            lines[#lines+1]="  Goal: "..(r.goal or "Explore").." | Reason: "..(r.reason or "Starting patrol").." | Score: "..math.floor(r.goalScore or 10)
+            local memories=0;for _ in pairs(r.lootMemory) do memories=memories+1 end
+            local blocked=0;for _,untilTime in pairs(r.blockedRoutes) do if untilTime>getTickCount() then blocked=blocked+1 end end
+            lines[#lines+1]="  Memory: "..memories.." loot sites | "..blocked.." blocked routes | nearby threats "..(r.enemies or 0)
             lines[#lines+1]="  Patrol waypoint: "..r.index.."/"..#r.route.." | Movement: "..(r.navigation or "waiting for controller")
             lines[#lines+1]="  Food: "..math.floor(r.food).."/100 | Water: "..math.floor(r.water).."/100 | Bleeding: "..(r.bleeding and "yes" or "no")
             lines[#lines+1]="  Last used: "..tostring(getElementData(ped,"survivor:lastUse") or "Nothing yet")
@@ -149,17 +249,31 @@ setTimer(function()
         elseif not isElement(r.owner) then if isElement(r.col) then destroyElement(r.col) end;destroyElement(ped);survivors[ped]=nil
         elseif isPedDead(ped) then corpse(ped,r)
         else
+            local now=getTickCount()
             local target,best=nil,30
+            local zombies,closeCount={},0
             for _,zombie in ipairs(getElementsByType("ped")) do
-                if getElementData(zombie,"zombie") and not isPedDead(zombie)
-                    and getElementDimension(zombie)==getElementDimension(ped) and getElementInterior(zombie)==getElementInterior(ped) then
+                if getElementData(zombie,"zombie") and not isPedDead(zombie) and world(ped,zombie) then
                     local d=range(ped,zombie)
+                    if d<30 then zombies[#zombies+1]=zombie end
+                    if d<=18 then closeCount=closeCount+1 end
                     if d<best then target=zombie;best=d end
                 end
             end
-            r.target=target
-            local now=getTickCount()
+            r.target=target;r.enemies=closeCount
             local paused=not world(ped,r.owner) or range(ped,r.owner)>180
+            if closeCount>=2 then
+                local x,y=getElementPosition(ped)
+                local key=math.floor(x/20)..":"..math.floor(y/20)
+                r.danger[key]={x=x,y=y,untilTime=now+60000}
+            end
+            local dangerEntries={}
+            for key,memory in pairs(r.danger) do
+                if now>memory.untilTime then r.danger[key]=nil
+                else dangerEntries[#dangerEntries+1]={key=key,untilTime=memory.untilTime} end
+            end
+            table.sort(dangerEntries,function(a,b) return a.untilTime>b.untilTime end)
+            for index=33,#dangerEntries do r.danger[dangerEntries[index].key]=nil end
             if paused then r.lastNeeds=now;r.use=nil
             else
                 local ticks=math.floor((now-r.lastNeeds)/10000)
@@ -167,49 +281,52 @@ setTimer(function()
                     r.lastNeeds=r.lastNeeds+ticks*10000
                     r.food=math.max(0,r.food-ticks);r.water=math.max(0,r.water-ticks*1.5)
                     local damage=(r.bleeding and 2 or 0)+(r.food<=0 and 3 or 0)+(r.water<=0 and 4 or 0)
-                    r.hp=math.max(0,r.hp-damage*ticks)
-                    syncNeeds(ped,r)
+                    r.hp=math.max(0,r.hp-damage*ticks);syncNeeds(ped,r)
                 end
-                if target or r.hp<=0 then r.use=nil else consume(ped,r,now) end
+                if closeCount>0 or now<r.fleeUntil or r.hp<=0 then r.use=nil else consume(ped,r,now) end
+                rememberLoot(ped,r,now)
             end
-            if r.hp<=0 then killPed(ped);corpse(ped,r) end
-            local state=r.hp<=0 and "dead" or paused and "paused" or target and ((r.ammo<=0 or r.hp<=30) and "retreat" or "combat") or r.use and r.use.state or "patrol"
-            if state=="patrol" then
-                if r.loot and (not wanted(r,r.loot) or not world(ped,r.loot) or getTickCount()-r.lootSince>45000) then
-                    if isElement(r.loot) then r.ignored[r.loot]=getTickCount()+30000 end
+            if r.hp<=0 then killPed(ped);corpse(ped,r)
+            else
+                if r.loot and (not wanted(r,r.loot) or not world(ped,r.loot) or now-r.lootSince>45000 or r.navigation=="blocked" and now-r.lootSince>6000) then
+                    if isElement(r.loot) then r.ignored[r.loot]=now+120000 end
                     r.loot=nil
                 end
-                if not r.loot then
-                    local nearest=35;local bestPriority=-1
-                    for _,col in ipairs(getElementsByType("colshape")) do
-                        if world(ped,col) and (not r.ignored[col] or getTickCount()>r.ignored[col]) and wanted(r,col) then
-                            local d=range(ped,col)
-                            local _,_,score=wanted(r,col)
-                            if d<35 and (score>bestPriority or score==bestPriority and d<nearest) then
-                                r.loot=col;nearest=d;bestPriority=score
-                            end
-                        end
-                    end
-                    if r.loot then r.lootSince=getTickCount();r.lootStatus="Approaching" end
+                local candidate=not paused and lootGoal(ped,r,now) or nil
+                local decision=DayZSurvivorBrain.decide({paused=paused,hp=r.hp,ammo=r.ammo,personality=r.personality,
+                    nearest=target and best or nil,enemies=closeCount,use=r.use and r.use.state,
+                    fleeing=now<r.fleeUntil,loot=candidate})
+                local state=decision.state
+                local previousState=getElementData(ped,"survivor:state")
+                if state~=previousState then
+                    outputDebugString("[DayZ survivors] "..r.personality.name.." chose "..decision.goal..": "..decision.reason,3)
+                    if state=="patrol" then r.progress=now;r.routeStarted=now end
                 end
-                if r.loot then
-                    state="loot"
+                r.goal=decision.goal;r.reason=decision.reason;r.goalScore=decision.score
+                data(ped,"goal",r.goal);data(ped,"reason",r.reason)
+                if state=="retreat" then
+                    if closeCount>0 then r.fleeUntil=now+5000 end
+                    data(ped,"waypoint",safeWaypoint(ped,r,zombies,now));r.use=nil;r.loot=nil
+                elseif state=="loot" then
+                    if r.loot~=candidate.col then r.lootSince=now;r.lootStatus="Approaching" end
+                    r.loot=candidate.col
                     local x,y,z=getElementPosition(r.loot);data(ped,"waypoint",{x,y,z})
-                end
-            else r.loot=nil end
-            data(ped,"lootTarget",r.loot or false)
-            data(ped,"state",state);data(ped,"target",target or false)
-            if state=="patrol" then
-                local wp=r.route[r.index];local x,y,z=getElementPosition(ped)
-                if ((x-wp[1])^2+(y-wp[2])^2)^0.5<2 or getTickCount()-r.routeStarted>45000 then
-                    r.index=r.index%#r.route+1;r.progress=getTickCount();r.routeStarted=getTickCount()
-                elseif getDistanceBetweenPoints3D(x,y,z,r.px,r.py,r.pz)>0.7 then
-                    r.px=x;r.py=y;r.pz=z;r.progress=getTickCount()
-                elseif getTickCount()-r.progress>6000 then
-                    r.index=r.index%#r.route+1;r.progress=getTickCount();r.routeStarted=getTickCount()
-                    outputDebugString("[DayZ survivors] Patrol blocked; trying next waypoint",3)
-                end
-                data(ped,"waypoint",r.route[r.index])
+                elseif state=="patrol" then
+                    r.loot=nil
+                    local wp=r.route[r.index];local x,y,z=getElementPosition(ped)
+                    local arrived=((x-wp[1])^2+(y-wp[2])^2)^0.5<2
+                    local timedOut=now-r.routeStarted>45000
+                    local stuck=now-r.progress>6000
+                    if arrived or timedOut or stuck then
+                        if arrived then r.visited[r.index]=now
+                        else r.blockedRoutes[r.index]=now+120000 end
+                        r.index=nextExplore(ped,r,now);r.progress=now;r.routeStarted=now
+                    elseif getDistanceBetweenPoints3D(x,y,z,r.px,r.py,r.pz)>0.7 then
+                        r.px=x;r.py=y;r.pz=z;r.progress=now
+                    end
+                    data(ped,"waypoint",r.route[r.index])
+                else r.loot=nil end
+                data(ped,"lootTarget",r.loot or false);data(ped,"state",state);data(ped,"target",target or false)
             end
         end
     end

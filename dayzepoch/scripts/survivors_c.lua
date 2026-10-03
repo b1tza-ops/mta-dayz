@@ -67,9 +67,11 @@ setTimer(function()
                 local clear=isLineOfSightClear(px,py,pz+0.7,x,y,z+0.5,true,true,false,true,false,false,false,ped)
                 if clear and getElementData(ped,"survivor:owner")==localPlayer then triggerServerEvent("dayz:survivorSight",localPlayer,ped,target) end
                 setPedControlState(ped,"aim_weapon",state=="combat")
-                if state=="retreat" then walkTowards(ped,px+(px-x),py+(py-y))
+                if state=="retreat" then
+                    local wp=getElementData(ped,"survivor:waypoint")
+                    if type(wp)=="table" then walkTowards(ped,wp[1],wp[2]) else walkTowards(ped,px+(px-x),py+(py-y)) end
                 else reportNavigation(ped,"waiting") end
-            elseif not isPedDead(ped) and (state=="patrol" or state=="loot") then
+            elseif not isPedDead(ped) and (state=="patrol" or state=="loot" or state=="retreat") then
                 local wp=getElementData(ped,"survivor:waypoint")
                 if type(wp)=="table" then
                     local x,y,z=getElementPosition(ped)
