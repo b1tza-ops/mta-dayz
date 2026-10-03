@@ -1,136 +1,4 @@
-local inventoryItems = {
-	[1] = {
-		{"weapon11", 3,"images/inventory/weapons/m4a1holo.png"},
-		{"weapon12", 6,"images/inventory/weapons/mk48.png"},
-		{"weapon13", 5,"images/inventory/weapons/rpk.png"},
-		{"weapon10", 3,"images/inventory/weapons/ak107.png"},
-		{"weapon6", 3,"images/inventory/weapons/aksgold.png"},
-		{"weapon14", 3,"images/inventory/weapons/sa58.png"},
-		{"weapon7", 3,"images/inventory/weapons/winchester1866.png"},
-		{"weapon15", 3,"images/inventory/weapons/saiga12k.png"},
-		{"weapon9", 3,"images/inventory/weapons/aks74u.png"},
-		{"weapon8", 3,"images/inventory/weapons/crossbow.png"},
-		{"weapon2", 3,"images/inventory/weapons/dmr.png"},
-		{"weapon3", 3,"images/inventory/weapons/cz550.png"},
-		{"weapon5", 3,"images/inventory/weapons/m24.png"},
-		{"weapon1", 3,"images/inventory/weapons/vks.png"},
-		{"weapon4", 3,"images/inventory/weapons/svdcamo.png"}
-	},
-	[2] = {
-		{"weapon21", 2,"images/inventory/weapons/m1911.png"},
-		{"weapon23", 2,"images/inventory/weapons/m9sd.png"},
-		{"weapon25", 2,"images/inventory/weapons/g17.png"},
-		{"weapon20", 2,"images/inventory/weapons/microuzi.png"},
-		{"weapon18", 3,"images/inventory/weapons/mp5a5.png"},
-		{"weapon19", 2,"images/inventory/weapons/revolver.png"},
-		{"weapon24", 2,"images/inventory/weapons/huntingknife.png"},
-		{"weapon22", 2,"images/inventory/weapons/hatchet.png"},
-		{"weapon26", 2,"images/inventory/weapons/bat.png"},
-		{"weapon27", 2,"images/inventory/weapons/shovel.png"},
-		{"weapon17", 2,"images/inventory/weapons/machete.png"}
-	},
-	[3] = {
-		{"weapon16", 1,"images/inventory/weapons/grenade.png"},
-		{"weapon28", 1,"images/inventory/weapons/binoculars.png", "inventorydescription6"}
-	},
-	[4] = {
-		{"mag1", 0.0666666666666667,"images/inventory/mags/pistol.png","mag1description"},
-		{"mag2", 0.1428571428571429,"images/inventory/mags/revolver.png","mag2description"},
-		{"mag3", 0.0666666666666667,"images/inventory/mags/semirifle.png","mag3description"},
-		{"mag4", 0.0666666666666667,"images/inventory/mags/rifle.png","mag4description"},
-		{"mag7", 0.1428571428571429,"images/inventory/mags/shotgun.png","mag7description"},
-		{"mag5", 0.05,"images/inventory/mags/m4rifle.png","mag5description"},
-		{"mag6", 0.03,"images/inventory/mags/heavy.png","mag6description"},
-		{"mag8", 0.1,"images/inventory/mags/sniper.png","mag8description"},
-		{"mag9", 1,"images/inventory/mags/bolt.png","mag9description"},
-		{"mag10", 0.1,"images/inventory/mags/sniper2.png","mag10description"}
-	},
-	[5] = {
-		{"fooditem1", 1,"images/inventory/waterbottle.png","inventorydescription8"},
-		{"fooditem3", 1,"images/inventory/pasta.png","inventorydescription9"},
-		{"fooditem4", 1,"images/inventory/beans.png","inventorydescription10"},
-		{"fooditem5", 1,"images/inventory/burger.png","inventorydescription10"},
-		{"fooditem9", 1,"images/inventory/pizza.png","inventorydescription10"},
-		{"fooditem7", 1,"images/inventory/soda.png","inventorydescription11"},
-		{"fooditem6", 1,"images/inventory/milk.png","inventorydescription12"},
-		{"fooditem10", 1,"images/inventory/cookedmeat.png","inventorydescription13"}
-	},
-	[6] = {
-		{"medicine5", 1,"images/inventory/bandage.png", "inventorydescription15", "inventoryactiontext9"},
-		{"medicine1", 4,"images/inventory/medicaments/medickit.png","inventorydescription19", "inventoryactiontext11"},
-		{"medicine2", 2,"images/inventory/medicaments/medickit.png","inventorydescription19", "inventoryactiontext11"},
-		{"medicine3", 1,"images/inventory/medicaments/smallmedickit.png","inventorydescription19", "inventoryactiontext11"},
-		{"medicine4", 1,"images/inventory/heatpack.png","inventorydescription20", "inventoryactiontext11"},
-		{"medicine6", 1,"images/inventory/painkiller.png", "inventorydescription21", "inventoryactiontext11"},
-		{"medicine8", 1,"images/inventory/medicaments/morphine.png", "inventorydescription22", "inventoryactiontext11"},
-		{"medicine7", 1,"images/inventory/medicaments/bloodbag.png","inventorydescription23"},
-	},
-	[7] = {
-		{"item1", 2,"images/inventory/woodpile.png","inventorydescription14"},
-		{"item5", 1,"images/inventory/roadflarered.png", "inventorydescription16", "inventoryactiontext10"},
-		{"item11", 1,"images/inventory/roadflaregreen.png", "inventorydescription16", "inventoryactiontext10"},
-		{"item12", 1,"images/inventory/roadflareblue.png", "inventorydescription16", "inventoryactiontext10"},
-		{"item10", 2,"images/inventory/emptycanister.png","inventorydescription17"},
-		{"item9", 2,"images/inventory/fullcanister.png","inventorydescription18"},
-		{"item2", 1,"images/inventory/wirefence.png", "inventorydescription24", "inventoryactiontext12"},
-		{"item13", 1,"images/inventory/mine.png", "inventorydescription25", "inventoryactiontext10"},
-		{"item14", 1,"images/inventory/key.png", "inventorydescription25"},
-		{"fooditem11", 1,"images/inventory/rawmeat.png","inventorydescription26"},
-		{"vehiclepart3", 2,"images/inventory/tire.png", "inventorydescription27"},
-		{"vehiclepart4", 2,"images/inventory/tankpart.png", "inventorydescription27"},
-		{"vehiclepart5", 2,"images/inventory/scrapmetal.png", "inventorydescription27"},
-		{"vehiclepart2", 5,"images/inventory/rotor.png", "inventorydescription27"},
-		{"vehiclepart1", 5,"images/inventory/engine.png", "inventorydescription27"},
-		{"item3", 3,"images/inventory/tent.png", "inventorydescription28", "inventoryactiontext13"},
-		{"item4", 10,"images/inventory/safe.png", "inventorydescription29", "inventoryactiontext14"},
-		{"fooditem2", 1,"images/inventory/emptybottle.png", "inventorydescription31", "inventoryactiontext16"}, 
-		{"fooditem8", 1,"images/inventory/emptysoda.png", "inventorydescription32"},
-		{"item6", 1,"images/inventory/trash.png", "inventorydescription33"},
-		--{"currency1", 0,"images/inventory/briefcase.png", "inventorydescription34"},
-		--{"currency2", 0,"images/inventory/briefcase.png", "inventorydescription35"},
-		--{"currency3", 0,"images/inventory/briefcase.png", "inventorydescription36"},
-		{"item7", 1,"images/inventory/c4.png", "inventorydescription37"},
-		{"item8", 1,"images/inventory/supplysignal.png","inventorydescription38","inventoryactiontext17"},
-	},
-	[8] = {
-		{"clothing2", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing3", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing4", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing5", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing6", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing9", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing1", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing7", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing8", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"backpack5", 1,"images/inventory/equipment/drybag.png", "inventorydescription51", "inventoryactiontext18"},
-		{"backpack4", 1,"images/inventory/equipment/leathersack.png", "inventorydescription39", "inventoryactiontext18"},
-		{"backpack6", 1,"images/inventory/equipment/tortillabackpack.png", "inventorydescription65", "inventoryactiontext18"},
-		{"backpack7", 1,"images/inventory/equipment/alicebackpack.png", "inventorydescription66", "inventoryactiontext18"},
-		{"backpack3", 1,"images/inventory/equipment/huntingbackpack.png", "inventorydescription40", "inventoryactiontext18"},
-		{"backpack2", 1,"images/inventory/equipment/boulderbackpack.png", "inventorydescription41", "inventoryactiontext18"},
-		{"backpack1", 1,"images/inventory/equipment/coyotebackpack.png", "inventorydescription42", "inventoryactiontext18"},
-		{"helmet1", 1,"images/inventory/equipment/specialforceshelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet2", 1,"images/inventory/equipment/militaryhelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet3", 1,"images/inventory/equipment/motorcyclehelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet4", 1,"images/inventory/equipment/swathelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet5", 1,"images/inventory/equipment/welderhelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet6", 1,"images/inventory/equipment/cap.png", "inventorydescription70", "inventoryactiontext22"},
-		{"helmet7", 1,"images/inventory/equipment/ushanka.png", "inventorydescription70", "inventoryactiontext22"},
-		{"vest1", 1,"images/inventory/equipment/policevest.png", "inventorydescription69", "inventoryactiontext23"},
-		{"vest2", 1,"images/inventory/equipment/militaryvest.png", "inventorydescription69", "inventoryactiontext23"},
-	},
-	[9] = {
-		{"toolbelt7", 0,"images/inventory/nvgoggles.png", "inventorydescription43"},
-		{"toolbelt6", 0,"images/inventory/infgoggles.png", "inventorydescription44"},
-		{"toolbelt1", 0,"images/inventory/map.png","inventorydescription45"},
-		{"toolbelt5", 0,"images/inventory/boxofmatches.png", "inventorydescription46", "inventoryactiontext19"},
-		{"toolbelt3", 0,"images/inventory/watch.png", "inventorydescription47"},
-		{"toolbelt2", 0,"images/inventory/gps.png", "inventorydescription45", "inventoryactiontext20"},
-		{"toolbelt4", 0,"images/inventory/toolbox.png", "inventorydescription48"},
-		{"toolbelt9", 0,"images/inventory/toolbox.png", "inventorydescription49"},
-		{"toolbelt8", 0,"images/inventory/radiodevice.png", "inventorydescription50", "inventoryactiontext21"}
-	}
-}
+local inventoryItems = DayZInventoryItems;
 
 local keyTable = {
 	[1] = "inventorycolumntext1",
@@ -815,31 +683,8 @@ function getVehicleMaxFuel(loot)
 end
 
 function fillgas(veh)
-	if ((getElementData(veh, "fuel")+20) < getVehicleMaxFuel(veh)) then
-		addingfuel = 20;
-	elseif ((getElementData(veh, "fuel")+20) > (getVehicleMaxFuel(veh) + 15)) then
-		startRollMessage("clientinfotext13", 160, 40, 40);
-		return;
-	else
-		addingfuel = getVehicleMaxFuel(veh)-getElementData(veh, "fuel");
-	end
-	triggerServerEvent("setPlayerUseAnimation",localPlayer);
-	setTimer(function()
-		setElementData(veh, "fuel", getElementData(veh, "fuel")+addingfuel);
-		setElementData(localPlayer, "item9", getElementData(localPlayer, "item9") - 1);
-		setElementData(localPlayer, "item10", getElementData(localPlayer, "item10") + 1);
-		refreshInventory();
-		startRollMessage("clientinfotext14", 40, 160, 40);
-	end,2000,1);
-	local sound = playSound("sounds/refuel.ogg",false);
-	setElementData(localPlayer,"isInAction",true);
-	setTimer(function()
-		setElementData(localPlayer,"isInAction",false);
-		stopSound(sound);
-	end, 3000, 1);
+    triggerServerEvent("dayz:refuel",localPlayer,veh)
 end
-addEvent("onClientFillGas",true);
-addEventHandler("onClientFillGas", root, fillgas);
 
 function moveInventoryItemOut()
 	if (getElementData(localPlayer,"isInAction")) then return; end
@@ -891,39 +736,8 @@ addEventHandler("onClientGUIClick", inv_bp.button[1], moveInventoryItemOut,false
 addEventHandler("onClientGUIDoubleClick", inv_bp.scrollpane[1], moveInventoryItemOut);
 
 addEventHandler("onPlayerMoveItemOutOFInventory", root, function(itemName, loot)
-	local itemPlus = 1;
-	if (getMagazineSize(itemName)) then itemPlus = getMagazineSize(itemName); end
-	local itemName2 = itemName;
-	if (itemName == "Tire_inVehicle") then itemName2 = "vehiclepart3"; end
-	if (itemName == "Engine_inVehicle") then itemName2 = "vehiclepart1"; end
-	if (itemName == "Parts_inVehicle") then itemName2 = "vehiclepart4"; end
-	if (itemName == "Scrap_inVehicle") then itemName2 = "vehiclepart5"; end
-	if (itemName == "Rotor_inVehicle") then itemName2 = "vehiclepart2"; end
-	if ((getElementData(localPlayer, itemName2)/itemPlus) < 1) then
-		itemPlus = getElementData(localPlayer, itemName2);
-	end
-	for i=1,3 do
-		if (itemName == getElementData(localPlayer,"currentweapon_"..tostring(i))) then
-			triggerServerEvent("removeBackWeaponOnDrop", localPlayer, true, i);
-		end
-	end
-	if loot then
-		setElementData(loot, itemName, (getElementData(loot, itemName) or 0) + itemPlus);
-		if (#getElementsWithinColShape(loot, "player") > 1) then
-			triggerServerEvent("onPlayerChangeLoot", root, loot);
-		end
-	else
-		triggerServerEvent("playerDropAItem", localPlayer, itemName, itemPlus);
-	end
-	if (itemName == "Tire_inVehicle") then itemName = "vehiclepart3"; end
-	if (itemName == "Engine_inVehicle") then itemName = "vehiclepart1"; end
-	if (itemName == "Parts_inVehicle") then itemName = "vehiclepart4"; end
-	if (itemName == "Scrap_inVehicle") then itemName = "vehiclepart5"; end
-	if (itemName == "Rotor_inVehicle") then itemName = "vehiclepart2"; end
-	setElementData(localPlayer, itemName, getElementData(localPlayer, itemName) - itemPlus);
-	if (loot and getElementData(loot, "itemloot")) then
-		triggerServerEvent("refreshItemLoot", root, loot, getElementData(loot, "parent"));
-	end
+    if loot then triggerServerEvent("dayz:transferItem",localPlayer,"put",itemName,loot)
+    else triggerServerEvent("dayz:dropItem",localPlayer,itemName) end
 end);
 
 function moveLootItemOut()
@@ -970,21 +784,7 @@ addEventHandler("onClientGUIClick", inv_loot.button[1], moveLootItemOut,false);
 addEventHandler("onClientGUIDoubleClick", inv_loot.scrollpane[1], moveLootItemOut);
 
 addEventHandler("onPlayerMoveItemInInventory", root, function(itemName, loot)
-	local itemPlus = 1;
-	if (getMagazineSize(itemName)) then itemPlus = getMagazineSize(itemName); end
-	if ((getElementData(loot, itemName)/itemPlus) < 1) then
-		itemPlus = getElementData(loot, itemName);
-	end
-	if loot then
-		setElementData(localPlayer, itemName, getElementData(localPlayer, itemName) + itemPlus);
-		if (itemPlus ~= 0) then
-			setElementData(loot, itemName, getElementData(loot, itemName) - itemPlus);
-		end
-		if (#getElementsWithinColShape(loot, "player") > 1) then triggerServerEvent("onPlayerChangeLoot", root, loot); end
-	end
-	if getElementData(loot, "itemloot") then
-		triggerServerEvent("refreshItemLoot", root, loot, getElementData(loot, "parent"));
-	end
+    triggerServerEvent("dayz:transferItem",localPlayer,"take",itemName,loot)
 end);
 
 function onClientOpenInventoryStopMenu()
@@ -1527,23 +1327,4 @@ function getWeaponAmmoType(weapon)
 	return false, false;
 end
 
-addEventHandler("onClientPlayerWeaponFire", localPlayer, function(weapon, ammor)
-	local slot = getSlotFromWeapon(weapon);
-	if (slot == 3 or slot == 5 or slot == 6 or slot == 7) then
-		local ammo,_ = getWeaponAmmoType(getElementData(localPlayer, "currentweapon_1"));
-		if (getElementData(localPlayer, ammo) > 0) then
-			setElementData(localPlayer, ammo, getElementData(localPlayer, ammo) - 1);
-		end
-	elseif (slot == 2 or slot == 4) then
-		local ammo,_ = getWeaponAmmoType(getElementData(localPlayer, "currentweapon_2"));
-		if (getElementData(localPlayer, ammo) > 0) then
-			setElementData(localPlayer, ammo, getElementData(localPlayer, ammo) - 1);
-		end
-	else
-		local weap = getElementData(localPlayer, "currentweapon_3");
-		local ammo,_ = getWeaponAmmoType(weap);
-		if (getElementData(localPlayer, ammo) > 0) then
-			setElementData(localPlayer, ammo, getElementData(localPlayer, ammo) - 1);
-		end
-	end
-end);
+-- Ammo consumption is handled by native server weapon/projectile events.

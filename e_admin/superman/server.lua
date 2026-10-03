@@ -47,9 +47,11 @@ end
 addEventHandler("onResourceStart", getResourceRootElement(thisResource), Superman.Start, false)
 
 function Superman.clientStart()
-  setElementData(client, "superman:flying", true)
+  if client ~= source or not isDayZAdmin(client) then return end
+  setElementData(client, "superman:flying", true, "broadcast", "deny")
 end
 
 function Superman.clientStop()
-  setElementData(client, "superman:flying", false)
+  if client ~= source or not isDayZAdmin(client) then return end
+  setElementData(client, "superman:flying", false, "broadcast", "deny")
 end

@@ -570,10 +570,10 @@ local last_veh_id = 0;
 local last_tent_id = 0;
 local backupdone = false;
 
-addEvent("respawnVehiclesInWater", true);
+addEvent("respawnVehiclesInWater", false);
 addEvent("repairVehicle", true);
 addEvent("cancelVehicleRepair", true);
-addEvent("respawnDayZVehicle", true);
+addEvent("respawnDayZVehicle", false);
 
 if fileExists("scripts/tools/backup.db") then
 	backupdone = true;
@@ -581,7 +581,7 @@ else
 	backupdone = false;
 end
 
-local db = dbConnect("sqlite", "scripts/tools/backup.db");
+local db = assert(dbConnect("sqlite", "scripts/tools/backup.db", "", "", "share=0;batch=0;queue=dayz-backup"), "DayZ backup database connection failed");
 dbExec(db, "CREATE TABLE IF NOT EXISTS `vehicles` (model, x, y, z, rX, rY, rZ, slots, fuel, engines, moving, parts, scrap, rotor, items, health, dayz, sx, sy, sz, id)");
 dbExec(db, "CREATE TABLE IF NOT EXISTS `tents` (model, x, y, z, rX, rY, rZ, slots, scale, items, id)");
 dbExec(db, "CREATE TABLE IF NOT EXISTS `safes` (model, x, y, z, rX, rY, rZ, slots, scale, code, safe_id, items, id)");
@@ -603,15 +603,15 @@ function createHeliCrashSite()
 	setElementHealth(cargobob, 0);
 	setElementFrozen(cargobob, true);
 	local cargoCol = createColSphere(x, y, z, 3);
-	setElementData(cargoCol, "parent", cargobob);
-	setElementData(cargoCol, "helicrash", true);
-	setElementData(cargoCol, "MAX_Slots", 0);
+	setDayZData(cargoCol, "parent", cargobob);
+	setDayZData(cargoCol, "helicrash", true);
+	setDayZData(cargoCol, "MAX_Slots", 0);
 	for _,v in ipairs(lootItems["helicrashsides"]) do
 		local value =  math.percentChance(v[5]*3.5, math.random(2));
-		setElementData(cargoCol, v[1], value);
+		setDayZData(cargoCol, v[1], value);
 		local ammoData,_ = getWeaponAmmoType(v[1], true);
 		if (ammoData and value > 0) then
-			setElementData(cargoCol, ammoData, getMagazineSize(ammoData)*math.random(2));
+			setDayZData(cargoCol, ammoData, getMagazineSize(ammoData)*math.random(2));
 		end
 	end
 	setTimer(createHeliCrashSite, 3600000, 1);
@@ -620,7 +620,7 @@ end
 function updateHospitals()
 	for i,_ in pairs(hospitalCol) do
 		for _,v in ipairs(lootItems["hospital"]) do
-			setElementData(hospitalCol[i], v[1], math.random(5));
+			setDayZData(hospitalCol[i], v[1], math.random(5));
 		end
 	end
 	setTimer(updateHospitals, 3600000, 1);
@@ -634,9 +634,9 @@ function createHospitalPacks()
 		local object = createObject(1558, x, y, z-0.15, nil, nil, nil);
 		hospitalCol[i] = createColSphere(x, y, z-0.15, 2);
 		setObjectScale(object,1)
-		setElementData(hospitalCol[i], "parent", object);
-		setElementData(hospitalCol[i], "hospitalbox", true);
-		setElementData(hospitalCol[i], "MAX_Slots", 28);
+		setDayZData(hospitalCol[i], "parent", object);
+		setDayZData(hospitalCol[i], "hospitalbox", true);
+		setDayZData(hospitalCol[i], "MAX_Slots", 28);
 	end
 	updateHospitals();
 end
@@ -654,30 +654,30 @@ function spawnDayZVehicles()
 		local veh = createVehicle(v[1], x, y, z);
 		local vehCol = createColSphere(x, y, z, 2.5);
 		attachElements(vehCol, veh);
-		setElementData(vehCol, "parent", veh);
-		setElementData(veh, "parent", vehCol);
-		setElementData(vehCol, "vehicle", true);
-		setElementData(veh, "dayzvehicle", 1);
+		setDayZData(vehCol, "parent", veh);
+		setDayZData(veh, "parent", vehCol);
+		setDayZData(vehCol, "vehicle", true);
+		setDayZData(veh, "dayzvehicle", 1);
 		local tires,engine,parts,scrap,rotor,slots = getVehicleAddonInfos(v[1]);
-		setElementData(vehCol, "MAX_Slots", tonumber(slots));
-		setElementData(vehCol, "Tire_inVehicle", math.random(0, tires));
-		setElementData(vehCol, "Engine_inVehicle", math.random(0, engine));
-		setElementData(vehCol, "Parts_inVehicle", math.random(0, parts));
-		setElementData(vehCol, "Scrap_inVehicle", math.random(0, scrap));
-		setElementData(vehCol, "Rotor_inVehicle", math.random(0, rotor));
-		setElementData(vehCol, "needtires", tires);
-		setElementData(vehCol, "needparts", parts);
-		setElementData(vehCol, "needscrap", scrap);
-		setElementData(vehCol, "needrotor", rotor);
-		setElementData(vehCol, "needengines", engine);
-		setElementData(vehCol, "spawn", {v[1], x, y, z});
-		setElementData(vehCol, "fuel", math.random(5, 20));
+		setDayZData(vehCol, "MAX_Slots", tonumber(slots));
+		setDayZData(vehCol, "Tire_inVehicle", math.random(0, tires));
+		setDayZData(vehCol, "Engine_inVehicle", math.random(0, engine));
+		setDayZData(vehCol, "Parts_inVehicle", math.random(0, parts));
+		setDayZData(vehCol, "Scrap_inVehicle", math.random(0, scrap));
+		setDayZData(vehCol, "Rotor_inVehicle", math.random(0, rotor));
+		setDayZData(vehCol, "needtires", tires);
+		setDayZData(vehCol, "needparts", parts);
+		setDayZData(vehCol, "needscrap", scrap);
+		setDayZData(vehCol, "needrotor", rotor);
+		setDayZData(vehCol, "needengines", engine);
+		setDayZData(vehCol, "spawn", {v[1], x, y, z});
+		setDayZData(vehCol, "fuel", math.random(5, 20));
 		for _,v in ipairs(lootItems["helicrashsides"]) do
 			local value =  math.percentChance(v[5], math.random(2));
-			setElementData(vehCol, v[1], value);
+			setDayZData(vehCol, v[1], value);
 			local ammoData,_ = getWeaponAmmoType(v[1], true);
 			if (ammoData and value > 0) then
-				setElementData(vehCol, ammoData, getMagazineSize(ammoData)*math.random(2));
+				setDayZData(vehCol, ammoData, getMagazineSize(ammoData)*math.random(2));
 			end
 		end
 	end
@@ -691,8 +691,8 @@ addEventHandler("onVehicleExplode", root,  function()
 	local x1,y1,z1 = getElementPosition(source);
 	local col = getElementData(source, "parent");
 	local id,x,y,z = unpack(getElementData(col, "spawn"));
-	setElementData(col, "deadVehicle", true);
-	setElementData(source, "isExploded", true);
+	setDayZData(col, "deadVehicle", true);
+	setDayZData(source, "isExploded", true);
 	if (getElementData(source, "dayzvehicle") == 1) then
 		setTimer(respawnDayZVehicle, 60000*30, 1, id, x, y, z, source, col);
 	else
@@ -733,30 +733,30 @@ function respawnDayZVehicle(id, x, y, z, veh, col)
 	local vehCol = createColSphere(x, y, z, 4);
 	attachElements(vehCol, veh);
 	if (id == 528) then setVehicleDamageProof(veh,true); end
-	setElementData(vehCol, "parent", veh);
-	setElementData(veh, "parent", vehCol);
-	setElementData(vehCol, "vehicle", true);
-	setElementData(veh, "dayzvehicle", 1);
+	setDayZData(vehCol, "parent", veh);
+	setDayZData(veh, "parent", vehCol);
+	setDayZData(vehCol, "vehicle", true);
+	setDayZData(veh, "dayzvehicle", 1);
 	local tires,engine,parts,scrap,rotor,slots = getVehicleAddonInfos(id);
-	setElementData(vehCol, "MAX_Slots", tonumber(slots));
-	setElementData(vehCol, "Tire_inVehicle", math.random(0, tires));
-	setElementData(vehCol, "Engine_inVehicle", math.random(0, engine));
-	setElementData(vehCol, "Parts_inVehicle", math.random(0, parts));
-	setElementData(vehCol, "Scrap_inVehicle", math.random(0, scrap));
-	setElementData(vehCol, "Rotor_inVehicle", math.random(0, rotor));
-	setElementData(vehCol, "needtires", tires);
-	setElementData(vehCol, "needparts", parts);
-	setElementData(vehCol, "needscrap", scrap);
-	setElementData(vehCol, "needrotor", rotor);
-	setElementData(vehCol, "needengines", engine);
-	setElementData(vehCol, "spawn", {id, x, y, z});
-	setElementData(vehCol, "fuel", 10);
+	setDayZData(vehCol, "MAX_Slots", tonumber(slots));
+	setDayZData(vehCol, "Tire_inVehicle", math.random(0, tires));
+	setDayZData(vehCol, "Engine_inVehicle", math.random(0, engine));
+	setDayZData(vehCol, "Parts_inVehicle", math.random(0, parts));
+	setDayZData(vehCol, "Scrap_inVehicle", math.random(0, scrap));
+	setDayZData(vehCol, "Rotor_inVehicle", math.random(0, rotor));
+	setDayZData(vehCol, "needtires", tires);
+	setDayZData(vehCol, "needparts", parts);
+	setDayZData(vehCol, "needscrap", scrap);
+	setDayZData(vehCol, "needrotor", rotor);
+	setDayZData(vehCol, "needengines", engine);
+	setDayZData(vehCol, "spawn", {id, x, y, z});
+	setDayZData(vehCol, "fuel", 10);
 	for _,v in ipairs(lootItems["helicrashsides"]) do
 		local value =  math.percentChance(v[5], math.random(2));
-		setElementData(vehCol, v[1], value);
+		setDayZData(vehCol, v[1], value);
 		local ammoData,_ = getWeaponAmmoType(v[1], true);
 		if (ammoData and value > 0) then
-			setElementData(vehCol, ammoData, getMagazineSize(ammoData)*math.random(2));
+			setDayZData(vehCol, ammoData, getMagazineSize(ammoData)*math.random(2));
 		end
 	end
 end
@@ -776,17 +776,17 @@ addEventHandler("onPlayerVehicleEnter", root, function(veh, seat)
 	if (id == 509) then return; end
 	local col = getElementData(veh, "parent");
 	local tires,engine,parts,scrap,rotor,_ = getVehicleAddonInfos(id);
-	setElementData(veh, "maxfuel", getVehicleMaxFuel(id));
-	setElementData(veh, "needtires", tires);
-	setElementData(veh, "needparts", parts);
-	setElementData(veh, "needscrap", scrap);
-	setElementData(veh, "needrotor", rotor);
-	setElementData(veh, "needengines", engine);
+	setDayZData(veh, "maxfuel", getVehicleMaxFuel(id));
+	setDayZData(veh, "needtires", tires);
+	setDayZData(veh, "needparts", parts);
+	setDayZData(veh, "needscrap", scrap);
+	setDayZData(veh, "needrotor", rotor);
+	setDayZData(veh, "needengines", engine);
 	setVehicleEngineState(veh, false);
 	if (getElementData(col, "Parts_inVehicle") == parts) then
-		setElementData(veh, "fplus", 5);
+		setDayZData(veh, "fplus", 5);
 	else
-		setElementData(veh, "fplus", 20);
+		setDayZData(veh, "fplus", 20);
 	end
 	if (getElementData(col, "Tire_inVehicle") == tires) then
 		if (getElementData(col, "Scrap_inVehicle") == scrap) then
@@ -838,7 +838,7 @@ setTimer(function()
 		if (getElementModel(v) ~= 509) then
 			if (getVehicleEngineState(v) == true) then
 				if (getElementData(getElementData(v, "parent"), "fuel") >= 1) then
-					setElementData(getElementData(v, "parent"), "fuel", getElementData(getElementData(v, "parent"), "fuel")-(getVehicleFuelRemove(getElementModel(v))*getElementData(v, "fplus"))/60);
+					setDayZData(getElementData(v, "parent"), "fuel", getElementData(getElementData(v, "parent"), "fuel")-(getVehicleFuelRemove(getElementModel(v))*getElementData(v, "fplus"))/60);
 				else
 					setVehicleEngineState(v, false);
 				end
@@ -848,31 +848,33 @@ setTimer(function()
 end, 1000, 0);
 
 addEventHandler("repairVehicle", root, function(veh)
+	if client ~= source or not dayZRequest(client,"repair",1000) or not dayZNearby(client,veh,5) or getElementType(veh) ~= "vehicle" or (tonumber(getElementData(client,"toolbelt4")) or 0) < 1 then return end
 	if repairTimer[veh] then triggerClientEvent(source, "displayClientInfo", source, getVehicleName(veh).." "..getLanguageTextServer("clientinfotext38",source), 160, 40, 40) return; end
 	repairTimer[veh] = setTimer(fixDayZVehicle, (1000-(math.floor(getElementHealth(veh))))*120, 1, veh, source);
 	setElementFrozen(veh, true);
 	setElementFrozen(source, true);
 	setPedWeaponSlot(source, 0);
-	setElementData(veh, "repairer", source);
-	setElementData(source, "repairingvehicle", veh);
-	setElementData(source, "isInAction", true);
+	setDayZData(veh, "repairer", source);
+	setDayZData(source, "repairingvehicle", veh);
+	setDayZData(source, "isInAction", true);
 	setPedAnimation(source, "SCRATCHING", "sclng_r", -1, true, false, false, false);
 	triggerClientEvent(source,"playSoundForClient",source,"repairstart");
 	triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext39",source).." "..vehicle_name[getElementModel(veh)], 40, 160, 40);
 end);
 
 addEventHandler("cancelVehicleRepair", root, function()
+	if client and client ~= source then return end
 	local player = source;
 	local veh = getElementData(player,"repairingvehicle");
 	if (veh) then
 		setPedAnimation(player, false);
 		setElementFrozen(veh, false);
 		setElementFrozen(player, false);
-		setElementData(player, "isInAction", false);
+		setDayZData(player, "isInAction", false);
 		killTimer(repairTimer[veh]);
 		repairTimer[veh] = nil;
-		setElementData(veh, "repairer", nil);
-		setElementData(player, "repairingvehicle", nil);
+		setDayZData(veh, "repairer", nil);
+		setDayZData(player, "repairingvehicle", nil);
 		triggerClientEvent(player,"playSoundForClient",player,"repairstop");
 		triggerClientEvent(player, "displayClientInfo", player, getLanguageTextServer("clientinfotext42",player), 160, 40, 40);
 	end
@@ -885,10 +887,10 @@ function fixDayZVehicle(veh, player)
 		setPedAnimation(player, false);
 		setElementFrozen(veh, false);
 		setElementFrozen(player, false);
-		setElementData(player, "isInAction", false);
+		setDayZData(player, "isInAction", false);
 		repairTimer[veh] = nil;
-		setElementData(veh, "repairer", nil);
-		setElementData(player, "repairingvehicle", nil);
+		setDayZData(veh, "repairer", nil);
+		setDayZData(player, "repairingvehicle", nil);
 		triggerClientEvent(player,"playSoundForClient",player,"repairstop");
 		triggerClientEvent(player, "displayClientInfo", player, getLanguageTextServer("clientinfotext40",player).." "..vehicle_name[getElementModel(veh)], 40, 160, 40);
 	end
@@ -901,7 +903,7 @@ addEventHandler("onPlayerQuit", root, function()
 			killTimer(repairTimer[v]);
 			setElementFrozen(v, false);
 			repairTimer[v] = nil;
-			setElementData(v, "repairer", nil);
+			setDayZData(v, "repairer", nil);
 		end 
 	end
 end);
@@ -918,10 +920,21 @@ function setEngineStateByPlayer(player)
 	end
 end
 
-function backup()
-	dbExec(db, "DELETE FROM `vehicles`");
-	dbExec(db, "DELETE FROM `tents`");
-	dbExec(db, "DELETE FROM `safes`");
+local backupLoaded = true
+local function collectBackupRows()
+    local rows = {}
+    local function queueWrite(sql,...)
+        local values = {n=select("#",...),...}
+        for i=1,values.n do
+            local value = values[i]
+            assert(value ~= nil, "Missing backup field " .. i)
+            if type(value) == "number" then assert(value == value and math.abs(value) ~= math.huge,"Invalid backup number") end
+        end
+        rows[#rows+1] = {sql=sql,values=values}
+    end
+	queueWrite( "DELETE FROM `vehicles`");
+	queueWrite( "DELETE FROM `tents`");
+	queueWrite( "DELETE FROM `safes`");
 	local vc,tc,sc = 0, 0, 0;
 	for _,veh in ipairs(getElementsByType("vehicle")) do
 		if not getElementData(veh, "helicrash") then
@@ -942,7 +955,7 @@ function backup()
 							table.insert(items, {item[1], quantity});
 						end
 					end
-					dbExec(db, "INSERT INTO `vehicles` (model, x, y, z, rX, rY, rZ, slots, fuel, engines, moving, parts, scrap, rotor, items, dayz, health, sx, sy, sz, id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", 
+					queueWrite( "INSERT INTO `vehicles` (model, x, y, z, rX, rY, rZ, slots, fuel, engines, moving, parts, scrap, rotor, items, dayz, health, sx, sy, sz, id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 					getElementModel(veh), x, y, z, rX, rY, rZ, getElementData(col, "MAX_Slots") or 20, getElementData(col, "fuel") or 0, getElementData(col, "Engine_inVehicle") or 0, 
 					getElementData(col, "Tire_inVehicle") or 0, getElementData(col, "Parts_inVehicle") or 0, getElementData(col, "Scrap_inVehicle") or 0, getElementData(col, "Rotor_inVehicle") or 0, toJSON(items), getElementData(veh, "dayzvehicle") or 0, health, sx, sy, sz, vc);
 				end
@@ -963,7 +976,7 @@ function backup()
 						table.insert(items, {item[1], quantity});
 					end
 				end
-				dbExec(db, "INSERT INTO `tents` (model, x, y, z, rX, rY, rZ, slots, scale, items, id) VALUES(?,?,?,?,?,?,?,?,?,?,?)", 
+				queueWrite( "INSERT INTO `tents` (model, x, y, z, rX, rY, rZ, slots, scale, items, id) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
 				getElementModel(tent), x, y, z, rX, rY, rZ, getElementData(col, "MAX_Slots") or 100, getObjectScale(tent), toJSON(items), tc);
 			end
 		elseif getElementData(col, "safe") then
@@ -980,14 +993,37 @@ function backup()
 							table.insert(items, {item[1], quantity});
 						end
 					end
-					dbExec(db, "INSERT INTO `safes` (model, x, y, z, rX, rY, rZ, slots, scale, code, safe_id, items, id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)", 
+					queueWrite( "INSERT INTO `safes` (model, x, y, z, rX, rY, rZ, slots, scale, code, safe_id, items, id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
 					getElementModel(safe), x, y, z, rX, rY, rZ, getElementData(col, "MAX_Slots") or 50, getObjectScale(safe), getElementData(col, getElementData(col, "id")), getElementData(col, "id"), toJSON(items), sc);
 				end
 			end
 		end
 	end
-	outputDebugString("Backup done ("..tc.." Tents), ("..sc.." Safes) and ("..vc.." Vehicles)", 3);
+	return rows, vc, tc, sc;
 end
+
+
+local backupRunning = false
+function backup(synchronous)
+    if not backupLoaded then outputDebugString("[DayZ backup] Saving disabled after failed restore; repair the saved data first",1); return false end
+    if backupRunning and not synchronous then return false end
+    -- Build the entire snapshot before any DELETE reaches SQLite.
+    local ok, rows, vc, tc, sc = pcall(collectBackupRows)
+    if not ok then outputDebugString("[DayZ backup] Snapshot rejected: " .. tostring(rows),1); return false end
+    local function completed(saved)
+        backupRunning = false
+        if saved then outputDebugString("[DayZ backup] Saved " .. vc .. " vehicles, " .. tc .. " tents and " .. sc .. " safes",3)
+        else outputDebugString("[DayZ backup] Save failed; previous snapshot retained",1) end
+    end
+    if synchronous then
+        local saved = writeDayZSnapshotSync(db,rows)
+        completed(saved)
+        return saved
+    end
+    backupRunning = true
+    return writeDayZSnapshot(db,rows,completed)
+end
+addEventHandler("onResourceStop",resourceRoot,function() backup(true) end)
 
 function createDayzVeh(model, x, y, z, rX, rY, rZ, slots, fuel, engines, moving, parts, scrap, rotor, items, dayz, health, sx, sy, sz)
 	local veh = createVehicle(model, x, y, z);
@@ -996,26 +1032,26 @@ function createDayzVeh(model, x, y, z, rX, rY, rZ, slots, fuel, engines, moving,
 	attachElements(vehCol, veh);
 	if (model == 528) then setVehicleDamageProof(veh,true); end
 	setElementHealth(veh, tonumber(health));
-	setElementData(vehCol, "parent", veh);
-	setElementData(veh, "parent", vehCol);
-	setElementData(veh, "dayzvehicle", tonumber(dayz));
-	setElementData(vehCol, "vehicle", true);
-	setElementData(vehCol, "MAX_Slots", tonumber(slots));
-	setElementData(vehCol, "Tire_inVehicle", tonumber(moving));
-	setElementData(vehCol, "Engine_inVehicle", tonumber(engines));
-	setElementData(vehCol, "Parts_inVehicle", tonumber(parts));
-	setElementData(vehCol, "Scrap_inVehicle", tonumber(scrap));
-	setElementData(vehCol, "Rotor_inVehicle", tonumber(rotor));
+	setDayZData(vehCol, "parent", veh);
+	setDayZData(veh, "parent", vehCol);
+	setDayZData(veh, "dayzvehicle", tonumber(dayz));
+	setDayZData(vehCol, "vehicle", true);
+	setDayZData(vehCol, "MAX_Slots", tonumber(slots));
+	setDayZData(vehCol, "Tire_inVehicle", tonumber(moving));
+	setDayZData(vehCol, "Engine_inVehicle", tonumber(engines));
+	setDayZData(vehCol, "Parts_inVehicle", tonumber(parts));
+	setDayZData(vehCol, "Scrap_inVehicle", tonumber(scrap));
+	setDayZData(vehCol, "Rotor_inVehicle", tonumber(rotor));
 	local needtires,needengine,needparts,needscrap,needrotor,_ = getVehicleAddonInfos(model);
-	setElementData(vehCol, "needtires", needtires);
-	setElementData(vehCol, "needparts", needparts);
-	setElementData(vehCol, "needscrap", needscrap);
-	setElementData(vehCol, "needrotor", needrotor);
-	setElementData(vehCol, "needengines", needengine);
-	setElementData(vehCol, "spawn", {model, sx, sy, sz});
-	setElementData(vehCol, "fuel", tonumber(fuel));
+	setDayZData(vehCol, "needtires", needtires);
+	setDayZData(vehCol, "needparts", needparts);
+	setDayZData(vehCol, "needscrap", needscrap);
+	setDayZData(vehCol, "needrotor", needrotor);
+	setDayZData(vehCol, "needengines", needengine);
+	setDayZData(vehCol, "spawn", {model, sx, sy, sz});
+	setDayZData(vehCol, "fuel", tonumber(fuel));
 	for _,v in ipairs(fromJSON(items)) do
-		setElementData(vehCol, v[1], v[2]);
+		setDayZData(vehCol, v[1], v[2]);
 	end
 end
 
@@ -1025,12 +1061,12 @@ function createDayzTent(model, x, y, z, rX, rY, rZ, slots, scale, items)
 	setElementRotation(tent, rX, rY, rZ);
 	setObjectScale(tent, scale);
 	attachElements(tentCol, tent);
-	setElementData(tentCol, "parent", tent);
-	setElementData(tent, "parent", tentCol);
-	setElementData(tentCol, "tent", true);
-	setElementData(tentCol, "MAX_Slots", slots);
+	setDayZData(tentCol, "parent", tent);
+	setDayZData(tent, "parent", tentCol);
+	setDayZData(tentCol, "tent", true);
+	setDayZData(tentCol, "MAX_Slots", slots);
 	for _,v in ipairs(fromJSON(items)) do
-		setElementData(tentCol, v[1], v[2]);
+		setDayZData(tentCol, v[1], v[2]);
 	end
 end
 
@@ -1041,18 +1077,34 @@ function createDayzSafe(model, x, y, z, rX, rY, rZ, slots, scale, code, safe_id,
 	setElementRotation(safe, rX, rY, rZ);
 	setObjectScale(safe, scale);
 	attachElements(safeCol, safe);
-	setElementData(safeCol, "parent", safe);
-	setElementData(safe, "parent", safeCol);
-	setElementData(safeCol, "safe", true);
-	setElementData(safeCol, safe_id, code);
-	setElementData(safeCol, "id", safe_id);
-	setElementData(safeCol, "MAX_Slots", slots);
+	setDayZData(safeCol, "parent", safe);
+	setDayZData(safe, "parent", safeCol);
+	setDayZData(safeCol, "safe", true);
+	setDayZData(safeCol, safe_id, code);
+	setDayZData(safeCol, "id", safe_id);
+	setDayZData(safeCol, "MAX_Slots", slots);
 	for _,v in ipairs(fromJSON(items)) do
-		setElementData(safeCol, v[1], v[2]);
+		setDayZData(safeCol, v[1], v[2]);
 	end
 end
 
 function loadBackup()
+    local p = dbPoll(dbQuery(db,"SELECT * FROM `vehicles`"),-1)
+    local p2 = dbPoll(dbQuery(db,"SELECT * FROM `tents`"),-1)
+    local p3 = dbPoll(dbQuery(db,"SELECT * FROM `safes`"),-1)
+    if type(p) ~= "table" or type(p2) ~= "table" or type(p3) ~= "table" then
+        outputDebugString("[DayZ backup] Load failed; current world retained",1)
+        return false
+    end
+    for _, collection in ipairs({p,p2,p3}) do
+        for _, row in ipairs(collection) do
+            if not tonumber(row.model) or not tonumber(row.x) or not tonumber(row.y) or not tonumber(row.z)
+                or type(fromJSON(row.items)) ~= "table" then
+                outputDebugString("[DayZ backup] Invalid saved row; current world retained",1)
+                return false
+            end
+        end
+    end
 	for _,v in pairs(getElementsByType("vehicle")) do
 		local col = getElementData(v, "parent");
 		if col then
@@ -1060,31 +1112,29 @@ function loadBackup()
 		end
 		destroyElement(v);
 	end
-	local p = dbPoll(dbQuery(db, "SELECT * FROM `vehicles`"), -1);
 	if (#p > 0) then
 		for _,d in pairs(p) do
 			createDayzVeh(d["model"], d["x"], d["y"], d["z"], d["rX"], d["rY"], d["rZ"], d["slots"], d["fuel"], d["engines"], d["moving"], d["parts"], d["scrap"], d["rotor"], d["items"], d["dayz"], d["health"], d["sx"], d["sy"], d["sz"]);
 		end
 	end
-	local p2 = dbPoll(dbQuery(db, "SELECT * FROM `tents`"), -1);
 	if (#p2 > 0) then
 		for _,d in pairs(p2) do
 			createDayzTent(d["model"], d["x"], d["y"], d["z"], d["rX"], d["rY"], d["rZ"], d["slots"], d["scale"], d["items"]);
 		end
 	end
-	local p2 = dbPoll(dbQuery(db, "SELECT * FROM `safes`"), -1);
-	if (#p2 > 0) then
-		for _,d in pairs(p2) do
+	if (#p3 > 0) then
+		for _,d in pairs(p3) do
 			createDayzSafe(d["model"], d["x"], d["y"], d["z"], d["rX"], d["rY"], d["rZ"], d["slots"], d["scale"], d["code"], d["safe_id"], d["items"]);
 		end
 	end
+    return true
 end
 
 if not backupdone then
 	spawnDayZVehicles();
 	backupdone = true;
 else
-	loadBackup();
+	backupLoaded = loadBackup();
 end
 setTimer(backup, (10*60000), 0);
 
@@ -1103,7 +1153,7 @@ end);
 for _,v in ipairs(patrolPoints) do
 	local x,y,z = v[1], v[2], v[3];
 	patrolCol = createColSphere(x, y, z, 3);
-	setElementData(patrolCol, "patrolstation", true);
+	setDayZData(patrolCol, "patrolstation", true);
 end
 
 createHeliCrashSite();

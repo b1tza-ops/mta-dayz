@@ -1,8 +1,9 @@
 <meta>
 	<info author="kaasis" name="MTAZ Shop" description="Shop system for MTAZ" />
 
-	<min_mta_version client="1.5.0" server="1.5.0" />
+	<min_mta_version client="1.6.0-9.22815" server="1.6.0-9.22815" />
 
+    <script src="catalog.lua" type="shared" />
 	<script src="shop_c.lua" type="client" cache="false" />
 	<script src="shop_s.lua" type="server" />
 

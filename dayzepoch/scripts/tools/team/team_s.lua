@@ -131,11 +131,11 @@ function inviteToTeam(player, team)
 		if (getGangEmptySlots(team) >= 1) then
 			if (getElementData(player,"gangteams."..team) ~= "Yes") then
 				outputChatBox("#3CB371You have been invited to join team #00FA9A"..team.."#3CB371. Press #00FA9AF1#3CB371 to accept invitation!", player, 0, 0, 0, true);
-				setElementData(player, "gangteams."..team, "Yes");
+				setDayZData(player, "gangteams."..team, "Yes");
 				table.insert(invitations,{player,team})
 				triggerClientEvent(client, "gang.refreshInviteList", client);
 			else
-				setElementData(player, "gangteams."..team, "No");
+				setDayZData(player, "gangteams."..team, "No");
 				deletePlayerInvite(client,team)
 				triggerClientEvent(client, "gang.refreshInviteList", client);
 			end
@@ -211,10 +211,10 @@ addEventHandler("creategang", root, function(player,teamname)
 						local acc = getPlayerAccount(player);
 						dbExec(db, "INSERT INTO `teams` (name, leader, officer, trusted, slots) VALUES(?,?,?,?,?)", name, getAccountName(acc), "", "", TEAM_slots);
 						dbExec(db, "INSERT INTO `team_acc` (team, username, rank) VALUES(?,?,?)", name, getAccountName(acc), "Leader");
-						setElementData(player, "gang", name);
-						setElementData(player, "gang.rank", "Leader");
-						setElementData(player, "gang.nick", getPlayerName(player));
-						setElementData(player, "zombieskilled", zKills-25);
+						setDayZData(player, "gang", name);
+						setDayZData(player, "gang.rank", "Leader");
+						setDayZData(player, "gang.nick", getPlayerName(player));
+						setDayZData(player, "zombieskilled", zKills-25);
 						setAccountData(acc, "gang", name);
 						setAccountData(acc, "gang.nick", getPlayerName(player));
 						outputChatBox("#3CB371Your team #00FA9A"..name.." #3CB371has been created, press #00FA9A[F1] #3CB371to manage it.", player, 0, 255, 0, true);
@@ -246,7 +246,7 @@ addCommandHandler("teamchat", function(player, _, ...)
 			outputChatBox(getLanguageTextServer("clientinfotext41",player), player, 160, 40, 40);
 			return;
 		else
-			setElementData(player,"antichat",true)
+			setDayZData(player,"antichat",true)
 			setTimer(setElementData, 1000, 1, player, "antichat", false);
 		end
 		for _,v in pairs(getPlayersInGang(team)) do
@@ -258,8 +258,8 @@ end);
 addEventHandler("onPlayerLogin", root, function(pa, acc, se)
 	local team = getPlayerGang(source);
 	if (team ~= "None") then
-		setElementData(source, "gang", team);
-		setElementData(source, "gang.rank", getPlayerGangRank(source));
+		setDayZData(source, "gang", team);
+		setDayZData(source, "gang.rank", getPlayerGangRank(source));
 		setAccountData(acc, "gang.nick", getPlayerName(source));
 	end
 end);
@@ -267,8 +267,8 @@ end);
 addEventHandler("team_accept", root, function(player,theteam)
 	if theteam then
 		removeElementData(player, "gangteams."..theteam);
-		setElementData(player, "gang", theteam);
-		setElementData(player, "gang.rank", "Member");
+		setDayZData(player, "gang", theteam);
+		setDayZData(player, "gang.rank", "Member");
 		local acc = getPlayerAccount(player);
 		setAccountData(acc, "gang", theteam);
 		setAccountData(acc, "gang.nick", getPlayerName(player));
@@ -353,7 +353,7 @@ addEventHandler("gang.question", root, function(intention, player, nick)
 	elseif (intention == "set_member") then
 		local team = getPlayerGang(client);
 		if isElement(player) and getPlayerName(player) then
-			setElementData(player, "gang.rank", "Member");
+			setDayZData(player, "gang.rank", "Member");
 			dbExec(db, "UPDATE `teams` SET `trusted`=? WHERE `name`='"..team.."'", "");
 			dbExec(db, "UPDATE `teams` SET `officer`=? WHERE `name`='"..team.."'", "");
 			dbExec(db, "UPDATE `team_acc` SET `rank`=? WHERE `username`=?", "Member", getAccountName(getPlayerAccount(player)));
@@ -370,7 +370,7 @@ addEventHandler("gang.question", root, function(intention, player, nick)
 		local team = getPlayerGang(client);
 		if isElement(player) and getPlayerName(player) then
 			local accName = getAccountName(getPlayerAccount(player))
-			setElementData(player, "gang.rank", "Trusted");
+			setDayZData(player, "gang.rank", "Trusted");
 			dbExec(db, "UPDATE `teams` SET `trusted`=? WHERE `name`='"..team.."'", accName);
 			dbExec(db, "UPDATE `teams` SET `officer`=? WHERE `name`='"..team.."'", "");
 			dbExec(db, "UPDATE `team_acc` SET `rank`=? WHERE `username`=?", "Trusted", accName);
@@ -386,7 +386,7 @@ addEventHandler("gang.question", root, function(intention, player, nick)
 		local team = getPlayerGang(client);
 		if isElement(player) and getPlayerName(player) then
 			local accName = getAccountName(getPlayerAccount(player))
-			setElementData(player, "gang.rank", "Officer");
+			setDayZData(player, "gang.rank", "Officer");
 			dbExec(db, "UPDATE `teams` SET `trusted`=? WHERE `name`='"..team.."'", "");
 			dbExec(db, "UPDATE `teams` SET `officer`=? WHERE `name`='"..team.."'", accName);
 			dbExec(db, "UPDATE `team_acc` SET `rank`=? WHERE `username`=?", "Officer", accName);

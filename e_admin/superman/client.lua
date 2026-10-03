@@ -70,7 +70,7 @@ local function setPlayerFlying(player, state)
   if state == true then state = true
   else state = false end
 
-  setElementData(player, "superman:flying", state)
+  setElementData(player, "superman:flying", state, false)
 end
 
 local function iterateFlyingPlayers()
@@ -323,7 +323,7 @@ function Superman.startFlight()
 
   if isPlayerFlying(localPlayer) then return end
 
-  triggerServerEvent("superman:start", rootElement)
+  triggerServerEvent("superman:start", localPlayer)
   setPlayerFlying(localPlayer, true)
   setElementVelocity(localPlayer, 0, 0, 0)
   self.currentSpeed = 0
@@ -491,7 +491,7 @@ function Superman.processFlight()
       self:restorePlayer(player)
       if player == localPlayer then
       	setGravity(serverGravity)
-        triggerServerEvent("superman:stop", getRootElement())
+        triggerServerEvent("superman:stop", localPlayer)
       end
     elseif distanceToGround and distanceToGround < LANDING_DISTANCE then
       self:processLanding(player, Velocity, distanceToGround)
