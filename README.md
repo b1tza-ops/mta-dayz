@@ -57,3 +57,13 @@ Before merging or opening a public server, use a private test server with backup
 This is a repair of the reviewed paths, not a complete security audit. Legacy combat damage, zombie AI and group-management logic still contain client-driven state and need separate review and real multiplayer testing. Do not describe this legacy gamemode as cheat-proof or performance-tested.
 
 MTA references: [script security](https://wiki.multitheftauto.com/wiki/Script_security), [protected element data](https://wiki.multitheftauto.com/wiki/SetElementData), [SQLite batching and transactions](https://wiki.multitheftauto.com/wiki/DbConnect).
+
+## Admin test items
+Log in to a DayZ character using an account in the server Admin ACL group.
+Use `/dayzitems NAME` to search item IDs and `/dayzgive ITEM_ID AMOUNT` to add
+items to your own inventory. For example: `/dayzitems M4`, `/dayzgive weapon11 1`,
+and `/dayzgive mag5 100`. Quantities default to 1 and must be integers from 1
+through 10000. Grants are server authorized, protected against client edits,
+and recorded in the server debug log. Admin grants can exceed backpack capacity;
+equip a suitable backpack before testing normal loot transfers.
+You can also press O, select your player, and use the Give panel.

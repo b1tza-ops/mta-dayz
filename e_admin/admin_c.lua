@@ -246,7 +246,7 @@ function main()
 		if (guiGridListGetSelectedItem(giveWindowGridlist) ~= -1) then
 			local item = guiGridListGetItemText(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist))
 			local quantity = guiGetText(giveWindowEditboxQuant)
-			local selectedPlayer = getPlayerFromName(guiGridListGetItemText(gridlistPlayers1,item,1))
+			local selectedPlayer = getPlayerFromName(guiGridListGetItemText(gridlistPlayers1,guiGridListGetSelectedItem(gridlistPlayers1),1))
 			if selectedPlayer then
 				triggerServerEvent("giveEvent",localPlayer,selectedPlayer,item,quantity)
 			end

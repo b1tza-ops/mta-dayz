@@ -160,3 +160,48 @@ addEventHandler("onPlayerQuit",root,function()
     if isTimer(muteTimers[source]) then killTimer(muteTimers[source]) end
     muteTimers[source] = nil
 end)
+
+-- Self-service test items: permissions come from the authenticated account.
+local function commandAdmin(caller)
+    if not isDayZAdmin(caller) or not getElementData(caller,"logedin") then
+        if player(caller) then outputChatBox("[DayZ] Log in with an Admin account first.",caller,255,80,80) end
+        return false
+    end
+    local now=getTickCount()
+    if requestTimes[caller] and now-requestTimes[caller]<200 then return false end
+    requestTimes[caller]=now
+    return true
+end
+addCommandHandler("dayzgive",function(caller,command,item,quantity)
+    if not commandAdmin(caller) then return end
+    quantity=quantity or "1"
+    if not validItem(item,quantity) then
+        outputChatBox("[DayZ] Usage: /dayzgive ITEM_ID AMOUNT (1-10000). Search with /dayzitems NAME",caller,255,180,80)
+        return
+    end
+    quantity=tonumber(quantity)
+    local balance=tonumber(getElementData(caller,item)) or 0
+    if balance~=balance or balance<0 or balance==math.huge then return end
+    setData(caller,item,balance+quantity)
+    triggerClientEvent(caller,"refreshInventoryManual",caller)
+    outputChatBox("[DayZ] Added "..quantity.." x "..item.." to your inventory.",caller,100,255,100)
+    outputDebugString("[DayZ admin] "..getAccountName(getPlayerAccount(caller)).." gave themselves "..quantity.." x "..item,3)
+end)
+addCommandHandler("dayzitems",function(caller,command,...)
+    if not commandAdmin(caller) then return end
+    local query=string.lower(table.concat({...}," "))
+    local matches={}
+    for _,category in pairs(items) do
+        for _,id in ipairs(category) do
+            local name=exports.dayzepoch:getLanguageTextServer(id,caller) or id
+            if string.find(string.lower(id),query,1,true) or string.find(string.lower(name),query,1,true) then
+                matches[#matches+1]={id,name}
+            end
+        end
+    end
+    table.sort(matches,function(a,b) return a[1]<b[1] end)
+    for i=1,math.min(#matches,20) do
+        outputChatBox("[DayZ] "..matches[i][1].." = "..matches[i][2],caller,200,230,200)
+    end
+    outputChatBox("[DayZ] "..#matches.." matches; showing up to 20. Narrow the search with /dayzitems NAME",caller,255,220,100)
+end)

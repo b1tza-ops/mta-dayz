@@ -18,7 +18,7 @@
 	<script src="gui/give_gui.lua" type="client" cache="false" />
 	<script src="gui/vehicle_gui.lua" type="client" cache="false" />
 
-	<script src="table/items.lua" type="client" cache="false" />
+	<script src="table/items.lua" type="shared" cache="false" />
 	<script src="table/vehicles.lua" type="client" cache="false" />
 
 	<script src="functions.lua" type="client" cache="false" />

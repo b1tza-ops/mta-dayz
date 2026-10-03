@@ -115,6 +115,8 @@ test("core spoofed actor rejected",function() source=b;client=a;assert(not dayZV
 test("unowned equipment rejected",function() source=a;client=a;assert(not dayZValidateAction("onPlayerEquipBackpack",{"backpack1",0}));client=nil;source=nil end)
 test("currency cannot be used as food",function() source=a;client=a;assert(not dayZValidateAction("onPlayerRequestChangingStats",{"zombieskilled","ignored","food"}));client=nil;source=nil end)
 
+local adminCommands={}
+function addCommandHandler(name,handler) adminCommands[name]=handler end
 dofile("e_admin/admin_s.lua");local admin=P();admin.account={name="b1tza"}
 test("ACL admin accepted and forged flag rejected",function() a.data.admin=true;assert(not isDayZAdmin(a));assert(isDayZAdmin(admin)) end)
 test("non-admin cannot grant or kill",function() remote("giveEvent",a,a,b,"fooditem4",10);remote("killPlayerEvent",a,a,b);assert(not b.data.fooditem4 and not b.data.blood) end)
@@ -124,6 +126,22 @@ test("negative and unknown admin grants rejected",function() remote("giveEvent",
 test("unauthorized player information request rejected",function() a.messages={};remote("getPlayerInfo",a,a,b);assert(#a.messages==0) end)
 test("each vehicle admin action invokes correct function",function() local v=E("vehicle");remote("fixVehicleEvent",admin,admin,b,v);assert(v.fixed and not v.blown);remote("blowVehicleEvent",admin,admin,b,v);assert(v.blown);remote("destroyVehicleEvent",admin,admin,b,v);assert(not isElement(v)) end)
 test("duty mode requires ACL",function() remote("dayz:adminDuty",a,a);assert(not a.data.dutyMode);remote("dayz:adminDuty",admin,admin);assert(admin.data.dutyMode and admin.policy.dutyMode=="deny") end)
+
+test("self-give command requires authenticated Admin",function()
+ now=now+1000;local old=a.data.weapon11;adminCommands.dayzgive(a,"dayzgive","weapon11","1");assert(a.data.weapon11==old)
+ local guest=P();guest.account={name="b1tza",guest=true};adminCommands.dayzgive(guest,"dayzgive","weapon11","1");assert(not guest.data.weapon11)
+end)
+test("self-give command adds bounded items with protected data",function()
+ now=now+1000;local old=tonumber(admin.data.weapon11) or 0
+ adminCommands.dayzgive(admin,"dayzgive","weapon11","2");assert(admin.data.weapon11==old+2 and admin.policy.weapon11=="deny")
+ now=now+1000;adminCommands.dayzgive(admin,"dayzgive","mag5");assert(admin.data.mag5==1)
+end)
+test("self-give rejects invalid items and quantities",function()
+ for _,quantity in ipairs({"-1","0","1.5","10001","nan"}) do
+  now=now+1000;local old=admin.data.weapon11;adminCommands.dayzgive(admin,"dayzgive","weapon11",quantity);assert(admin.data.weapon11==old)
+ end
+ now=now+1000;adminCommands.dayzgive(admin,"dayzgive","admin","1");assert(not admin.data.admin)
+end)
 
 dofile("e_shop/catalog.lua");dofile("e_shop/shop_s.lua")
 local buyer=P(-2316.474,2342.978,5.816);buyer.data.zombieskilled=100
