@@ -64,8 +64,10 @@ local function spawnZombies(player,amount)
     amount=tonumber(amount)
     if not amount or amount%1~=0 or amount<1 or amount>10 then return reply(player,"Choose 1 to 10 zombies.") end
     if not outdoor(player) then return reply(player,"Spawn zombies on foot, outdoors in dimension 0.") end
-    if countAssets(player,"zombie")+amount>20 or number(player,"spawnedzombies")+amount>configVar.maxzombies then
-        return reply(player,"Zombie limit reached. Clean up your test spawns first.")
+    -- The ordinary player limit is 5, but this admin tool offers batches up to 10.
+    -- Use its own bounded test allowance; createZombie still enforces the global cap.
+    if countAssets(player,"zombie")+amount>20 then
+        return reply(player,"Your 20-test-zombie limit is reached. Clean up your test spawns first.")
     end
     local x,y,z=getElementPosition(player)
     local spawned=0
@@ -80,7 +82,12 @@ local function spawnZombies(player,amount)
             spawned=spawned+1
         end
     end
-    reply(player,"Spawned "..spawned.." zombies. They expire after 5 minutes. Use flat ground.")
+    if spawned==0 then
+        reply(player,"No zombies spawned: the global zombie limit may be full, or ped creation failed. Check the server log.")
+        outputDebugString("[DayZ testing] Zombie batch failed for "..getAccountName(getPlayerAccount(player)).."; requested "..amount,2)
+    else
+        reply(player,"Spawned "..spawned.." of "..amount.." zombies. They expire after 5 minutes. Use flat ground.")
+    end
 end
 local function airdrop(player)
     if not outdoor(player) then return reply(player,"Create an airdrop on foot, outdoors in dimension 0.") end

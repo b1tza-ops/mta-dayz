@@ -78,7 +78,7 @@ The selected-player button uses the player selected in the main admin panel.
 Use `/dayztest` while logged in with an Admin ACL account. The panel provides:
 - Teleport presets (LS/SF/LV airports and Area 69) and return to the previous position.
 - Spawn 1-10 normal DayZ zombies nearby; up to 20 active test zombies per admin,
-  also respecting the existing player and global zombie limits.
+  respecting the global zombie limit. The normal five-zombie player cap does not block admin test batches.
 - Trigger a populated test airdrop 7 metres ahead. It falls for 10 seconds,
   appears as an orange radar marker, and uses the normal DayZ loot menu after landing.
   Contents: M4A1 Holo, 120 rounds of matching ammo, food, bandages and an engine.
