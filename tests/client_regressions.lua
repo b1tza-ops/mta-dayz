@@ -67,4 +67,20 @@ check('unknown damage is ignored before arithmetic',function()
  end
  assert(hits==2)
 end)
+check('destroyed loot is rejected before any inventory data reads',function()
+ local s=read('dayzepoch/inventory.lua')
+ isElement=function(e) return type(e)=='table' and e.alive==true end
+ local reads=0
+ getElementData=function(e,k) assert(isElement(e),'invalid inventory element read');reads=reads+1;return e.data[k] end
+ for _,name in ipairs({'refreshLoot','getElementMaxSlots','getElementCurrentSlots','isPlayerInLoot'}) do
+  local fn=assert(s:match('(function '..name..'%([^\n]*.-\nend)'))
+  run(fn)
+ end
+ local dead={alive=false};localPlayer={alive=true,data={loot=true,currentCol=dead}}
+ assert(refreshLoot(dead)==false and getElementMaxSlots(dead)==0 and getElementCurrentSlots(dead)==0)
+ assert(refreshLoot(false)==false and getElementMaxSlots(nil)==0 and getElementCurrentSlots(false)==0 and reads==0)
+ assert(isPlayerInLoot()==false)
+ local live={alive=true,data={MAX_Slots=20}};localPlayer.data.currentCol=live
+ assert(isPlayerInLoot()==live and getElementMaxSlots(live)==20)
+end)
 print(count..' client regression checks passed')

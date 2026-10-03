@@ -548,7 +548,7 @@ function refreshInventory()
 end
 
 function refreshLoot(loot, gearName)
-	if not loot then
+	if not isElement(loot) then
 		return false;
 	end
 	local x, y = 0, 0
@@ -635,10 +635,12 @@ addEventHandler("onClientElementDataChange",localPlayer,function(dataName)
 end);
 
 function getElementMaxSlots(element)
+	if not isElement(element) then return 0 end
 	return getElementData(element, "MAX_Slots") or 0;
 end
 
 function getElementCurrentSlots(element)
+	if not isElement(element) then return 0 end
 	local current_SLOTS = 0;
 	for _,k in pairs({1,2,3,4,5,6,7,8,9}) do
 		for _,v in ipairs(inventoryItems[k]) do
@@ -742,7 +744,8 @@ end);
 
 function moveLootItemOut()
 	if (getElementData(localPlayer,"isInAction")) then return; end
-	if (not getLootSelectedItem() or getElementData(isPlayerInLoot(), getLootSelectedItem()) <= 0) then return end
+	local loot, item = isPlayerInLoot(), getLootSelectedItem()
+	if not isElement(loot) or not item or (tonumber(getElementData(loot,item)) or 0) <= 0 then return end
 	local realdoubleclick = false;
 	if getElementType(source) == "gui-staticimage" then
 		if source == getLootSelectedGUI() then
@@ -793,7 +796,8 @@ end
 
 function isPlayerInLoot()
 	if getElementData(localPlayer, "loot") then
-		return getElementData(localPlayer, "currentCol");
+		local col = getElementData(localPlayer, "currentCol");
+		return isElement(col) and col or false;
 	end
 	return false;
 end
