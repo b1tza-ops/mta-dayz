@@ -4,11 +4,16 @@ root={};resourceRoot={};localPlayer={}
 local ped={data={['survivor:active']=true,['survivor:owner']=localPlayer,['survivor:state']='patrol',['survivor:waypoint']={10,0,0}},controls={},x=0,y=0,z=0}
 local target={data={},x=5,y=0,z=0}
 local clear=true
+local lootFixtures={}
+local pedFixtures={ped}
 function isElement(e) return type(e)=='table' end
 function getElementType(e) return e.kind or "colshape" end
 function isElementWithinColShape() return true end
 function getElementData(e,k) return e.data and e.data[k] end
-function getElementsByType() return {ped} end
+function getElementsByType(kind) if kind=='ped' then return pedFixtures else return lootFixtures end end
+function getElementDimension(e) return e.dim or 0 end
+function getElementInterior() return 0 end
+function getDayZSlots(e) return e.slots or 0 end
 function isElementSyncer() return true end
 function isPedDead() return false end
 function getElementPosition(e) return e.x,e.y,e.z end
@@ -67,3 +72,24 @@ clock=clock+2000
 function getGroundPosition() return 0 end
 timers[1].fn();assert(ped.controls.forwards and math.abs(ped.rotation+90)<0.01)
 print('PASS clear route resumes direct movement')
+
+local scan
+for _,timer in ipairs(timers) do if timer.ms==1500 then scan=timer.fn end end
+local visible={data={itemloot=true},x=20,y=0,z=0,slots=1}
+local hidden={data={itemloot=true},x=25,y=0,z=0,slots=1}
+local distant={data={itemloot=true},x=60,y=0,z=0,slots=1}
+local private={data={itemloot=true,safe=true},x=10,y=0,z=0,slots=1}
+local empty={data={itemloot=true},x=10,y=0,z=0,slots=0}
+lootFixtures={visible,hidden,distant,private,empty}
+function isLineOfSightClear(_,_,_,tx) return tx~=25 end
+scan()
+local observation=reports[#reports]
+assert(observation[1]=='dayz:survivorSenseLoot' and #observation[4]==1 and observation[4][1]==visible)
+print('PASS loot sensing notices visible supplies and excludes walls distance private and empty containers')
+
+local wallZombie={data={zombie=true},x=25,y=0,z=0}
+local visibleZombie={data={zombie=true},x=8,y=0,z=0}
+pedFixtures={ped,wallZombie,visibleZombie}
+scan();local observation=reports[#reports]
+assert(#observation[5]==1 and observation[5][1]==visibleZombie)
+print('PASS zombie sensing excludes threats on the other side of a wall')

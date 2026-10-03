@@ -162,6 +162,22 @@ test('survivors require authenticated admin and outdoor placement',function()
 end)
 local survivor,zombie
 local function tickSurvivors()
+ -- Simulate visible observations separately from the server's decision tick.
+ for _,p in ipairs(getElementsByType('ped')) do
+  if p.data['survivor:active'] then
+   local observed={}
+   for _,col in ipairs(getElementsByType('colshape')) do
+    if col.data.itemloot or col.data.airdrop or col.data.deadman then
+     if getDistanceBetweenPoints3D(p.x,p.y,p.z,col.x,col.y,col.z)<=50 and #observed<8 then observed[#observed+1]=col end
+    end
+   end
+   local seenZombies={}
+   for _,zombie in ipairs(getElementsByType('ped')) do
+    if zombie.data.zombie and not zombie.dead and getDistanceBetweenPoints3D(p.x,p.y,p.z,zombie.x,zombie.y,zombie.z)<=30 then seenZombies[#seenZombies+1]=zombie end
+   end
+   client=p.data['survivor:owner'];source=client;handlers['dayz:survivorSenseLoot'][1](p,observed,seenZombies);client=nil;source=nil
+  end
+ end
  for _,t in ipairs(timers) do if t.ms==500 and t.fn then t.fn();return end end
  error('Missing survivor timer')
 end
@@ -324,5 +340,36 @@ test('remembered supplies remain useful beyond discovery radius and failed route
  now=now+1000;tickSurvivors();assert(survivor.data['survivor:lootTarget']~=remembered)
  action(admin,'survivorinspect');assert(admin.last.message:find('Memory:',1,true))
  action(admin,'cleanup');destroyElement(remembered)
+end)
+test('loot sense reports validate ownership world range duplicates and container type',function()
+ action(admin,'survivor')
+ for _,p in ipairs(getElementsByType('ped')) do if p.data['survivor:active'] then survivor=p end end
+ local valid=createColSphere(survivor.x+10,survivor.y,survivor.z,1.25);valid.data.itemloot=true;valid.data.fooditem4=2
+ local far=createColSphere(survivor.x+60,survivor.y,survivor.z,1.25);far.data.itemloot=true;far.data.fooditem4=2
+ local private=createColSphere(survivor.x+5,survivor.y,survivor.z,1.25);private.data.itemloot=true;private.data.safe=true;private.data.fooditem4=2
+ local other=createColSphere(survivor.x+5,survivor.y,survivor.z,1.25);other.data.itemloot=true;other.data.fooditem4=2;other.dim=2
+ local function sense(who,list)
+  client=who;source=who;handlers['dayz:survivorSenseLoot'][1](survivor,list,{});client=nil;source=nil
+ end
+ sense(ordinary,{valid});assert(not survivor.data['survivor:sensedLoot'])
+ sense(admin,{far,private,other});assert(survivor.data['survivor:sensedLoot']==0)
+ now=now+1100;sense(admin,{valid,valid});assert(survivor.data['survivor:sensedLoot']==1)
+ for _,timer in ipairs(timers) do if timer.ms==500 and timer.fn then timer.fn();break end end
+ assert(survivor.data['survivor:lootTarget']==valid)
+ action(admin,'survivorinspect');assert(admin.last.message:find('Loot senses: 1 visible sites',1,true))
+ action(admin,'cleanup');destroyElement(valid);destroyElement(far);destroyElement(private);destroyElement(other)
+end)
+test('hidden zombies cannot lock survivors into combat and lost visibility clears targets',function()
+ action(admin,'survivor')
+ for _,p in ipairs(getElementsByType('ped')) do if p.data['survivor:active'] then survivor=p end end
+ local hidden=createZombie(survivor.x+5,survivor.y,survivor.z)
+ local function observe(list)
+  client=admin;source=admin;handlers['dayz:survivorSenseLoot'][1](survivor,{},list);client=nil;source=nil
+  for _,t in ipairs(timers) do if t.ms==500 and t.fn then t.fn();break end end
+ end
+ observe({});assert(survivor.data['survivor:state']=='patrol' and not survivor.data['survivor:target'])
+ now=now+1500;observe({hidden});assert(survivor.data['survivor:state']=='combat')
+ now=now+1500;observe({});assert(survivor.data['survivor:state']=='patrol' and not survivor.data['survivor:target'])
+ action(admin,'cleanup');destroyElement(hidden)
 end)
 print(passed..' admin testing behaviour checks passed')

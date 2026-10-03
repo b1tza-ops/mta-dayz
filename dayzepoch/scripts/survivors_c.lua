@@ -1,4 +1,4 @@
-local previous,avoidance,navigation={},{},{}
+local previous,avoidance,navigation,sensingCursor={},{},{},{}
 local function stop(ped)
     for _,control in ipairs({"forwards","backwards","sprint","aim_weapon","fire","jump"}) do setPedControlState(ped,control,false) end
 end
@@ -99,7 +99,7 @@ setTimer(function()
             else reportNavigation(ped,"waiting") end
         end
     end
-    for ped in pairs(previous) do if not isElement(ped) then previous[ped]=nil;avoidance[ped]=nil;navigation[ped]=nil end end
+    for ped in pairs(previous) do if not isElement(ped) then previous[ped]=nil;avoidance[ped]=nil;navigation[ped]=nil;sensingCursor[ped]=nil end end
 end,250,0)
 addEvent("dayz:survivorShot",true)
 addEventHandler("dayz:survivorShot",resourceRoot,function(ped,target)
@@ -115,3 +115,52 @@ end)
 addEventHandler("onClientResourceStop",resourceRoot,function()
     for _,ped in ipairs(getElementsByType("ped")) do if getElementData(ped,"survivor:active") then stop(ped) end end
 end)
+
+-- A 360-degree local awareness scan, with walls blocking actual observations.
+setTimer(function()
+    for _,ped in ipairs(getElementsByType("ped",root,true)) do
+        if getElementData(ped,"survivor:active") and getElementData(ped,"survivor:owner")==localPlayer
+            and isElementSyncer(ped) and not isPedDead(ped) and getElementData(ped,"survivor:state")~="paused" then
+            local x,y,z=getElementPosition(ped)
+            local seen={}
+            for _,col in ipairs(getElementsByType("colshape")) do
+                if (getElementData(col,"itemloot") or getElementData(col,"airdrop") or getElementData(col,"deadman"))
+                    and not getElementData(col,"safe") and not getElementData(col,"vehicle") and not getElementData(col,"tent")
+                    and getElementDimension(col)==getElementDimension(ped) and getElementInterior(col)==getElementInterior(ped)
+                    and getDayZSlots(col)>0 then
+                    local cx,cy,cz=getElementPosition(col)
+                    local d=getDistanceBetweenPoints3D(x,y,z,cx,cy,cz)
+                    if d<=50 then
+                        local parent=getElementData(col,"parent")
+                        local ignored=isElement(parent) and getElementType(parent)=="object" and parent or ped
+                        if isLineOfSightClear(x,y,z+0.7,cx,cy,cz+0.7,true,true,false,true,false,false,false,ignored) then
+                            seen[#seen+1]={col=col,distance=d}
+                        end
+                    end
+                end
+            end
+            table.sort(seen,function(a,b) return a.distance<b.distance end)
+            local batch={}
+            if #seen>0 then
+                local offset=sensingCursor[ped] or 0
+                for index=1,math.min(8,#seen) do batch[index]=seen[(offset+index-1)%#seen+1].col end
+                sensingCursor[ped]=(offset+#batch)%#seen
+            end
+            local threats={}
+            for _,zombie in ipairs(getElementsByType("ped",root,true)) do
+                if getElementData(zombie,"zombie") and not isPedDead(zombie)
+                    and getElementDimension(zombie)==getElementDimension(ped) and getElementInterior(zombie)==getElementInterior(ped) then
+                    local zx,zy,zz=getElementPosition(zombie)
+                    local d=getDistanceBetweenPoints3D(x,y,z,zx,zy,zz)
+                    if d<=30 and isLineOfSightClear(x,y,z+0.7,zx,zy,zz+0.7,true,true,false,true,false,false,false,ped) then
+                        threats[#threats+1]={ped=zombie,distance=d}
+                    end
+                end
+            end
+            table.sort(threats,function(a,b) return a.distance<b.distance end)
+            local visibleZombies={}
+            for index=1,math.min(16,#threats) do visibleZombies[index]=threats[index].ped end
+            triggerServerEvent("dayz:survivorSenseLoot",localPlayer,ped,batch,visibleZombies)
+        end
+    end
+end,1500,0)

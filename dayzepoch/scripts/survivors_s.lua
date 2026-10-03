@@ -110,11 +110,6 @@ local function safeWaypoint(ped,r,zombies,now)
     return chosen
 end
 local function rememberLoot(ped,r,now)
-    for _,col in ipairs(getElementsByType("colshape")) do
-        if lootable(col) and world(ped,col) and range(ped,col)<=35 then
-            r.lootMemory[col]=now
-        end
-    end
     local entries={}
     for col,seen in pairs(r.lootMemory) do
         if not isElement(col) or now-seen>180000 then r.lootMemory[col]=nil;r.ignored[col]=nil
@@ -130,7 +125,7 @@ local function lootGoal(ped,r,now)
             local supply,_,priorityScore=wanted(r,col)
             local distance=range(ped,col)
             -- Return to remembered supplies only for a current shortage.
-            if supply and distance<=(priorityScore>1 and 80 or 35) then
+            if supply and distance<=(priorityScore>1 and 80 or 50) then
                 local x,y=getElementPosition(col)
                 local score=40+priorityScore*0.6-distance*0.3-dangerPenalty(r,x,y,now)
                 if col==r.loot then score=score+8 end -- commitment prevents target thrashing
@@ -197,7 +192,7 @@ function DayZSpawnTestSurvivor(player)
     -- Eight waypoints around an 80-by-80-metre patrol area.
     local route={{x+4,y,z},{x+40,y,z},{x+40,y+40,z},{x,y+40,z},
         {x-40,y+40,z},{x-40,y,z},{x-40,y-40,z},{x,y-40,z}}
-    survivors[ped]={owner=player,col=col,personality=personalities[count%#personalities+1],lootMemory={},visited={[1]=getTickCount()},blockedRoutes={},danger={},fleeUntil=0,ignored={},lastLoot=0,food=65,water=65,bleeding=false,lastNeeds=getTickCount(),route=route,index=2,routeStarted=getTickCount(),ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
+    survivors[ped]={owner=player,col=col,personality=personalities[count%#personalities+1],zombieSight={},lootMemory={},visited={[1]=getTickCount()},blockedRoutes={},danger={},fleeUntil=0,ignored={},lastLoot=0,food=65,water=65,bleeding=false,lastNeeds=getTickCount(),route=route,index=2,routeStarted=getTickCount(),ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
     if not setElementSyncer(ped,player,true) then
         survivors[ped]=nil;destroyElement(col);destroyElement(ped)
         outputDebugString("[DayZ survivors] Could not assign survivor controller",2)
@@ -220,13 +215,14 @@ function DayZInspectTestSurvivors(player)
             lines[#lines+1]="  Goal: "..(r.goal or "Explore").." | Reason: "..(r.reason or "Starting patrol").." | Score: "..math.floor(r.goalScore or 10)
             local memories=0;for _ in pairs(r.lootMemory) do memories=memories+1 end
             local blocked=0;for _,untilTime in pairs(r.blockedRoutes) do if untilTime>getTickCount() then blocked=blocked+1 end end
+            lines[#lines+1]="  Loot senses: "..(r.sensedCount or 0).." visible sites | radius 50m | "..(r.lastSense and math.floor((getTickCount()-r.lastSense)/1000).."s since scan" or "waiting for first scan")
             lines[#lines+1]="  Memory: "..memories.." loot sites | "..blocked.." blocked routes | nearby threats "..(r.enemies or 0)
             lines[#lines+1]="  Patrol waypoint: "..r.index.."/"..#r.route.." | Movement: "..(r.navigation or "waiting for controller")
             lines[#lines+1]="  Food: "..math.floor(r.food).."/100 | Water: "..math.floor(r.water).."/100 | Bleeding: "..(r.bleeding and "yes" or "no")
             lines[#lines+1]="  Last used: "..tostring(getElementData(ped,"survivor:lastUse") or "Nothing yet")
             if isElement(r.loot) then
                 lines[#lines+1]="  Loot target: "..string.format("%.1f",range(ped,r.loot)).."m | "..(r.lootStatus or "Approaching")
-            else lines[#lines+1]="  No loot target: needs supplies within 35m, no nearby zombie threat" end
+            else lines[#lines+1]="  No selected loot target: supplies may be absent, unnecessary, blocked or unsafe" end
             lines[#lines+1]="  Last collected: "..tostring(getElementData(ped,"survivor:lastLoot") or "Nothing yet")
             for _,supply in ipairs(supplies) do lines[#lines+1]="  "..supply.name..": "..count(r.col,supply.item) end
         end
@@ -252,8 +248,8 @@ setTimer(function()
             local now=getTickCount()
             local target,best=nil,30
             local zombies,closeCount={},0
-            for _,zombie in ipairs(getElementsByType("ped")) do
-                if getElementData(zombie,"zombie") and not isPedDead(zombie) and world(ped,zombie) then
+            for zombie,seen in pairs(r.zombieSight) do
+                if isElement(zombie) and now-seen<=4000 and getElementData(zombie,"zombie") and not isPedDead(zombie) and world(ped,zombie) then
                     local d=range(ped,zombie)
                     if d<30 then zombies[#zombies+1]=zombie end
                     if d<=18 then closeCount=closeCount+1 end
@@ -396,4 +392,34 @@ addEventHandler("dayz:survivorNavigation",root,function(ped,status)
     r.lastNav=now
     if status=="blocked" and r.navigation~=status then outputDebugString("[DayZ survivors] Movement blocked; trying alternate directions",3) end
     r.navigation=status
+end)
+
+-- The owner's client supplies visibility observations; positions, container type
+-- and distance are checked here. Reports never include item grants or coordinates.
+addEvent("dayz:survivorSenseLoot",true)
+addEventHandler("dayz:survivorSenseLoot",root,function(ped,observed,visibleZombies)
+    local r=survivors[ped]
+    if source~=client or not r or client~=r.owner or not isElement(ped) or isPedDead(ped)
+        or not world(ped,client) or range(ped,client)>180 or type(observed)~="table" or #observed>8
+        or type(visibleZombies)~="table" or #visibleZombies>16 then return end
+    local now=getTickCount()
+    if r.lastSense and now-r.lastSense<1000 then return end
+    r.lastSense=now;r.sensedCount=0
+    r.zombieSight={}
+    for index=1,#visibleZombies do
+        local zombie=visibleZombies[index]
+        if isElement(zombie) and getElementType(zombie)=="ped" and getElementData(zombie,"zombie")
+            and not isPedDead(zombie) and world(ped,zombie) and range(ped,zombie)<=30 then
+            r.zombieSight[zombie]=now
+        end
+    end
+    local unique={}
+    for index=1,#observed do
+        local col=observed[index]
+        if lootable(col) and world(ped,col) and range(ped,col)<=50 and getDayZSlots(col)>0 and not unique[col] then
+            unique[col]=true;r.lootMemory[col]=now;r.sensedCount=r.sensedCount+1
+        end
+    end
+    data(ped,"sensedLoot",r.sensedCount)
+    rememberLoot(ped,r,now)
 end)

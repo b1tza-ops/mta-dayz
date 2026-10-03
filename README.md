@@ -164,5 +164,25 @@ receive lower exploration priority; danger areas remembered for a minute also
 reduce destination scores (maximum 32 areas). Inspections show personality, goal,
 reason, selected score, memory counts and nearby threat count. Server debug output
 records goal changes. This is deterministic game AI with local steering, not an
-LLM, full map pathfinding or player combat. Proximity is used for server threat
-assessment; the admin controller still verifies visibility for firing/looting.
+LLM, full map pathfinding or player combat. The admin controller reports visible zombies; the server validates their range
+and world before threat assessment. Visibility also gates firing and looting.
+
+
+### Loot awareness
+
+The admin controller runs a 360-degree loot visibility scan every 1.5 seconds,
+within 50 metres of each survivor. Walls and intervening objects block detection;
+the target crate itself is ignored. Empty containers and private inventories are
+excluded. Batches rotate through nearby visible sites (maximum eight observations
+per report). The server validates owner, container type, distance and world before
+updating bounded memory; it no longer automatically discovers containers through
+walls. Normal restocking works out to 50 metres, urgent remembered supplies to 80.
+Inspection shows visible observations from the last scan and time since that scan.
+As with shooting, the prototype trusts its authenticated admin controller's
+visibility observation; this remains a local test NPC system.
+
+Zombie awareness uses the same 1.5-second scan with line of sight, within 30 metres
+and at most 16 visible threats. A new scan removes hidden threats immediately;
+observations also expire after four seconds without refresh. Zombies behind walls
+therefore no longer keep survivors stationary in combat. Existing retreat
+commitment can continue briefly after sight is lost, then patrol/needs resume.
