@@ -73,3 +73,22 @@ Use `/dayzpanel` while logged in as an Admin to open the item catalogue directly
 Search readable item names, choose a category, enter the quantity and click
 **Give to myself**. The O admin panel Items button opens the same catalogue.
 The selected-player button uses the player selected in the main admin panel.
+
+## Admin testing panel
+Use `/dayztest` while logged in with an Admin ACL account. The panel provides:
+- Teleport presets (LS/SF/LV airports and Area 69) and return to the previous position.
+- Spawn 1-10 normal DayZ zombies nearby; up to 20 active test zombies per admin,
+  also respecting the existing player and global zombie limits.
+- Trigger a populated test airdrop 7 metres ahead. It falls for 10 seconds,
+  appears as an orange radar marker, and uses the normal DayZ loot menu after landing.
+  Contents: M4A1 Holo, 120 rounds of matching ammo, food, bandages and an engine.
+- Inspect the nearest vehicle within 12 metres: health, engine state, fuel,
+  inventory capacity and installed/required parts. Inspection does not mutate vehicles.
+- Clean up only your own active test zombies and airdrops.
+
+Spawn on foot in dimension/interior 0 and on flat open ground. Test zombies expire
+in 5 minutes; crates expire in 15 minutes. A maximum of two test crates per admin
+is active at once. Cleanup, disconnect and resource stop remove temporary assets;
+already looted items remain in players' inventories. These are manual testing
+crates, not a scheduled public airdrop event. All actions are server authenticated,
+throttled and logged. Engine gameplay validation is still required.

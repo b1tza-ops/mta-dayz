@@ -56,3 +56,23 @@ giveWindowEditboxQuant.text='0';handlers.onClientGUIClick[selfButton]();assert(#
 search.text='MAG5';refreshGiveItems();assert(#giveWindowGridlist.rows==1 and giveWindowGridlist.rows[1][1]=='STANAG ammo')
 guiComboBoxSetSelected(giveWindowCombobox,2);search.text='';refreshGiveItems();assert(#giveWindowGridlist.rows==1 and giveWindowGridlist.rows[1].id=='fooditem4')
 print('PASS item panel names, search, categories, item IDs, self-give and quantity validation')
+-- Also exercise the real admin testing panel's controls.
+function guiCreateMemo(x,y,w,h,text) return control('memo',text) end
+function guiMemoSetReadOnly() end
+function outputChatBox() end
+local commands={}
+function addCommandHandler(name,fn) commands[name]=fn end
+dofile('dayzepoch/scripts/shared/admin_testing_locations.lua')
+dofile('dayzepoch/scripts/admin_testing_c.lua')
+commands.dayztest();assert(requests[#requests][1]=='dayz:testAction' and requests[#requests][3]=='open')
+handlers['dayz:openTesting'][resourceRoot]()
+local before=#requests
+local expected={['Teleport']='teleport',['Return to previous position']='back',['Spawn zombies nearby']='zombies',['Trigger test airdrop']='airdrop',['Inspect nearest vehicle']='inspect',['Clean up my test zombies and airdrops']='cleanup'}
+for _,e in ipairs(controls) do
+ if expected[e.text] then
+  handlers.onClientGUIClick[e]()
+  assert(requests[#requests][1]=='dayz:testAction' and requests[#requests][3]==expected[e.text])
+ end
+end
+assert(#requests==before+6)
+print('PASS testing panel opens and sends all six actions through server requests')
