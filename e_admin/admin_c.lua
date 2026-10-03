@@ -244,7 +244,7 @@ function main()
 
 	function give()
 		if (guiGridListGetSelectedItem(giveWindowGridlist) ~= -1) then
-			local item = guiGridListGetItemText(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist))
+			local item = guiGridListGetItemData(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist),1)
 			local quantity = guiGetText(giveWindowEditboxQuant)
 			local selectedPlayer = getPlayerFromName(guiGridListGetItemText(gridlistPlayers1,guiGridListGetSelectedItem(gridlistPlayers1),1))
 			if selectedPlayer then
@@ -255,7 +255,7 @@ function main()
 
 	function giveAll()
 		if (guiGridListGetSelectedItem(giveWindowGridlist) ~= -1) then
-			local item = guiGridListGetItemText(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist))
+			local item = guiGridListGetItemData(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist),1)
 			local quantity = guiGetText(giveWindowEditboxQuant)
 			triggerServerEvent("giveAllEvent",localPlayer,item,quantity)
 		end

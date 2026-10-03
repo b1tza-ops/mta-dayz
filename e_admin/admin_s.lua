@@ -109,6 +109,8 @@ end
 secure("giveEvent", function(target,item,quantity) return player(target) and validItem(item,quantity) end,
     function(caller,target,item,quantity)
         setData(target,item,(tonumber(getElementData(target,item)) or 0)+tonumber(quantity))
+        triggerClientEvent(target,"refreshInventoryManual",target)
+        triggerClientEvent(caller,"dayz:adminItemGranted",resourceRoot,item,tonumber(quantity),getPlayerName(target))
     end)
 secure("giveAllEvent", validItem, function(caller,item,quantity)
     for _, target in ipairs(getElementsByType("player")) do
@@ -204,4 +206,10 @@ addCommandHandler("dayzitems",function(caller,command,...)
         outputChatBox("[DayZ] "..matches[i][1].." = "..matches[i][2],caller,200,230,200)
     end
     outputChatBox("[DayZ] "..#matches.." matches; showing up to 20. Narrow the search with /dayzitems NAME",caller,255,220,100)
+end)
+
+secure("dayz:requestItemPanel",function() return true end,function(caller)
+    if getElementData(caller,"logedin") then
+        triggerClientEvent(caller,"dayz:openItemPanel",resourceRoot)
+    end
 end)

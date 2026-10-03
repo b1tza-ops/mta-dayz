@@ -67,3 +67,9 @@ through 10000. Grants are server authorized, protected against client edits,
 and recorded in the server debug log. Admin grants can exceed backpack capacity;
 equip a suitable backpack before testing normal loot transfers.
 You can also press O, select your player, and use the Give panel.
+
+### Named item panel
+Use `/dayzpanel` while logged in as an Admin to open the item catalogue directly.
+Search readable item names, choose a category, enter the quantity and click
+**Give to myself**. The O admin panel Items button opens the same catalogue.
+The selected-player button uses the player selected in the main admin panel.
