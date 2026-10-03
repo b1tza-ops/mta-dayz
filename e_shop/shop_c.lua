@@ -309,8 +309,8 @@ end)
 
 addEventHandler("onClientElementDataChange",root,function(data)
 	if getElementData(localPlayer, "logedin") then
-		if (string.find(data,currency_item)) then
-			guiSetText(shop_gui.label[1], " zKills: "..getElementData(localPlayer, currency_item))
+		if source == localPlayer and type(currency_item) == "string" and data == currency_item and isElement(shop_gui.label[1]) then
+			guiSetText(shop_gui.label[1], " zKills: "..(tonumber(getElementData(localPlayer, currency_item)) or 0))
 		end
 	end
 end)

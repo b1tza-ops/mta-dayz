@@ -625,6 +625,7 @@ addEventHandler("onClientPlayerDamage", localPlayer, function(attacker, weapon, 
 			setElementData(localPlayer, "pain", true);
 		end
 		local damage = getWeaponDamage(attacker, weapon);
+		if type(damage) ~= "number" or damage <= 0 then return end;
 		local helmet = getElementData(localPlayer,"helmet");
 		local vest = getElementData(localPlayer,"vest");
 		if (bodypart == 9) then
@@ -727,6 +728,7 @@ addEventHandler("onClientPedDamage", root, function(attacker, weapon, bodypart, 
 					return;
 				end
 				local damage = getWeaponDamage(attacker, weapon);
+		if type(damage) ~= "number" or damage <= 0 then return end;
 				if (weapon == 16) then
 					local aX,aY,aZ = getElementPosition(attacker);
 					local tX,tY,tZ = getElementPosition(source);
@@ -1186,10 +1188,10 @@ addEventHandler("onClientRender", root, function()
 		dxDrawImage(sW*0.96, sH*0.92, 50, 50, "images/dayzicons/eat/100.png", 0, 0, 0, tocolor(0,0,0,20));
 		dxDrawImage(sW*0.96, sH*0.92, 50, 50, "images/dayzicons/eat/"..f_number..".png", 0, 0, 0, tocolor(r5,g5,b5, 180));
 		local veh = getPedOccupiedVehicle(localPlayer);
-		if (veh and getElementModel(veh) ~= 509) then --[[If it's not a bike]]
-			local col = getElementData(veh, "parent");
+		local col = isElement(veh) and getElementData(veh, "parent");
+		if (isElement(veh) and isElement(col) and getElementModel(veh) ~= 509) then --[[DayZ vehicles except bikes]]
 			local maxfuel = tonumber(getElementData(veh, "maxfuel")) or 0;
-			local fuel = math.floor(tonumber(getElementData(col, "fuel"))) or 0;
+			local fuel = math.floor(tonumber(getElementData(col, "fuel")) or 0);
 			local needengine = tonumber(getElementData(veh, "needengines")) or 0;
 			local needtires = tonumber(getElementData(veh, "needtires")) or 0;
 			local needparts = tonumber(getElementData(veh, "needparts")) or 0;
@@ -1504,8 +1506,8 @@ end);
 
 setTimer(function()
 	if getElementData(localPlayer, "logedin") then
-		setElementData(localPlayer, "alivetime", getElementData(localPlayer, "alivetime") + 1);
-		setElementData(localPlayer, "stats.playtime", getElementData(localPlayer, "stats.playtime") + 1);
+		setElementData(localPlayer, "alivetime", (tonumber(getElementData(localPlayer, "alivetime")) or 0) + 1);
+		setElementData(localPlayer, "stats.playtime", (tonumber(getElementData(localPlayer, "stats.playtime")) or 0) + 1);
 		if (bpml > 0) then
 			setElementData(localPlayer, "blood", getElementData(localPlayer, "blood") - bpml);
 			if (getElementData(localPlayer,"cold")) then

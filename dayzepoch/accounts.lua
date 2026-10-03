@@ -189,6 +189,13 @@ addEventHandler("onPlayerDayZLogin", root, function(player)
 	if not isElement(player) or getElementType(player) ~= "player" then return end
 	local account = getPlayerAccount(player);
 	if not account or isGuestAccount(account) then return end
+	-- Console-created accounts have no character statistics yet. Initialize these
+	-- before the fresh-spawn path and preserve existing statistics on respawn.
+	for _,v in ipairs(playerData2Table) do
+		local value = getAccountData(account,v[1]);
+		if type(value) ~= type(v[2]) then value = v[2]; setAccountData(account,v[1],value); end
+		setDayZData(player,v[1],value);
+	end
 	local x,y,z = getAccountData(account, "last_x"), getAccountData(account, "last_y"), getAccountData(account, "last_z");
 	local skin = tonumber(getAccountData(account, "skin")) or 71;
 	if getAccountData(account, "isDead") or type(x) ~= "number" or type(y) ~= "number" or type(z) ~= "number" then
@@ -218,9 +225,6 @@ addEventHandler("onPlayerDayZLogin", root, function(player)
 	setElementModel(player, getElementData(player, "skin"));
 	setTimer(checkBuggedAccont, (25*1000), 1, player);
 	setDayZData(player, "spawnedzombies", 0);
-	for _,v in ipairs(playerData2Table) do
-		setDayZData(player,v[1],getAccountData(account,v[1]));
-	end
 	equipThem(player, 0);
 	loadPlayerSafeCodes(player);
 end);
