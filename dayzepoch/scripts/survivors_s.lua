@@ -16,7 +16,11 @@ function DayZSpawnTestSurvivor(player)
     if not isElement(ped) then return nil,"Survivor creation failed; check the server log." end
     local route={{x+4,y,z},{x+16,y,z},{x+16,y+12,z},{x+4,y+12,z}}
     survivors[ped]={owner=player,route=route,index=2,ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
-    setPedSyncer(ped,player)
+    if not setElementSyncer(ped,player,true) then
+        survivors[ped]=nil;destroyElement(ped)
+        outputDebugString("[DayZ survivors] Could not assign survivor controller",2)
+        return nil,"Could not assign survivor controller; nothing spawned."
+    end
     giveWeapon(ped,25,40,true)
     setElementHealth(ped,100)
     data(ped,"active",true);data(ped,"owner",player);data(ped,"ammo",40);data(ped,"health",100)

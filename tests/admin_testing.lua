@@ -61,7 +61,7 @@ function setVehicleLocked(e,v) e.locked=v end
 function setVehicleEngineState(e,v) e.engine=v end
 dofile('dayzepoch/scripts/shared/admin_testing_locations.lua')
 function createPed(model,x,y,z) local e=E('ped',x,y,z);e.model=model;return e end
-function setPedSyncer(e,p) e.syncer=p end
+function setElementSyncer(e,p,persist) assert(persist==true);e.syncer=p;return true end
 function giveWeapon(e,w,a) e.weapon=w;e.ammo=a end
 function setElementHealth(e,h) e.health=h end
 function killPed(e) e.dead=true end
