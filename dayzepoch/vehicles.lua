@@ -937,7 +937,7 @@ local function collectBackupRows()
 	queueWrite( "DELETE FROM `safes`");
 	local vc,tc,sc = 0, 0, 0;
 	for _,veh in ipairs(getElementsByType("vehicle")) do
-		if not getElementData(veh, "helicrash") then
+		if not getElementData(veh, "helicrash") and not getElementData(veh, "adminTestVehicle") then
 			local col = getElementData(veh, "parent");
 			if col then
 				if not (getElementData(col,"deadVehicle")) then

@@ -126,6 +126,45 @@ local function airdrop(player)
     end,10000,1)
     reply(player,"Test airdrop incoming 7 metres ahead: orange map marker, landing in 10 seconds. Use flat ground.")
 end
+local function spawnTestVehicle(player,value)
+    local index=tonumber(value)
+    local entry=index and index%1==0 and DayZAdminTestVehicles[index]
+    if not entry then return reply(player,"Choose a listed DayZ vehicle.") end
+    if not outdoor(player) then return reply(player,"Spawn vehicles on foot, outdoors in dimension 0.") end
+    if countAssets(player,"vehicle")>=3 then return reply(player,"Three test vehicles are active. Clean up first.") end
+    local tires,engines,parts,scrap,rotor,slots=getVehicleAddonInfos(entry.model)
+    local fuel=getVehicleMaxFuel(entry.model)
+    if not slots or fuel==false or fuel==nil then return reply(player,"Vehicle configuration is missing; nothing spawned.") end
+    local x,y,z=getElementPosition(player)
+    local _,_,rotation=getElementRotation(player)
+    local angle=math.rad(rotation)
+    x=x-math.sin(angle)*10;y=y+math.cos(angle)*10
+    local vehicle=createVehicle(entry.model,x,y,z+1,0,0,rotation)
+    local col=createColSphere(x,y,z,4)
+    if not isElement(vehicle) or not isElement(col) then
+        if isElement(vehicle) then destroyElement(vehicle) end
+        if isElement(col) then destroyElement(col) end
+        outputDebugString("[DayZ testing] Vehicle creation failed for model "..entry.model,2)
+        return reply(player,"Could not create the vehicle. Check the server log.")
+    end
+    attachElements(col,vehicle)
+    setDayZData(vehicle,"parent",col);setDayZData(col,"parent",vehicle)
+    setDayZData(col,"vehicle",true)
+    setDayZData(vehicle,"dayzvehicle",0)
+    setDayZData(vehicle,"adminTestVehicle",true)
+    setDayZData(col,"spawn",{entry.model,x,y,z})
+    setDayZData(col,"MAX_Slots",slots)
+    setDayZData(col,"fuel",fuel);setDayZData(vehicle,"maxfuel",fuel)
+    for _,part in ipairs({{"Tire_inVehicle","needtires",tires},{"Engine_inVehicle","needengines",engines},
+        {"Parts_inVehicle","needparts",parts},{"Scrap_inVehicle","needscrap",scrap},{"Rotor_inVehicle","needrotor",rotor}}) do
+        setDayZData(col,part[1],part[3]);setDayZData(col,part[2],part[3]);setDayZData(vehicle,part[2],part[3])
+    end
+    setDayZData(vehicle,"fplus",5)
+    fixVehicle(vehicle);setElementHealth(vehicle,1000)
+    setVehicleLocked(vehicle,false);setVehicleEngineState(vehicle,false)
+    remember(player,{kind="vehicle",elements={vehicle,col}},30*60000)
+    reply(player,"Spawned "..entry.name.." 10 metres ahead: repaired, full fuel and all required parts. Enter to drive. Expires after 30 minutes or cleanup. Boats need water; use open, flat ground for other vehicles.")
+end
 local function inspect(player)
     local candidate,distance=nil,12
     local px,py,pz=getElementPosition(player)
@@ -156,21 +195,22 @@ addEvent("dayz:testAction",true)
 addEventHandler("dayz:testAction",root,function(action,value)
     local player=client
     if source~=player or not admin(player) or type(action)~="string" then return end
-    local allowed={open=true,teleport=true,back=true,zombies=true,airdrop=true,inspect=true,cleanup=true}
+    local allowed={open=true,teleport=true,back=true,zombies=true,airdrop=true,inspect=true,cleanup=true,vehicle=true}
     if not allowed[action] then return end
     local now=getTickCount();cooldowns[player]=cooldowns[player] or {}
     local times=cooldowns[player]
     if times.any and now-times.any<300 then return end
-    if (action=="zombies" or action=="airdrop") and times[action] and now-times[action]<5000 then
+    if (action=="zombies" or action=="airdrop" or action=="vehicle") and times[action] and now-times[action]<5000 then
         return reply(player,"Wait 5 seconds between test spawns.")
     end
     times.any=now;times[action]=now
     outputDebugString("[DayZ testing] "..getAccountName(getPlayerAccount(player)).." requested "..action,3)
     if action=="open" then return triggerClientEvent(player,"dayz:openTesting",resourceRoot) end
     if action=="inspect" then return inspect(player) end
-    if action=="cleanup" then cleanup(player);return reply(player,"Removed your active test zombies and airdrops.") end
+    if action=="cleanup" then cleanup(player);return reply(player,"Removed your active test zombies, airdrops and vehicles.") end
     if action=="zombies" then return spawnZombies(player,value) end
     if action=="airdrop" then return airdrop(player) end
+    if action=="vehicle" then return spawnTestVehicle(player,value) end
     if getPedOccupiedVehicle(player) then return reply(player,"Exit your vehicle before teleporting.") end
     if action=="teleport" then
         local index=tonumber(value)

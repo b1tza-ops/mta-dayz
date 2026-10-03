@@ -51,6 +51,14 @@ function getVehicleEngineState() return false end
 function getDayZSlots() return 2 end
 local function P(name) local e=E('player');e.account={name=name};e.data.logedin=true;return e end
 local admin=P('b1tza');local ordinary=P('other')
+local failVehicle=false
+function createVehicle(model,x,y,z) if failVehicle then return false end;local e=E('vehicle',x,y,z);e.model=model;return e end
+function getVehicleAddonInfos(id) if id==487 then return 0,1,1,1,1,20 end;return 4,1,1,1,0,25 end
+function getVehicleMaxFuel() return 80 end
+function fixVehicle(e) e.fixed=true end
+function setElementHealth(e,v) e.health=v end
+function setVehicleLocked(e,v) e.locked=v end
+function setVehicleEngineState(e,v) e.engine=v end
 dofile('dayzepoch/scripts/shared/admin_testing_locations.lua')
 dofile('dayzepoch/scripts/admin_testing_s.lua')
 local function action(who,name,value,origin)
@@ -117,5 +125,22 @@ test('cooldown prevents rapid repeat mutations',function()
 end)
 test('quit cleans active assets',function()
  source=admin;handlers.onPlayerQuit[1]();source=nil;assert(admin.data.spawnedzombies==0)
+end)
+test('vehicle spawning validates callers, catalogue and world',function()
+ local n=active('vehicle');action(ordinary,'vehicle',1);action(admin,'vehicle',999);action(admin,'vehicle',1,ordinary)
+ admin.dim=2;action(admin,'vehicle',1);admin.dim=0;assert(active('vehicle')==n)
+end)
+test('fully fitted helicopter uses native DayZ requirements and cleanup',function()
+ action(admin,'vehicle',7)
+ local list=getElementsByType('vehicle');local v=list[#list];local col=v.data.parent
+ assert(v.model==487 and v.fixed and v.health==1000 and v.locked==false and v.data.adminTestVehicle)
+ assert(col.data.vehicle and col.data.parent==v and col.data.fuel==80 and col.data.MAX_Slots==20)
+ assert(col.data.Rotor_inVehicle==1 and col.data.Engine_inVehicle==1 and col.data.Tire_inVehicle==0)
+ action(admin,'cleanup');assert(not isElement(v) and not isElement(col))
+end)
+test('vehicle cap and failed creation leave no orphan colshape',function()
+ action(admin,'vehicle',1);action(admin,'vehicle',1);action(admin,'vehicle',1)
+ local n=active('vehicle');action(admin,'vehicle',1);assert(active('vehicle')==n)
+ action(admin,'cleanup');n=active('colshape');failVehicle=true;action(admin,'vehicle',1);failVehicle=false;assert(active('colshape')==n)
 end)
 print(passed..' admin testing behaviour checks passed')

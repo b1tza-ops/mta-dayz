@@ -2,7 +2,7 @@
 local nativeSetElementData = setElementData
 local fixedProtected = {
     admin=true, dutyMode=true, ["superman:flying"]=true, logedin=true, zombie=true,
-    MAX_Slots=true, helmet=true, vest=true, skin=true, playerCol=true, spawn=true, dayzvehicle=true, spawnedzombies=true,
+    MAX_Slots=true, helmet=true, vest=true, skin=true, playerCol=true, spawn=true, dayzvehicle=true, adminTestVehicle=true, spawnedzombies=true,
     zombieskilled=true, headshots=true, murders=true, banditskilled=true,
     fuel=true, Engine_inVehicle=true, Rotor_inVehicle=true,
     Tire_inVehicle=true, Parts_inVehicle=true, Scrap_inVehicle=true,
