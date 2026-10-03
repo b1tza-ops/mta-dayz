@@ -24,6 +24,14 @@ check('MTA cache-first order loads shared tables before consumers',function()
   end
  end
 end)
+check('remote inventory actions are loaded by the resource manifest',function()
+ local manifest=read('dayzepoch/meta.xml')
+ assert(manifest:find('<script src="scripts/inventory_s.lua" type="server" />',1,true))
+ local handlers=read('dayzepoch/scripts/inventory_s.lua')
+ for _,event in ipairs({'dayz:transferItem','dayz:dropItem','dayz:vehiclePart','dayz:refuel','dayz:fillCanister'}) do
+  assert(handlers:find('addEvent("'..event..'",true)',1,true))
+ end
+end)
 check('shop currency handler ignores other players and missing values',function()
  local handler=assert(read('e_shop/shop_c.lua'):match('addEventHandler%("onClientElementDataChange",root,function%(data%)(.-)\nend%)'))
  localPlayer={};source=localPlayer
