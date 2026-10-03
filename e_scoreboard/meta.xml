@@ -1,5 +1,5 @@
 <meta>
-	<info author="Awwu & edited by kaasis" type="script" name="Scoreboard" description="DirectX scoreboard resource" showInResourceBrowser="true" version="2.7.1"/>
+	<info author="Awwu &amp; edited by kaasis" type="script" name="Scoreboard" description="DirectX scoreboard resource" showInResourceBrowser="true" version="2.7.1"/>
 
 	<script src="dxscoreboard_exports.lua" type="server" />
 	<script src="dxscoreboard_client.lua" type="client" cache="false" />
