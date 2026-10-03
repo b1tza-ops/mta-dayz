@@ -273,4 +273,16 @@ test('starvation and bleeding can kill without consuming imaginary items',functi
  assert(survivor.dead and survivor.data.parent.data.deadman)
  action(admin,'cleanup')
 end)
+test('expanded patrol and navigation diagnostics restrict the controller',function()
+ action(admin,'survivor')
+ for _,p in ipairs(getElementsByType('ped')) do if p.data['survivor:active'] then survivor=p end end
+ assert(survivor.data['survivor:waypoint'][1]==admin.x+40)
+ local function nav(who,status)
+  client=who;source=who;handlers['dayz:survivorNavigation'][1](survivor,status);client=nil;source=nil
+ end
+ nav(ordinary,'blocked');nav(admin,'arbitrary-route')
+ action(admin,'survivorinspect');assert(not admin.last.message:find('Movement: blocked',1,true))
+ nav(admin,'detouring');action(admin,'survivorinspect');assert(admin.last.message:find('Movement: detouring',1,true) and admin.last.message:find('/8',1,true))
+ action(admin,'cleanup')
+end)
 print(passed..' admin testing behaviour checks passed')

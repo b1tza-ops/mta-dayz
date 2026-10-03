@@ -99,8 +99,10 @@ function DayZSpawnTestSurvivor(player)
     attachElements(col,ped)
     setDayZData(col,"parent",ped);setDayZData(ped,"parent",col)
     setDayZData(col,"MAX_Slots",20);setDayZData(col,"weapon7",1);setDayZData(col,"mag7",40)
-    local route={{x+4,y,z},{x+16,y,z},{x+16,y+12,z},{x+4,y+12,z}}
-    survivors[ped]={owner=player,col=col,ignored={},lastLoot=0,food=65,water=65,bleeding=false,lastNeeds=getTickCount(),route=route,index=2,ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
+    -- Eight waypoints around an 80-by-80-metre patrol area.
+    local route={{x+4,y,z},{x+40,y,z},{x+40,y+40,z},{x,y+40,z},
+        {x-40,y+40,z},{x-40,y,z},{x-40,y-40,z},{x,y-40,z}}
+    survivors[ped]={owner=player,col=col,ignored={},lastLoot=0,food=65,water=65,bleeding=false,lastNeeds=getTickCount(),route=route,index=2,routeStarted=getTickCount(),ammo=40,hp=100,lastShot=0,lastMelee=0,progress=getTickCount(),px=x+4,py=y,pz=z}
     if not setElementSyncer(ped,player,true) then
         survivors[ped]=nil;destroyElement(col);destroyElement(ped)
         outputDebugString("[DayZ survivors] Could not assign survivor controller",2)
@@ -119,6 +121,7 @@ function DayZInspectTestSurvivors(player)
     for ped,r in pairs(survivors) do
         if isElement(ped) and r.owner==player then
             lines[#lines+1]="Survivor: "..tostring(getElementData(ped,"survivor:state")).." | HP "..r.hp.." | shells "..r.ammo.." | distance "..math.floor(range(player,ped)).."m | inventory "..string.format("%.1f",getDayZSlots(r.col)).."/20 slots"
+            lines[#lines+1]="  Patrol waypoint: "..r.index.."/"..#r.route.." | Movement: "..(r.navigation or "waiting for controller")
             lines[#lines+1]="  Food: "..math.floor(r.food).."/100 | Water: "..math.floor(r.water).."/100 | Bleeding: "..(r.bleeding and "yes" or "no")
             lines[#lines+1]="  Last used: "..tostring(getElementData(ped,"survivor:lastUse") or "Nothing yet")
             if isElement(r.loot) then
@@ -198,12 +201,12 @@ setTimer(function()
             data(ped,"state",state);data(ped,"target",target or false)
             if state=="patrol" then
                 local wp=r.route[r.index];local x,y,z=getElementPosition(ped)
-                if getDistanceBetweenPoints3D(x,y,z,unpack(wp))<2 then
-                    r.index=r.index%#r.route+1;r.progress=getTickCount()
+                if ((x-wp[1])^2+(y-wp[2])^2)^0.5<2 or getTickCount()-r.routeStarted>45000 then
+                    r.index=r.index%#r.route+1;r.progress=getTickCount();r.routeStarted=getTickCount()
                 elseif getDistanceBetweenPoints3D(x,y,z,r.px,r.py,r.pz)>0.7 then
                     r.px=x;r.py=y;r.pz=z;r.progress=getTickCount()
                 elseif getTickCount()-r.progress>6000 then
-                    r.index=r.index%#r.route+1;r.progress=getTickCount()
+                    r.index=r.index%#r.route+1;r.progress=getTickCount();r.routeStarted=getTickCount()
                     outputDebugString("[DayZ survivors] Patrol blocked; trying next waypoint",3)
                 end
                 data(ped,"waypoint",r.route[r.index])
@@ -262,4 +265,18 @@ addEventHandler("dayz:survivorLoot",root,function(ped,col,visible)
     dayZRefreshInventory(r.owner,col)
     data(ped,"lastLoot",supply.name.." x"..amount)
     outputDebugString("[DayZ survivors] Looted "..supply.item.." x"..amount,3)
+end)
+
+-- Diagnostic reports do not let clients change routes or positions.
+addEvent("dayz:survivorNavigation",true)
+addEventHandler("dayz:survivorNavigation",root,function(ped,status)
+    local r=survivors[ped]
+    local allowed={walking=true,detouring=true,blocked=true,waiting=true}
+    if source~=client or not r or client~=r.owner or not isElement(ped) or not world(ped,client)
+        or range(ped,client)>180 or type(status)~="string" or not allowed[status] then return end
+    local now=getTickCount()
+    if r.lastNav and now-r.lastNav<1000 then return end
+    r.lastNav=now
+    if status=="blocked" and r.navigation~=status then outputDebugString("[DayZ survivors] Movement blocked; trying alternate directions",3) end
+    r.navigation=status
 end)

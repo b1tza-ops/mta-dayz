@@ -97,11 +97,11 @@ throttled and logged. Engine gameplay validation is still required.
 
 In `/dayztest`, choose **Spawn AI survivor**, then **Inspect my survivors** to see
 state, health and remaining shells. Each admin can spawn three temporary survivors.
-They patrol a 12-metre square near their spawn, engage nearby zombies with a shotgun,
+They patrol eight waypoints across an 80-by-80-metre area near their spawn, engage nearby zombies with a shotgun,
 and retreat below 31 health or when their 40 shells run out. Cleanup, disconnect or
 15 minutes removes them. Use a flat, open area; this is waypoint navigation, not
-map-wide pathfinding. Blocked patrols try jumping, then switch waypoints after six
-seconds. Beyond 180 metres from their owner they pause.
+map-wide pathfinding. Blocked patrols try clear side directions, then switch waypoints after six
+seconds without progress (or 45 seconds without reaching the waypoint). Beyond 180 metres from their owner they pause.
 
 The owner's client controls movement and checks visibility. The server validates
 ownership, target, range, world, shot cadence and ammo, and applies fixed combat
@@ -137,3 +137,11 @@ your living test survivors: sets food 35, water 30, health 55 and bleeding on.
 Test airdrops now include soda, small medic kits and shotgun shells in addition to
 the existing food/bandages. Use the button near a landed drop without zombies,
 then inspect to see bandaging, healing, drinking, eating and inventory changes.
+
+
+Survivor navigation uses short, body-width collision probes and ground-height
+checks. Blocked directions try side corridors with a short steering commitment to
+reduce left/right oscillation. It avoids sharp climbs and drops and applies the
+same steering to retreats. Inspection reports walking/detouring/blocked/waiting
+and the current waypoint. This is local steering, not full map pathfinding; closed
+rooms, mazes, interiors and large obstacles can still need authored routes.
