@@ -178,7 +178,7 @@ local playerData2Table = {
 	{"stats.banditskilled",0},
 	{"stats.deaths",0},
 	{"stats.playtime",0},
-	{"stats.joined",""},
+	{"stats.joined",0},
 }
 
 addEvent("onPlayerDayZRegister", false);
@@ -193,7 +193,15 @@ addEventHandler("onPlayerDayZLogin", root, function(player)
 	-- before the fresh-spawn path and preserve existing statistics on respawn.
 	for _,v in ipairs(playerData2Table) do
 		local value = getAccountData(account,v[1]);
-		if type(value) ~= type(v[2]) then value = v[2]; setAccountData(account,v[1],value); end
+		if v[1] == "stats.joined" then
+			value = tonumber(value);
+			if not value or value ~= value or value <= 0 or value == math.huge then
+				value = getTimestamp();
+			end
+			setAccountData(account,v[1],value);
+		elseif type(value) ~= type(v[2]) then
+			value = v[2]; setAccountData(account,v[1],value);
+		end
 		setDayZData(player,v[1],value);
 	end
 	local x,y,z = getAccountData(account, "last_x"), getAccountData(account, "last_y"), getAccountData(account, "last_z");

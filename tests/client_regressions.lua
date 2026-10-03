@@ -41,12 +41,15 @@ check('console-created account gets stats before fresh spawn',function()
  local init=assert(s:match('%-%- Console%-created accounts(.-)\n\tlocal x,y,z ='))
  init=init:sub(assert(init:find('\n'))+1)
  local data={};local persisted={};local assigned={}
+ getTimestamp=function() return 1800000000 end
  getAccountData=function(_,k) return data[k] or false end
  setAccountData=function(_,k,v) persisted[k]=v end
  setDayZData=function(_,k,v) assigned[k]=v end
- local setup='local account={};local player={};local playerData2Table={{"stats.playtime",0},{"stats.email",""}};'
+ local setup='local account={};local player={};local playerData2Table={{"stats.playtime",0},{"stats.email",""},{"stats.joined",0}};'
  run(setup..init);assert(assigned['stats.playtime']==0 and persisted['stats.playtime']==0)
- data['stats.playtime']=42;run(setup..init);assert(assigned['stats.playtime']==42)
+ assert(assigned['stats.joined']==1800000000)
+ data['stats.playtime']=42;data['stats.joined']=1700000000;run(setup..init);assert(assigned['stats.playtime']==42 and assigned['stats.joined']==1700000000)
+ data['stats.joined']='1700000000';run(setup..init);assert(assigned['stats.joined']==1700000000)
 end)
 check('unknown damage is ignored before arithmetic',function()
  local s=read('dayzepoch/core_client.lua');local hits=0
