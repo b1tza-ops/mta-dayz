@@ -109,7 +109,7 @@ local function airdrop(player)
     setDayZData(col,"parent",crate);setDayZData(crate,"parent",col)
     -- Enable looting only after the crate lands.
     setDayZData(col,"MAX_Slots",100)
-    for item,quantity in pairs({weapon11=1,mag5=120,fooditem4=4,medicine5=4,vehiclepart1=1}) do
+    for item,quantity in pairs({weapon11=1,mag5=120,fooditem4=4,medicine5=4,vehiclepart1=1,fooditem7=4,medicine3=2,mag7=14}) do
         setDayZData(col,item,quantity)
     end
     local record={kind="airdrop",elements={crate,chute,col,blip}}
@@ -195,17 +195,18 @@ addEvent("dayz:testAction",true)
 addEventHandler("dayz:testAction",root,function(action,value)
     local player=client
     if source~=player or not admin(player) or type(action)~="string" then return end
-    local allowed={open=true,teleport=true,back=true,zombies=true,airdrop=true,inspect=true,cleanup=true,vehicle=true,survivor=true,survivorinspect=true}
+    local allowed={open=true,teleport=true,back=true,zombies=true,airdrop=true,inspect=true,cleanup=true,vehicle=true,survivor=true,survivorinspect=true,survivorneeds=true}
     if not allowed[action] then return end
     local now=getTickCount();cooldowns[player]=cooldowns[player] or {}
     local times=cooldowns[player]
     if times.any and now-times.any<300 then return end
-    if (action=="zombies" or action=="airdrop" or action=="vehicle" or action=="survivor") and times[action] and now-times[action]<5000 then
+    if (action=="zombies" or action=="airdrop" or action=="vehicle" or action=="survivor" or action=="survivorneeds") and times[action] and now-times[action]<5000 then
         return reply(player,"Wait 5 seconds between test spawns.")
     end
     times.any=now;times[action]=now
     outputDebugString("[DayZ testing] "..getAccountName(getPlayerAccount(player)).." requested "..action,3)
     if action=="open" then return triggerClientEvent(player,"dayz:openTesting",resourceRoot) end
+    if action=="survivorneeds" then return reply(player,DayZTestSurvivorNeeds(player)) end
     if action=="survivorinspect" then return reply(player,DayZInspectTestSurvivors(player)) end
     if action=="survivor" then
         if not outdoor(player) then return reply(player,"Spawn survivors on foot outdoors in dimension 0.") end

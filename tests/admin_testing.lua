@@ -189,7 +189,7 @@ test('close zombie attacks reduce health and cause retreat then death',function(
  zombie=createZombie(survivor.x+1,survivor.y,survivor.z);zombie.data.blood=100000
  tickSurvivors()
  for i=1,5 do now=now+1000;sight(admin,survivor,zombie) end
- tickSurvivors();assert(survivor.data['survivor:state']=='retreat' and survivor.data['survivor:health']==25)
+ tickSurvivors();assert(survivor.data['survivor:state']=='retreat' and survivor.data['survivor:health']>0 and survivor.data['survivor:health']<=30)
  for i=1,2 do now=now+1000;sight(admin,survivor,zombie) end
  assert(survivor.dead)
  action(admin,'cleanup');assert(not isElement(survivor))
@@ -235,5 +235,42 @@ test('dead survivor exposes exactly its carried items and cleanup removes body',
  local col=survivor.data.parent;assert(not col.data.deadman and col.data.weapon7==1 and col.data.mag7==54)
  survivor.dead=true;tickSurvivors();assert(col.data.deadman and col.data.playername=='AI survivor' and col.data.mag7==54)
  action(admin,'cleanup');assert(not isElement(col) and not isElement(survivor));destroyElement(loot)
+end)
+test('needs testing action requires actual Admin and only edits owned survivors',function()
+ action(admin,'survivor')
+ for _,p in ipairs(getElementsByType('ped')) do if p.data['survivor:active'] then survivor=p end end
+ action(ordinary,'survivorneeds');assert(survivor.data['survivor:food']==65)
+ action(admin,'survivorneeds');assert(survivor.data['survivor:food']==35 and survivor.data['survivor:water']==30 and survivor.data['survivor:health']==55)
+end)
+test('bandages kits drinks and food consume real inventory after each action',function()
+ local col=survivor.data.parent
+ col.data.medicine5=1;col.data.medicine3=1;col.data.fooditem7=1;col.data.fooditem4=1
+ local expected={{'bandaging','medicine5'},{'healing','medicine3'},{'drinking','fooditem7'},{'eating','fooditem4'}}
+ for _,pair in ipairs(expected) do
+  tickSurvivors();assert(survivor.data['survivor:state']==pair[1] and col.data[pair[2]]==1)
+  now=now+3001;tickSurvivors();assert(col.data[pair[2]]==0)
+ end
+ assert(not survivor.data['survivor:bleeding'] and survivor.data['survivor:health']>=78)
+ assert(survivor.data['survivor:food']>70 and survivor.data['survivor:water']>70)
+ action(admin,'survivorinspect');assert(admin.last.message:find('Last used:',1,true))
+end)
+test('threat interruption preserves unused supplies and blocks consumption',function()
+ local col=survivor.data.parent;col.data.medicine5=1
+ action(admin,'survivorneeds');tickSurvivors();assert(survivor.data['survivor:state']=='bandaging')
+ zombie=createZombie(survivor.x+5,survivor.y,survivor.z);zombie.data.blood=100000
+ now=now+3100;tickSurvivors();assert(col.data.medicine5==1 and survivor.data['survivor:state']=='combat')
+ destroyElement(zombie)
+end)
+test('missing supplies cannot restore needs and distant simulation pauses decay',function()
+ local col=survivor.data.parent;col.data.medicine5=0
+ action(admin,'survivorneeds');now=now+20000;tickSurvivors()
+ assert(survivor.data['survivor:food']==33 and survivor.data['survivor:water']==27 and survivor.data['survivor:health']==51)
+ local x=admin.x;admin.x=survivor.x+200;now=now+60000;tickSurvivors()
+ assert(survivor.data['survivor:food']==33 and survivor.data['survivor:state']=='paused');admin.x=x
+end)
+test('starvation and bleeding can kill without consuming imaginary items',function()
+ now=now+1200000;tickSurvivors()
+ assert(survivor.dead and survivor.data.parent.data.deadman)
+ action(admin,'cleanup')
 end)
 print(passed..' admin testing behaviour checks passed')

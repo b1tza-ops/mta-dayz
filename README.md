@@ -108,7 +108,7 @@ ownership, target, range, world, shot cadence and ammo, and applies fixed combat
 damage. Shot effects are illustrative rather than a ballistics simulation; zombie
 contact damage is simulated on the server. Visibility trusts the admin controller,
 so this prototype is not intended as a public NPC security boundary. Survivors do
-not yet attack players or consume food/medical supplies. Existing
+not yet attack players. Existing
 zombies retain their player-targeting AI. Test with zombies near the survivor.
 
 
@@ -118,7 +118,22 @@ landed airdrops or bodies within 35 metres. They collect shotgun shells (up to 7
 beans, soda and bandages (up to two each), one server-validated transfer every 1.5
 seconds. Visibility comes from the admin controller, as with prototype combat.
 Private safes, tents and vehicle inventories are excluded. Targets that cannot be
-reached within 45 seconds are skipped temporarily. They do not consume supplies
-yet. Inspection lists carried supplies and occupied slots. Death exposes the same
+reached within 45 seconds are skipped temporarily. They consume carried supplies when safe. Inspection lists carried supplies and occupied slots. Death exposes the same
 inventory as a lootable body; cleanup and the original 15-minute lifetime remove
 both body and inventory. Shotgun ammo is consumed from that inventory on each shot.
+
+
+Survivor needs update every ten seconds while their owner is nearby in the same
+world. Food falls by 1 and water by 1.5; at 50 or below they use beans (+45 food)
+and soda (+50 water). Zombie contact causes bleeding, which costs 2 health per
+needs tick until a bandage is used. Medic kits restore 25/40/60 health depending on
+size, and are used at 70 health or below. All uses take three seconds and consume
+one carried item only when completed. Nearby zombies interrupt without consuming
+that item. Empty food/water also damage health. Distant survivors pause needs.
+Urgent medical, drink, food and ammo shortages take priority when choosing loot.
+
+The admin panel's **Test survivor hunger, thirst and injuries** button affects only
+your living test survivors: sets food 35, water 30, health 55 and bleeding on.
+Test airdrops now include soda, small medic kits and shotgun shells in addition to
+the existing food/bandages. Use the button near a landed drop without zombies,
+then inspect to see bandaging, healing, drinking, eating and inventory changes.
