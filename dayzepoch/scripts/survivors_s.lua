@@ -75,6 +75,10 @@ function DayZInspectTestSurvivors(player)
     for ped,r in pairs(survivors) do
         if isElement(ped) and r.owner==player then
             lines[#lines+1]="Survivor: "..tostring(getElementData(ped,"survivor:state")).." | HP "..r.hp.." | shells "..r.ammo.." | distance "..math.floor(range(player,ped)).."m | inventory "..string.format("%.1f",getDayZSlots(r.col)).."/20 slots"
+            if isElement(r.loot) then
+                lines[#lines+1]="  Loot target: "..string.format("%.1f",range(ped,r.loot)).."m | "..(r.lootStatus or "Approaching")
+            else lines[#lines+1]="  No loot target: needs supplies within 35m, no nearby zombie threat" end
+            lines[#lines+1]="  Last collected: "..tostring(getElementData(ped,"survivor:lastLoot") or "Nothing yet")
             for _,supply in ipairs(supplies) do lines[#lines+1]="  "..supply.name..": "..count(r.col,supply.item) end
         end
     end
@@ -109,7 +113,7 @@ setTimer(function()
                             if d<nearest then r.loot=col;nearest=d end
                         end
                     end
-                    if r.loot then r.lootSince=getTickCount() end
+                    if r.loot then r.lootSince=getTickCount();r.lootStatus="Approaching" end
                 end
                 if r.loot then
                     state="loot"
@@ -160,12 +164,17 @@ addEventHandler("dayz:survivorSight",root,function(ped,target)
 end)
 
 addEvent("dayz:survivorLoot",true)
-addEventHandler("dayz:survivorLoot",root,function(ped,col)
+addEventHandler("dayz:survivorLoot",root,function(ped,col,visible)
     local r=survivors[ped]
     if source~=client or not r or client~=r.owner or not isElement(ped) or isPedDead(ped)
-        or col~=r.loot or not lootable(col) or not world(ped,col) or range(ped,col)>2
+        or col~=r.loot or not lootable(col) or not world(ped,col) or range(ped,col)>4 or not isElementWithinColShape(ped,col)
         or not world(ped,client) or range(ped,client)>180 or getElementData(ped,"survivor:state")~="loot"
         or getTickCount()-r.lastLoot<1500 then return end
+    if visible~=true then
+        r.lootStatus="At loot, but visibility blocked"
+        return
+    end
+    r.lootStatus="Collecting supplies"
     local supply,amount=wanted(r,col)
     if not supply then r.loot=nil;return end
     -- Both balances are read and changed in the same event; no delayed transfers.

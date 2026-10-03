@@ -38,7 +38,8 @@ function getElementsWithinColShape() return {} end
 function createZombie(x,y,z) local e=E('ped',x,y,z);e.data.zombie=true;return e end
 local failObject=false
 function createObject(model,x,y,z) if failObject then return false end;local e=E('object',x,y,z);e.model=model;return e end
-function createColSphere(x,y,z) return E('colshape',x,y,z) end
+function createColSphere(x,y,z,radius) local e=E('colshape',x,y,z);e.radius=radius or 1.25;return e end
+function isElementWithinColShape(e,col) return getDistanceBetweenPoints3D(e.x,e.y,e.z,col.x,col.y,col.z)<=col.radius end
 function createBlip(x,y,z) return E('blip',x,y,z) end
 function attachElements() end
 function setElementFrozen() end
@@ -202,7 +203,7 @@ test('survivor limit and cleanup are bounded',function()
 end)
 local loot
 local function lootRequest(who,ped,col)
- client=who;source=who;handlers['dayz:survivorLoot'][1](ped,col);client=nil;source=nil
+ client=who;source=who;handlers['dayz:survivorLoot'][1](ped,col,true);client=nil;source=nil
 end
 test('survivor seeks real supplies and transfers only within reach',function()
  action(admin,'survivor')
@@ -215,6 +216,11 @@ test('survivor seeks real supplies and transfers only within reach',function()
  lootRequest(admin,survivor,loot);assert(loot.data.mag7==7 and survivor.data.parent.data.mag7==47 and survivor.data['survivor:ammo']==47)
  lootRequest(admin,survivor,loot);assert(loot.data.mag7==7)
  now=now+1600;lootRequest(admin,survivor,loot);assert(loot.data.mag7==0 and survivor.data.parent.data.mag7==54)
+end)
+test('crate edge interaction succeeds without entering solid crate centre',function()
+ loot.radius=4;survivor.x=loot.x+3;loot.data.fooditem4=2
+ now=now+1600;lootRequest(admin,survivor,loot)
+ assert(loot.data.fooditem4==1 and survivor.data.parent.data.fooditem4==1)
 end)
 test('loot requests reject different worlds and private containers',function()
  loot.data.mag7=7;loot.dim=7;now=now+1600;lootRequest(admin,survivor,loot);assert(loot.data.mag7==7);loot.dim=0

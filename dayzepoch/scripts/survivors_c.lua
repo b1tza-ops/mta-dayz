@@ -24,15 +24,19 @@ setTimer(function()
                 if type(wp)=="table" then
                     local x,y,z=getElementPosition(ped)
                     local d=getDistanceBetweenPoints3D(x,y,z,wp[1],wp[2],wp[3])
-                    face(ped,wp[1],wp[2]);setPedControlState(ped,"forwards",d>1.2)
                     local col=getElementData(ped,"survivor:lootTarget")
-                    if state=="loot" and d<=2 and isElement(col) and getElementData(ped,"survivor:owner")==localPlayer
-                        and isLineOfSightClear(x,y,z+0.5,wp[1],wp[2],wp[3]+0.5,true,true,false,true,false,false,false,ped) then
-                        triggerServerEvent("dayz:survivorLoot",localPlayer,ped,col)
+                    local inReach=state=="loot" and isElement(col) and d<=4 and isElementWithinColShape(ped,col)
+                    face(ped,wp[1],wp[2]);setPedControlState(ped,"forwards",not inReach and d>1.2)
+                    if inReach and getElementData(ped,"survivor:owner")==localPlayer then
+                        -- The crate itself is the interaction target, not an obstacle.
+                        local parent=getElementData(col,"parent")
+                        local ignored=isElement(parent) and getElementType(parent)=="object" and parent or ped
+                        local clear=isLineOfSightClear(x,y,z+0.7,wp[1],wp[2],wp[3]+0.7,true,true,false,true,false,false,false,ignored)
+                        triggerServerEvent("dayz:survivorLoot",localPlayer,ped,col,clear)
                     end
                     local old=previous[ped]
                     if not old or getDistanceBetweenPoints3D(x,y,z,old.x,old.y,old.z)>0.7 then previous[ped]={x=x,y=y,z=z,time=getTickCount()}
-                    elseif getTickCount()-old.time>2500 then setPedControlState(ped,"jump",true) end
+                    elseif not inReach and getTickCount()-old.time>2500 then setPedControlState(ped,"jump",true) end
                 end
             end
         end

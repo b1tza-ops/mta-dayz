@@ -4,6 +4,8 @@ local ped={data={['survivor:active']=true,['survivor:owner']=localPlayer,['survi
 local target={data={},x=5,y=0,z=0}
 local clear=true
 function isElement(e) return type(e)=='table' end
+function getElementType(e) return e.kind or "colshape" end
+function isElementWithinColShape() return true end
 function getElementData(e,k) return e.data and e.data[k] end
 function getElementsByType() return {ped} end
 function isElementSyncer() return true end
@@ -32,6 +34,13 @@ ped.data['survivor:state']='paused';timers[1].fn();assert(not ped.controls.backw
 print('PASS survivor patrol, visibility, shot pulse, retreat and pause controls')
 
 ped.data['survivor:state']='loot';ped.data['survivor:waypoint']={1,0,0};ped.data['survivor:lootTarget']=target
-local n=#reports;clear=false;timers[1].fn();assert(#reports==n)
-clear=true;timers[1].fn();assert(reports[#reports][1]=='dayz:survivorLoot' and reports[#reports][4]==target)
+local n=#reports;clear=false;timers[1].fn();assert(#reports==n+1 and reports[#reports][5]==false)
+clear=true;timers[1].fn();assert(reports[#reports][1]=='dayz:survivorLoot' and reports[#reports][4]==target and reports[#reports][5]==true)
 print('PASS survivor loot approach checks visibility before requesting transfer')
+
+local crate={kind='object',data={}};target.data.parent=crate
+ped.data['survivor:waypoint']={3,0,0}
+local ignored
+function isLineOfSightClear(...) local args={...};ignored=args[14];return ignored==crate end
+timers[1].fn();assert(ignored==crate and reports[#reports][5]==true and not ped.controls.forwards)
+print('PASS crate edge looting ignores target crate collision and stops walking')
