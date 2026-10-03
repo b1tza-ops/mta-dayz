@@ -14,7 +14,7 @@ local fixedProtected = {
 }
 
 function isDayZProtectedKey(key)
-    return type(key) == "string" and (fixedProtected[key] or isDayZItem(key)
+    return type(key) == "string" and (fixedProtected[key] or key:match("^survivor:") or isDayZItem(key)
         or key:match("^currentweapon_%d+$") or key:match("^%d+$")
         or key:match("^stats%.") and key ~= "stats.playtime") and true or false
 end

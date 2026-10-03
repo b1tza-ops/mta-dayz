@@ -92,3 +92,21 @@ is active at once. Cleanup, disconnect and resource stop remove temporary assets
 already looted items remain in players' inventories. These are manual testing
 crates, not a scheduled public airdrop event. All actions are server authenticated,
 throttled and logged. Engine gameplay validation is still required.
+
+### AI survivor prototype
+
+In `/dayztest`, choose **Spawn AI survivor**, then **Inspect my survivors** to see
+state, health and remaining shells. Each admin can spawn three temporary survivors.
+They patrol a 12-metre square near their spawn, engage nearby zombies with a shotgun,
+and retreat below 31 health or when their 40 shells run out. Cleanup, disconnect or
+15 minutes removes them. Use a flat, open area; this is waypoint navigation, not
+map-wide pathfinding. Blocked patrols try jumping, then switch waypoints after six
+seconds. Beyond 180 metres from their owner they pause.
+
+The owner's client controls movement and checks visibility. The server validates
+ownership, target, range, world, shot cadence and ammo, and applies fixed combat
+damage. Shot effects are illustrative rather than a ballistics simulation; zombie
+contact damage is simulated on the server. Visibility trusts the admin controller,
+so this prototype is not intended as a public NPC security boundary. Survivors do
+not yet loot, attack players, chase supplies or leave inventory on death. Existing
+zombies retain their player-targeting AI. Test with zombies near the survivor.

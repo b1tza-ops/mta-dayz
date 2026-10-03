@@ -37,12 +37,14 @@
 	<script src="vehicles.lua" type="server" />
     <script src="accounts.lua" type="server" />
     <script src="scripts/inventory_s.lua" type="server" />
+    <script src="scripts/survivors_s.lua" type="server" />
     <script src="scripts/admin_testing_s.lua" type="server" />
 	<!-- Client -->
     <script src="menu_client.lua" type="client" cache="false"/>
     <script src="inventory.lua" type="client" cache="false"/>
     <script src="core_client.lua" type="client" cache="false"/>
 	<script src="zombies_c.lua" type="client" cache="false"/>
+    <script src="scripts/survivors_c.lua" type="client" cache="false" />
     <script src="scripts/admin_testing_c.lua" type="client" cache="false" />
     <!-- Functions -->
     <export function="dxDrawDayzWindow" type="client"/>

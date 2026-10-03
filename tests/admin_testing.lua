@@ -60,6 +60,14 @@ function setElementHealth(e,v) e.health=v end
 function setVehicleLocked(e,v) e.locked=v end
 function setVehicleEngineState(e,v) e.engine=v end
 dofile('dayzepoch/scripts/shared/admin_testing_locations.lua')
+function createPed(model,x,y,z) local e=E('ped',x,y,z);e.model=model;return e end
+function setPedSyncer(e,p) e.syncer=p end
+function giveWeapon(e,w,a) e.weapon=w;e.ammo=a end
+function setElementHealth(e,h) e.health=h end
+function killPed(e) e.dead=true end
+local killedTarget
+function triggerEvent(name,target) if name=='onZombieGetsKilled' then killedTarget=target;destroyElement(target) end end
+dofile('dayzepoch/scripts/survivors_s.lua')
 dofile('dayzepoch/scripts/admin_testing_s.lua')
 local function action(who,name,value,origin)
  now=now+6000;client=who;source=origin or who;handlers['dayz:testAction'][1](name,value);client=nil;source=nil
@@ -142,5 +150,49 @@ test('vehicle cap and failed creation leave no orphan colshape',function()
  action(admin,'vehicle',1);action(admin,'vehicle',1);action(admin,'vehicle',1)
  local n=active('vehicle');action(admin,'vehicle',1);assert(active('vehicle')==n)
  action(admin,'cleanup');n=active('colshape');failVehicle=true;action(admin,'vehicle',1);failVehicle=false;assert(active('colshape')==n)
+end)
+test('survivors require authenticated admin and outdoor placement',function()
+ local n=active('ped');action(ordinary,'survivor');admin.dim=5;action(admin,'survivor');admin.dim=0;assert(active('ped')==n)
+end)
+local survivor,zombie
+local function tickSurvivors()
+ for _,t in ipairs(timers) do if t.ms==500 and t.fn then t.fn();return end end
+ error('Missing survivor timer')
+end
+local function sight(who,ped,target)
+ client=who;source=who;handlers['dayz:survivorSight'][1](ped,target);client=nil;source=nil
+end
+test('survivor spawn initializes route weapon health and inspection',function()
+ action(admin,'survivor')
+ for _,p in ipairs(getElementsByType('ped')) do if p.data['survivor:active'] then survivor=p end end
+ assert(survivor and survivor.syncer==admin and survivor.weapon==25 and survivor.data['survivor:ammo']==40)
+ assert(type(survivor.data['survivor:waypoint'])=='table')
+ action(admin,'survivorinspect');assert(admin.last.message:find('shells 40',1,true))
+end)
+test('server restricts target controller shot rate and ammunition',function()
+ zombie=createZombie(survivor.x+5,survivor.y,survivor.z);zombie.data.blood=10000
+ tickSurvivors();assert(survivor.data['survivor:state']=='combat')
+ sight(ordinary,survivor,zombie);assert(zombie.data.blood==10000)
+ sight(admin,survivor,ordinary);assert(zombie.data.blood==10000)
+ sight(admin,survivor,zombie);assert(zombie.data.blood==7500 and survivor.data['survivor:ammo']==39)
+ sight(admin,survivor,zombie);assert(zombie.data.blood==7500)
+ for i=1,3 do now=now+1000;sight(admin,survivor,zombie) end
+ assert(killedTarget==zombie and not isElement(zombie) and survivor.data['survivor:ammo']==36)
+end)
+test('close zombie attacks reduce health and cause retreat then death',function()
+ zombie=createZombie(survivor.x+1,survivor.y,survivor.z);zombie.data.blood=100000
+ tickSurvivors()
+ for i=1,5 do now=now+1000;sight(admin,survivor,zombie) end
+ tickSurvivors();assert(survivor.data['survivor:state']=='retreat' and survivor.data['survivor:health']==25)
+ for i=1,2 do now=now+1000;sight(admin,survivor,zombie) end
+ assert(survivor.dead)
+ action(admin,'cleanup');assert(not isElement(survivor))
+ destroyElement(zombie)
+end)
+test('survivor limit and cleanup are bounded',function()
+ action(admin,'survivor');action(admin,'survivor');action(admin,'survivor')
+ local n=active('ped');action(admin,'survivor');assert(active('ped')==n)
+ action(admin,'cleanup')
+ for _,p in ipairs(getElementsByType('ped')) do assert(not p.data['survivor:active']) end
 end)
 print(passed..' admin testing behaviour checks passed')
