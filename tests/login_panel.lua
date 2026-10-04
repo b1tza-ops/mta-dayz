@@ -41,6 +41,8 @@ function outputDebugString() end
 function tocolor(...) return {...} end
 function dxDrawRectangle() end
 function dxDrawText() end
+local logoDrawn=false
+function dxDrawImage(_,__,___,____,path) assert(path=="redfear-logo.png");logoDrawn=true end
 dofile('e_login/login_c.lua')
 event('onClientResourceStart');assert(login.window[1].visible)
 for _,e in ipairs(controls) do
@@ -58,6 +60,6 @@ assert(#registerEdits==4 and registerEdits[3].mask and registerEdits[4].mask)
 registerEdits[1].text='survivor';registerEdits[2].text='test@example.com';registerEdits[3].text='secret';registerEdits[4].text='wrong'
 clientSubmitRegister();assert(#requests==1)
 registerEdits[4].text='secret';clientSubmitRegister();assert(#requests==2 and requests[2][1]=='submitRegister' and requests[2][7]=='en')
-event('onClientRender');loginSuccess();assert(not login.window[1].visible and login.edit[2].text=='' and registerEdits[3].text=='')
+event('onClientRender');assert(logoDrawn);loginSuccess();assert(not login.window[1].visible and login.edit[2].text=='' and registerEdits[3].text=='')
 clientSubmitLogin();assert(#requests==2)
 print('PASS login/register layout, masked passwords, validation, event arguments, throttling and successful cleanup')
