@@ -204,4 +204,28 @@ test('resource stop removes public drops and timers',function()
  source=resourceRoot;for _,fn in ipairs(handlers.onResourceStop) do fn() end;source=nil
  assert(not isElement(col) and active('object')==0 and active('blip')==0)
 end)
+function Zomb_delete(ped) destroyElement(ped) end
+dofile('dayzepoch/scripts/helicopter_crashes_s.lua')
+local crashTick=timers[#timers].fn
+test('crashes authenticate spawn once and populate rare loot',function()
+ local n=active('vehicle');commands.crashnow(ordinary);assert(active('vehicle')==n)
+ commands.crashnow(admin);assert(active('vehicle')==n+1)
+ local col=latestCol();assert(col.data.helicrash and col.data.MAX_Slots==0)
+ assert(col.data.weapon11 or col.data.weapon12 or col.data.weapon2 or col.data.weapon5)
+ assert(col.data.backpack1 or col.data.vest2 or col.data.toolbelt7 or col.data.toolbelt6)
+ local wreck=col.data.parent;assert(wreck.data.helicrash and wreck.health==0 and wreck.locked)
+ commands.crashnow(admin);assert(active('vehicle')==n+1)
+ local old=active('ped');admin.x=col.x;admin.y=col.y;admin.z=col.z
+ crashTick();assert(active('ped')==old+5)
+ crashTick();assert(active('ped')==old+5)
+ runTimer(25*60000);assert(not isElement(col) and active('ped')==old and active('vehicle')==n)
+end)
+test('crash creation rolls back failures and resource stop cleans sites',function()
+ local cols=active('colshape')
+ failVehicle=true;commands.crashnow(admin);failVehicle=false
+ assert(active('colshape')==cols and active('blip')==0)
+ commands.crashnow(nil);local col=latestCol()
+ source=resourceRoot;for _,fn in ipairs(handlers.onResourceStop) do fn() end;source=nil
+ assert(not isElement(col) and active('blip')==0)
+end)
 print(passed..' admin testing behaviour checks passed')

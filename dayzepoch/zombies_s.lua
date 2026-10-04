@@ -331,7 +331,9 @@ function Zomb_delete_player(ped)
 				end
 			end
 			local zOwner = getElementData(ped, "owner");
-			setDayZData(zOwner, "spawnedzombies", getElementData(zOwner, "spawnedzombies") - 1);
+			if isElement(zOwner) then
+                setDayZData(zOwner, "spawnedzombies", math.max(0,(tonumber(getElementData(zOwner,"spawnedzombies")) or 0)-1));
+            end
 			destroyElement(ped);
 		end
 	end

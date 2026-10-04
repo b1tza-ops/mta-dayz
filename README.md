@@ -135,3 +135,22 @@ Use `/airdrops` for the current status. `/airdropnow` requires an Admin ACL acco
 or the server console (`airdropnow` without a slash). Timing and locations are
 configured at the top of `scripts/public_airdrops_s.lua`. Restart the resource
 after editing. Landing positions still require testing in the MTA game engine.
+
+### Public helicopter crash sites
+
+The crash scheduler replaces the original hourly crash generator. One wreck
+appears every 45 minutes while living survivors are online in the main world,
+at one of seven original countryside sites without an immediate location repeat.
+A red map marker and announcement identify the location. Loot includes useful
+supplies, a guaranteed random military weapon with matching ammo and premium gear.
+Up to five ordinary DayZ zombies activate when a survivor comes within 70 metres,
+respecting the global zombie cap. Killed guards are not repeatedly respawned.
+The wreck, loot marker and surviving guards expire after 25 minutes.
+
+Admin ACL accounts can use `/crashnow`; the console uses `crashnow`. Players can
+use `/crashsites` for status. Edit timings and locations at the top of
+`scripts/helicopter_crashes_s.lua`. Validate terrain placement in-game.
+
+The full-screen map retains a compressed background texture, retries allocation
+failures every five seconds and recreates it after a client restore. Failures
+produce a diagnostic message instead of leaving transparent terrain with markers.

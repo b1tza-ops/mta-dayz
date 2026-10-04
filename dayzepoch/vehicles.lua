@@ -592,30 +592,7 @@ function getVehicleAddonInfos(id)
 	end
 end
 
-function createHeliCrashSite()
-	if isElement(cargoCol) then
-		destroyElement(getElementData(cargoCol, "parent"));
-		destroyElement(cargoCol);
-	end
-	local nr = math.random(7);
-	local x,y,z = heliCrashSites[nr][1], heliCrashSites[nr][2], heliCrashSites[nr][3];
-	local cargobob = createVehicle(548, x, y, z);
-	setElementHealth(cargobob, 0);
-	setElementFrozen(cargobob, true);
-	local cargoCol = createColSphere(x, y, z, 3);
-	setDayZData(cargoCol, "parent", cargobob);
-	setDayZData(cargoCol, "helicrash", true);
-	setDayZData(cargoCol, "MAX_Slots", 0);
-	for _,v in ipairs(lootItems["helicrashsides"]) do
-		local value =  math.percentChance(v[5]*3.5, math.random(2));
-		setDayZData(cargoCol, v[1], value);
-		local ammoData,_ = getWeaponAmmoType(v[1], true);
-		if (ammoData and value > 0) then
-			setDayZData(cargoCol, ammoData, getMagazineSize(ammoData)*math.random(2));
-		end
-	end
-	setTimer(createHeliCrashSite, 3600000, 1);
-end
+-- Scheduled crash events are owned by scripts/helicopter_crashes_s.lua.
 
 function updateHospitals()
 	for i,_ in pairs(hospitalCol) do
@@ -1156,5 +1133,5 @@ for _,v in ipairs(patrolPoints) do
 	setDayZData(patrolCol, "patrolstation", true);
 end
 
-createHeliCrashSite();
+-- Crash scheduler starts in helicopter_crashes_s.lua.
 createHospitalPacks();
