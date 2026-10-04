@@ -618,58 +618,9 @@ addEventHandler("onClientPlayerDamage", localPlayer, function(attacker, weapon, 
 			end
 		end
 	elseif (weapon and weapon > 1 and weapon < 40 and attacker and getElementType(attacker) == "player") then
-		local number = math.random(1, 8);
-		if (number >= 6 or number <= 8) then
-			setElementData(localPlayer, "bleeding", getElementData(localPlayer, "bleeding") + math.floor(loss*10));
-		end
-		local number2 = math.random(1, 7);
-		if (number2 == 2) then
-			setElementData(localPlayer, "pain", true);
-		end
-		local damage = getWeaponDamage(attacker, weapon);
-		if type(damage) ~= "number" or damage <= 0 then return end;
-		local helmet = getElementData(localPlayer,"helmet");
-		local vest = getElementData(localPlayer,"vest");
-		if (bodypart == 9) then
-			if (helmet ~= "" and helmet ~= "helmet6" and helmet ~= "helmet7") then
-				damage = damage/helmetDamageReduction[helmet];
-			else
-				setElementData(localPlayer, "blood", -9000);
-			end
-			headshot = true;
-		end
-		if (bodypart == 3) then
-			if (vest ~= "") then
-				damage = damage/vestDamageReduction[vest];
-			end
-		end
-		if (bodypart == 7 or bodypart == 8) then
-			damage = damage/2;
-			setElementData(localPlayer, "brokenbone", true);
-			local x,y,z = getElementPosition(localPlayer);
-			playSound3D("sounds/breakbone.mp3", x, y, z);
-		end
-		if (bodypart == 5 or bodypart == 6) then
-			damage = damage/2;
-		end
-		if not isElementInWater(localPlayer) then
-			playSound("sounds/hit"..math.random(1, 3)..".mp3");
-		end
-		setElementData(localPlayer, "blood", getElementData(localPlayer, "blood") - math.random(damage*0.8, damage*1.2));
-		--[[if (getElementData(localPlayer, "humanity") >= 1) then
-			setElementData(attacker, "humanity", getElementData(attacker, "humanity") - math.random(40, 200));
-		elseif (getElementData(localPlayer, "humanity") <= 0 and getElementData(attacker, "humanity") >= 1) then
-			setElementData(attacker, "humanity", getElementData(attacker, "humanity") + math.random(40, 200));
-			if (getElementData(attacker,"humanity") > 5000) then
-				setElementData(attacker, "humanity", 5000);
-			end
-		end]]--
-		if (getElementData(localPlayer, "blood") <= 0) then
-			if not getElementData(localPlayer, "isDead") then
-				triggerServerEvent("kilLDayZPlayer", localPlayer, attacker, headshot, getWeaponNameFromID(weapon));
-				setElementData(localPlayer, "isDead", true);
-			end
-		end
+        -- Victim reports the hit; server derives damage from protected equipment.
+        triggerServerEvent("dayz:combatHit",localPlayer,attacker,weapon,bodypart)
+
 	elseif (weapon == 54 or weapon == 49) then
 		setElementData(localPlayer, "blood", getElementData(localPlayer, "blood") - math.random(100, 1000));
 		local number = math.random(1, 5);

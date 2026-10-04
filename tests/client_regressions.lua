@@ -65,7 +65,7 @@ check('unknown damage is ignored before arithmetic',function()
   assert(guard:find('type(damage)',1,true));hits=hits+1
   run('local damage=nil;'..guard..'return end; error("nil damage passed")')
  end
- assert(hits==2)
+ assert(hits==1) -- PvP now reports hits to the server; NPC damage keeps its guard.
 end)
 check('destroyed loot is rejected before any inventory data reads',function()
  local s=read('dayzepoch/inventory.lua')

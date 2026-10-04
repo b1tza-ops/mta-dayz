@@ -920,11 +920,11 @@ addEventHandler("onClientRender", root, function()
 		dxDrawText(text,x+10+(tWidth*0.4),(y+h/2)-tHeight);
 		dxDrawRectangle(x+40, y+10, w-50, 48, tocolor(15,20,18,170));
 		dxDrawImage(x+50-5, y+11.5, 48, 48, "images/armor.png",0,0,0,tocolor(255,255,255,alphaV));
-		dxDrawText(vdr.."%",x+50-5+1, y+11.5+30+1,x+50-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
-		dxDrawText(vdr.."%",x+50-5, y+11.5+30,x+50-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
+		dxDrawText("V "..math.floor(vestDamageReduction[vest] and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(vest))) or 100) or 0).."%",x+50-5+1, y+11.5+30+1,x+50-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
+		dxDrawText("V "..math.floor(vestDamageReduction[vest] and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(vest))) or 100) or 0).."%",x+50-5, y+11.5+30,x+50-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
 		dxDrawImage(x+50+5+48-5, y+11.5, 48, 48, "images/helmet.png",0,0,0,tocolor(255,255,255,alphaH));
-		dxDrawText(hdr.."%",x+50+5+48-5+1, y+11.5+30+1,x+50+5+48-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
-		dxDrawText(hdr.."%",x+50+5+48-5, y+11.5+30,x+50+5+48-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
+		dxDrawText("H "..math.floor((helmetDamageReduction[helmet] or 1)>1 and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(helmet))) or 100) or 0).."%",x+50+5+48-5+1, y+11.5+30+1,x+50+5+48-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
+		dxDrawText("H "..math.floor((helmetDamageReduction[helmet] or 1)>1 and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(helmet))) or 100) or 0).."%",x+50+5+48-5, y+11.5+30,x+50+5+48-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
 		dxDrawRectangle(x+40, y+10+48+5, w-50, h-30-48-5, tocolor(15,20,18,170));
 		if (not isInAction and isCursorOnElement(x+10, y+10, 30, h-30)) then
 			inventorySurface(x+10, y+10, 30, h-30, tocolor(0, 0, 0, 20), false, "left");

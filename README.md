@@ -154,3 +154,31 @@ use `/crashsites` for status. Edit timings and locations at the top of
 The full-screen map retains a compressed background texture, retries allocation
 failures every five seconds and recreates it after a client restore. Failures
 produce a diagnostic message instead of leaving transparent terrain with markers.
+
+### RedFear PvP combat
+
+PvP hit reports are sent by the victim; the server computes damage from the
+attacker's equipped item and validates actor, native weapon, world, range and
+report frequency. Client reports contain no damage amounts. Engine hit/body-part
+detection remains client based; these checks are not a complete anticheat.
+Existing NPC, zombie, fall, vehicle and explosion damage paths are retained.
+
+`scripts/shared/combat.lua` sets base damage, full-damage distance, maximum range
+and lethal headshot range per weapon. Ranges are RedFear tuning values, not a
+copy of TOP-GTA's settings. Damage falls linearly to zero at maximum range.
+Arms take 45%, legs 60%, and body part 4 takes 70% before armor reduction.
+Existing helmet/vest reduction factors and sidearm humanity modifiers are retained.
+Working helmets block lethal headshots unless the weapon base damage is 12000
+or higher. Outside lethal range, a head hit applies normal calculated damage.
+
+Armor condition is saved per player and armor type (inventory stacks do not
+carry individual instance durability). Swapping types does not reset wear.
+Each protected hit removes ceil(raw damage / 500) condition points, minimum 1.
+The final hit receives protection, then zero-condition equipped armor is consumed;
+a replacement begins at 100%. Unequipped inventory armor remains normal stacked
+items. Inventory H/V percentages display condition, not damage reduction.
+
+Incoming/outgoing numbers fade after 2.5 seconds, capped at five lines. `/damage`
+toggles them for the current client session. Existing accounts receive 100%
+condition defaults without a database migration. Validate PvP with two players,
+including range boundaries, helmets, broken armor and death attribution.
