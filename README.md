@@ -198,3 +198,8 @@ Upload the patch's `dayzepoch` directory over the existing resource, then run `r
 ### RedFear custom world expansion
 
 `redfear_world` adds Last Hope Refuge, Checkpoint Vulture and Sector 13 Quarantine, with native buildings/collision structures and 19 DayZ loot points. Upload the separate resource and updated DayZ manifest/bridge, then `refresh`, `restart dayzepoch`, `start redfear_world`. Admin inspection: `/rfmap camp`, `/rfmap military`, `/rfmap quarantine`, `/rfmap back`. See `redfear_world/README.md` for startup configuration and live placement checks. Stop the resource to remove objects and its associated loot. No live engine/terrain validation was available.
+
+
+### RedFear graphics shaders
+
+Start the separate `redfear_graphics` resource for optional local colour grading and highlight bloom. `/graphics low|balanced|cinematic|off` selects and saves a preset; `/fixgraphics` resets graphics allocations. The effect pauses in cursor menus, before login, on death and during goggle effects. See `redfear_graphics/README.md` for installation and renderer validation. No live Direct3D/MTA compilation was available.
