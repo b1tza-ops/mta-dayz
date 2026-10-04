@@ -83,4 +83,24 @@ check('destroyed loot is rejected before any inventory data reads',function()
  local live={alive=true,data={MAX_Slots=20}};localPlayer.data.currentCol=live
  assert(isPlayerInLoot()==live and getElementMaxSlots(live)==20)
 end)
+check('world menu rejects absent destroyed and offscreen targets before drawing',function()
+ local body=assert(read('dayzepoch/menu_client.lua'):match('addEventHandler%("onClientRender", root, function%(%)\n(.-)\nend%);'))
+ local reads,draws,clears=0,0,0
+ isElement=function(e) return type(e)=='table' and e.alive end
+ getElementPosition=function(e) assert(isElement(e));reads=reads+1;return 1,2,3 end
+ getScreenFromWorldPosition=function() return false,false end
+ dxGetFontHeight=function() return 10 end
+ getPedOccupiedVehicle=function() return false end
+ disableMenu=function() clears=clears+1 end
+ renderMenu=function() draws=draws+1 end
+ dxGetTextWidth=function() error('offscreen target reached drawing') end
+ for _,setup in ipairs({'local newbiePosition=false;local newbieShow=true;', 'local newbiePosition={alive=false};local newbieShow=false;'}) do run(setup..body) end
+ assert(reads==0 and clears==2 and draws==0)
+ run('local newbiePosition={alive=true};local newbieShow=false;'..body)
+ run('local newbiePosition={alive=true};local newbieShow=true;'..body)
+ assert(reads==2 and draws==0)
+ getScreenFromWorldPosition=function() return 100,100,1 end
+ run('local newbiePosition={alive=true};local newbieShow=false;'..body)
+ assert(draws==1)
+end)
 print(count..' client regression checks passed')

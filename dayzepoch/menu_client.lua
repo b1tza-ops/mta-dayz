@@ -431,16 +431,18 @@ addEventHandler("onClientRender", root, function()
 	if veh then
 		disableMenu();
 	else
-		if not newbieShow then
-			if (newbiePosition) then
-				local x,y,z = getElementPosition(newbiePosition);
-				local x1,y1,z1 = getScreenFromWorldPosition(x, y, z);
-				renderMenu(x1,y1,z1,0,"",wHeight,bxSpace)
-			end
-			return;
-		end
-		local x,y,z = getElementPosition(newbiePosition);
-		local x1,y1,z1 = getScreenFromWorldPosition(x, y, z);
+        -- Menus can outlive their crate, vehicle or pickup after cleanup/destruction.
+        if not isElement(newbiePosition) then
+            if newbieShow or newbiePosition then disableMenu(); end
+            return;
+        end
+        local x,y,z = getElementPosition(newbiePosition);
+        local x1,y1,z1 = getScreenFromWorldPosition(x, y, z);
+        if type(x1) ~= "number" or type(y1) ~= "number" then return; end
+        if not newbieShow then
+            renderMenu(x1,y1,z1,0,"",wHeight,bxSpace);
+            return;
+        end
 		local length = dxGetTextWidth(newbieText, 1, "default-bold");
 		if (type(x1) == "number" and type(y1) == "number" and x1 <= sW and y1 <= sH) then
 			if (newbieText2 == "") then
