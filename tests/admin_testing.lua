@@ -93,7 +93,7 @@ test('zombie spawning enforces world, count and ownership',function()
  admin.dim=0;admin.int=0
  action(admin,'zombies',11);assert(active('ped')==0)
  action(admin,'zombies',3);assert(active('ped')==3 and admin.data.spawnedzombies==3)
- for _,ped in ipairs(getElementsByType('ped')) do assert(ped.data.owner==admin and ped.data.blood==10000) end
+ for _,ped in ipairs(getElementsByType('ped')) do assert(ped.data.owner==admin and ped.data["zombie:noXP"]==true) end
 end)
 test('admin batch of ten works with normal player cap five',function()
  configVar.maxzombies=5

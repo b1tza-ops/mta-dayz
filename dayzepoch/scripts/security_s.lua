@@ -15,7 +15,7 @@ local fixedProtected = {
 
 function isDayZProtectedKey(key)
     return type(key) == "string" and (fixedProtected[key] or isDayZItem(key)
-        or key:match("^armorCondition%.") or key:match("^currentweapon_%d+$") or key:match("^%d+$")
+        or key:match("^zombie:") or key:match("^armorCondition%.") or key:match("^currentweapon_%d+$") or key:match("^%d+$")
         or key:match("^stats%.") and key ~= "stats.playtime") and true or false
 end
 

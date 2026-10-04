@@ -71,9 +71,9 @@ local function activateGuards(players)
  -- Keep guards close to the recorded terrain height. Native zombie cap still applies.
  for i=#site.guards+1,5 do
   local angle=i*math.pi*2/5
-  local zombie=createZombie(loc.x+math.cos(angle)*5,loc.y+math.sin(angle)*5,loc.z+0.5,0,22)
+  local zombie=createZombie(loc.x+math.cos(angle)*5,loc.y+math.sin(angle)*5,loc.z+0.5,0,22,"military")
   if not isElement(zombie) then break end
-  setDayZData(zombie,'blood',10000)
+
   site.guards[#site.guards+1]=zombie
  end
 end

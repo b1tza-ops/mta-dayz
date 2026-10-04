@@ -179,6 +179,10 @@ local playerDataTable = {
 
 -- player statistics or any other data that will save and load when player join/quit game (note: theese data does not and will not reset upon's player death)
 local playerData2Table = {
+    {"stats.xp",0},
+    {"stats.level",1},
+    {"stats.title","none"},
+    {"stats.cosmeticSkin","none"},
 	{"stats.email",""},
 	{"stats.zombieskilled",0},
 	{"stats.headshots",0},

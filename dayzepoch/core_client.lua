@@ -589,7 +589,7 @@ addEventHandler("onClientPlayerDamage", localPlayer, function(attacker, weapon, 
 		return;
 	end
 	if (attacker and getElementType(attacker) == "ped") then
-		setElementData(localPlayer, "blood", (getElementData(localPlayer, "blood")-math.random(400, 900)));
+		setElementData(localPlayer, "blood", (getElementData(localPlayer, "blood")-(math.random(400, 900)*((getElementData(attacker,"zombie") and DayZZombieTypes[getElementData(attacker,"zombie:type")] or {}).damage or 1))));
 		local number = math.random(1, 7);
 		if (number == 4) then
 			setElementData(localPlayer, "bleeding", getElementData(localPlayer, "bleeding")+math.floor(loss*10));

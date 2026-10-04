@@ -26,8 +26,10 @@ function DayZChatRole(player)
 end
 function DayZFormatChat(player,channel,message)
     local role,color=DayZChatRole(player)
+    local title=DayZCosmetics and DayZCosmetics.title[getElementData(player,"stats.title")]
+    local badge=title and ("["..title.name.."] ") or ""
     return (channels[channel] or "#FFFFFF").."["..channel.."] "..color.."["..role.."] "
-        ..clean(getPlayerName(player)).."#FFFFFF: "..clean(message)
+        ..badge..clean(getPlayerName(player)).."#FFFFFF: "..clean(message)
 end
 function DayZPrepareChat(player,message)
     if not isElement(player) or getElementType(player)~="player" then return false end

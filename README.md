@@ -182,3 +182,14 @@ Incoming/outgoing numbers fade after 2.5 seconds, capped at five lines. `/damage
 toggles them for the current client session. Existing accounts receive 100%
 condition defaults without a database migration. Validate PvP with two players,
 including range boundaries, helmets, broken armor and death attribution.
+
+
+### Survivor progression and zombie variants
+
+`/progress` opens account-backed XP and cosmetic rewards. Zombie kills award civilian 10 XP, military 25 XP and fast 40 XP, with +5 for a headshot. XP survives death and is saved immediately to the MTA account. Levels 1–20 use cumulative thresholds `100 * level * (level - 1)`. Existing accounts begin at zero XP; historical kills are not converted.
+
+Native spawns roll 75% civilian (10,000 blood), 20% military (18,000 blood) and 5% fast (7,000 blood). Military attacks deal 1.35x zombie damage and chase at 0.85x animation speed; fast attacks deal 1.1x and chase at 1.4x. Crash guards are military. Existing headshot instant kills remain. Admin panel test zombies grant no XP. Tune these values in `scripts/shared/progression.lua`.
+
+Cosmetic titles unlock at levels 1/3/7/12/20; Scout/Ranger/Veteran outfits at 3/7/12; wave/cheer/dance at 1/5/10. Use the panel or `/title survivor`, `/outfit scout`, `/emote wave`; `/title none` and `/outfit none` reset selections. Outfits only overlay the player model: underlying clothing inventory, armor, damage and account skin remain unchanged. No gear, health or combat bonuses are granted.
+
+Upload the patch's `dayzepoch` directory over the existing resource, then run `refresh` and `restart dayzepoch`. Do not replace databases or accounts. Smoke test natural zombie kills, logout/login XP, death persistence, locked rewards, outfit reset and variant movement. Client-reported zombie kills retain the existing mode's trust limitations; this is not a replacement anti-cheat.

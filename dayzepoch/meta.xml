@@ -5,6 +5,8 @@
     <script src="scripts/shared/inventory_items.lua" type="shared" cache="false" />
     <script src="scripts/shared/inventory_rules.lua" type="shared" cache="false" />
     <script src="scripts/shared/combat.lua" type="shared" cache="false" />
+    <script src="scripts/shared/progression.lua" type="shared" cache="false" />
+    <script src="scripts/progression_c.lua" type="client" cache="false" />
     <script src="scripts/security_s.lua" type="server" />
     <script src="scripts/persistence_s.lua" type="server" />
 	<!--<!> Do not change the order of the files <!>-->
@@ -38,6 +40,7 @@
     <script src="zombies_s.lua" type="server" />
 	<script src="vehicles.lua" type="server" />
     <script src="accounts.lua" type="server" />
+    <script src="scripts/progression_s.lua" type="server" />
     <script src="scripts/inventory_s.lua" type="server" />
     <script src="scripts/airdrop_loot_s.lua" type="server" />
     <script src="scripts/admin_testing_s.lua" type="server" />

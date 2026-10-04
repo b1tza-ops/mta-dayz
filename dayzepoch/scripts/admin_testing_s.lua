@@ -75,7 +75,7 @@ local function spawnZombies(player,amount)
         local angle=i*math.pi*2/amount
         local zombie=createZombie(x+math.cos(angle)*8,y+math.sin(angle)*8,z,0,22)
         if isElement(zombie) then
-            setDayZData(zombie,"blood",10000)
+            setDayZData(zombie,"zombie:noXP",true)
             setDayZData(zombie,"owner",player)
             setDayZData(player,"spawnedzombies",number(player,"spawnedzombies")+1)
             remember(player,{kind="zombie",elements={zombie}},5*60000)

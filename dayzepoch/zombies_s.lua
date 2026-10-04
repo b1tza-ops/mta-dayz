@@ -89,6 +89,8 @@ end
 function chaseAnim(ped)
 	if isElement(ped) then
 		setPedAnimation(ped, chaseblock, chaseanim, -1, true, true, true);
+        local variant=DayZZombieTypes[getElementData(ped,"zombie:type")] or DayZZombieTypes.civilian
+        setPedAnimationSpeed(ped,chaseanim,variant.speed);
 	end
 end
 
@@ -156,6 +158,8 @@ function Zomb_chase(ped, Zx, Zy, Zz)
 							end
 						else
 							setPedAnimation(ped, chaseblock, chaseanim, -1, true, true, true);
+        local variant=DayZZombieTypes[getElementData(ped,"zombie:type")] or DayZZombieTypes.civilian
+        setPedAnimationSpeed(ped,chaseanim,variant.speed);
 							setTimer(Zomb_chase, checkspeed, 1, ped, x, y, z);
 						end
 					else
@@ -164,6 +168,8 @@ function Zomb_chase(ped, Zx, Zy, Zz)
 				end
 			else
 				setPedAnimation(ped, chaseblock, chaseanim, -1, true, true, true);
+        local variant=DayZZombieTypes[getElementData(ped,"zombie:type")] or DayZZombieTypes.civilian
+        setPedAnimationSpeed(ped,chaseanim,variant.speed);
 				setTimer(Zomb_chase, checkspeed, 1, ped, x, y, z);
 			end
 		end
@@ -459,11 +465,16 @@ addEventHandler("onPlayerSpawn", root, function()
 	end
 end);
 
-function createZombie(x, y, z, rot, skin)
+function createZombie(x, y, z, rot, skin, variant)
+    variant=DayZZombieTypes[variant] and variant or DayZChooseZombieType(math.random(100))
+    local kind=DayZZombieTypes[variant]
+    skin=kind.skin or skin
 	if (table.getn(everyZombie) < newZombieLimit) then
 		local zomb = createPed(tonumber(skin), tonumber(x), tonumber(y), tonumber(z));
 		if isElement(zomb) then
 			setDayZData(zomb, "zombie", true);
+            setDayZData(zomb,"zombie:type",variant);
+            setDayZData(zomb,"blood",kind.blood);
 			setDayZData(zomb, "forcedtoexist", true);
 			setElementRotation(zomb, 0, 0, rot);
 			setDayZData(zomb, "status", "idle");
@@ -500,8 +511,8 @@ addEventHandler("createZomieForPlayer", root, function(x, y, z)
     if getDistanceBetweenPoints3D(px,py,pz,x,y,z)>60
         or (tonumber(getElementData(client,"spawnedzombies")) or 0)>=configVar.maxzombies then return end
 	local zombie = createZombie(x, y, z, math.random(360), zombiePedSkins[math.random(#zombiePedSkins)]);
+	if not isElement(zombie) then return end
 	setDayZData(zombie, "zombie", true);
-	setDayZData(zombie, "blood", math.random(8000, 12000));
 	setDayZData(zombie, "owner", client);
 	setDayZData(client, "spawnedzombies", getElementData(client, "spawnedzombies") + 1);
 end);
@@ -519,7 +530,8 @@ end);
 addEventHandler("onZombieGetsKilled", root, function(killer, headshot, weapon)
     if not isElement(source) or getElementType(source) ~= "ped" or not getElementData(source,"zombie") then return end
     if client and (killer ~= client or not getElementData(client,"logedin") or not dayZNearby(client,source,150)) then return end
-	if (killer and getElementType(killer) == "player") then
+	if (isElement(killer) and getElementType(killer) == "player") then
+        DayZAwardZombieXP(killer,source,headshot);
 		if headshot then
 			setDayZData(killer, "headshots", getElementData(killer, "headshots") + 1);
 			setDayZData(killer, "stats.headshots", getElementData(killer, "stats.headshots") + 1);
