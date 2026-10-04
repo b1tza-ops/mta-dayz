@@ -84,7 +84,8 @@ Use `/dayztest` while logged in with an Admin ACL account. The panel provides:
   Contents: M4A1 Holo, 120 rounds of matching ammo, food, bandages and an engine.
 - Inspect the nearest vehicle within 12 metres: health, engine state, fuel,
   inventory capacity and installed/required parts. Inspection does not mutate vehicles.
-- Clean up only your own active test zombies and airdrops.
+- Spawn fully fitted DayZ vehicles with fuel and all required parts.
+- Clean up your own active test zombies, airdrops and vehicles.
 
 Spawn on foot in dimension/interior 0 and on flat open ground. Test zombies expire
 in 5 minutes; crates expire in 15 minutes. A maximum of two test crates per admin
@@ -92,97 +93,3 @@ is active at once. Cleanup, disconnect and resource stop remove temporary assets
 already looted items remain in players' inventories. These are manual testing
 crates, not a scheduled public airdrop event. All actions are server authenticated,
 throttled and logged. Engine gameplay validation is still required.
-
-### AI survivor prototype
-
-In `/dayztest`, choose **Spawn AI survivor**, then **Inspect my survivors** to see
-state, health and remaining shells. Each admin can spawn three temporary survivors.
-They patrol eight waypoints across an 80-by-80-metre area near their spawn, engage nearby zombies with a shotgun,
-and retreat below 31 health or when their 40 shells run out. Cleanup, disconnect or
-15 minutes removes them. Use a flat, open area; this is waypoint navigation, not
-map-wide pathfinding. Blocked patrols try clear side directions, then switch waypoints after six
-seconds without progress (or 45 seconds without reaching the waypoint). Beyond 180 metres from their owner they pause.
-
-The owner's client controls movement and checks visibility. The server validates
-ownership, target, range, world, shot cadence and ammo, and applies fixed combat
-damage. Shot effects are illustrative rather than a ballistics simulation; zombie
-contact damage is simulated on the server. Visibility trusts the admin controller,
-so this prototype is not intended as a public NPC security boundary. Survivors do
-not yet attack players. Existing
-zombies retain their player-targeting AI. Test with zombies near the survivor.
-
-
-Survivors now carry a 20-slot inventory containing their Winchester and remaining
-shotgun shells. With no nearby threats they seek ordinary ground-loot containers,
-landed airdrops or bodies within 35 metres. They collect shotgun shells (up to 70),
-beans, soda and bandages (up to two each), one server-validated transfer every 1.5
-seconds. Visibility comes from the admin controller, as with prototype combat.
-Private safes, tents and vehicle inventories are excluded. Targets that cannot be
-reached within 45 seconds are skipped temporarily. They consume carried supplies when safe. Inspection lists carried supplies and occupied slots. Death exposes the same
-inventory as a lootable body; cleanup and the original 15-minute lifetime remove
-both body and inventory. Shotgun ammo is consumed from that inventory on each shot.
-
-
-Survivor needs update every ten seconds while their owner is nearby in the same
-world. Food falls by 1 and water by 1.5; at 50 or below they use beans (+45 food)
-and soda (+50 water). Zombie contact causes bleeding, which costs 2 health per
-needs tick until a bandage is used. Medic kits restore 25/40/60 health depending on
-size, and are used at 70 health or below. All uses take three seconds and consume
-one carried item only when completed. Nearby zombies interrupt without consuming
-that item. Empty food/water also damage health. Distant survivors pause needs.
-Urgent medical, drink, food and ammo shortages take priority when choosing loot.
-
-The admin panel's **Test survivor hunger, thirst and injuries** button affects only
-your living test survivors: sets food 35, water 30, health 55 and bleeding on.
-Test airdrops now include soda, small medic kits and shotgun shells in addition to
-the existing food/bandages. Use the button near a landed drop without zombies,
-then inspect to see bandaging, healing, drinking, eating and inventory changes.
-
-
-Survivor navigation uses short, body-width collision probes and ground-height
-checks. Blocked directions try side corridors with a short steering commitment to
-reduce left/right oscillation. It avoids sharp climbs and drops and applies the
-same steering to retreats. Inspection reports walking/detouring/blocked/waiting
-and the current waypoint. This is local steering, not full map pathfinding; closed
-rooms, mazes, interiors and large obstacles can still need authored routes.
-
-
-### Survivor decision system and memory
-
-Survivors score explore, restock, fight, retreat and recovery goals from server
-observations. Spawn order cycles cautious scavenger, balanced survivor and bold
-fighter personalities. They retreat at different health/crowd thresholds and when
-ammo cannot cover nearby threats. Retreats choose a patrol destination with more
-zombie clearance, then retain that goal briefly rather than instantly resuming a
-fight. Recovery is allowed when threats are beyond 18 metres.
-
-Nearby eligible loot sites are remembered for three minutes (maximum 64). Urgent
-shortages can send them back to remembered supplies up to 80 metres away. Current
-loot goals receive a commitment bonus to reduce switching. Failed loot approaches
-and patrol waypoints are avoided for two minutes. Recently visited patrol points
-receive lower exploration priority; danger areas remembered for a minute also
-reduce destination scores (maximum 32 areas). Inspections show personality, goal,
-reason, selected score, memory counts and nearby threat count. Server debug output
-records goal changes. This is deterministic game AI with local steering, not an
-LLM, full map pathfinding or player combat. The admin controller reports visible zombies; the server validates their range
-and world before threat assessment. Visibility also gates firing and looting.
-
-
-### Loot awareness
-
-The admin controller runs a 360-degree loot visibility scan every 1.5 seconds,
-within 50 metres of each survivor. Walls and intervening objects block detection;
-the target crate itself is ignored. Empty containers and private inventories are
-excluded. Batches rotate through nearby visible sites (maximum eight observations
-per report). The server validates owner, container type, distance and world before
-updating bounded memory; it no longer automatically discovers containers through
-walls. Normal restocking works out to 50 metres, urgent remembered supplies to 80.
-Inspection shows visible observations from the last scan and time since that scan.
-As with shooting, the prototype trusts its authenticated admin controller's
-visibility observation; this remains a local test NPC system.
-
-Zombie awareness uses the same 1.5-second scan with line of sight, within 30 metres
-and at most 16 visible threats. A new scan removes hidden threats immediately;
-observations also expire after four seconds without refresh. Zombies behind walls
-therefore no longer keep survivors stationary in combat. Existing retreat
-commitment can continue briefly after sight is lost, then patrol/needs resume.

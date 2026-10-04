@@ -67,12 +67,12 @@ dofile('dayzepoch/scripts/admin_testing_c.lua')
 commands.dayztest();assert(requests[#requests][1]=='dayz:testAction' and requests[#requests][3]=='open')
 handlers['dayz:openTesting'][resourceRoot]()
 local before=#requests
-local expected={['Teleport']='teleport',['Return to previous position']='back',['Spawn zombies nearby']='zombies',['Trigger test airdrop']='airdrop',['Inspect nearest vehicle']='inspect',['Clean up all my test spawns']='cleanup',['Spawn fully working vehicle']='vehicle',['Spawn AI survivor']='survivor',['Inspect my survivors']='survivorinspect',['Test survivor hunger, thirst and injuries']='survivorneeds'}
+local expected={['Teleport']='teleport',['Return to previous position']='back',['Spawn zombies nearby']='zombies',['Trigger test airdrop']='airdrop',['Inspect nearest vehicle']='inspect',['Clean up all my test spawns']='cleanup',['Spawn fully working vehicle']='vehicle'}
 for _,e in ipairs(controls) do
  if expected[e.text] then
   handlers.onClientGUIClick[e]()
   assert(requests[#requests][1]=='dayz:testAction' and requests[#requests][3]==expected[e.text])
  end
 end
-assert(#requests==before+10)
-print('PASS testing panel opens and sends all ten actions through server requests')
+assert(#requests==before+7)
+print('PASS testing panel opens and sends all seven actions through server requests')
