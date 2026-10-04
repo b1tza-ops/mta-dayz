@@ -120,4 +120,14 @@ check('scoreboard missing country flags fall back without image warnings',functi
  run(setup..'local content=":admin/client/images/flags/RO.png";'..body)
  assert(images==1 and labels[1]=='GB' and labels[2]=='--' and labels[3]=='--')
 end)
+check('vehicle explosion ignores crash wrecks and absent spawn data',function()
+ local text=read('dayzepoch/vehicles.lua')
+ local body=assert(text:match('addEventHandler%("onVehicleExplode", root,  function%(%)%s*(.-)\nend%);'))
+ getElementData=function(e,k) return e[k] or false end
+ getVehicleOccupants=function() return {} end
+ getElementPosition=function() return 0,0,0 end
+ isElement=function(e) return type(e)=='table' end
+ source={helicrash=true};run(body)
+ source={parent={}};run(body)
+end)
 print(count..' client regression checks passed')

@@ -948,7 +948,7 @@ addEventHandler("onClientPreRender",root,function()
 			local vehicleid = getElementModel(vehicle);
 			if (vehicleid == 487 or vehicleid == 497) then
 				if getVehicleEngineState(vehicle) == false then
-					setHelicopterRotorSpeed(vehicle,0);
+					setVehicleRotorSpeed(vehicle,0);
 				end
 			end
 		end
@@ -1007,7 +1007,7 @@ addEventHandler("onClientRender",root,function()
 						for i,e in ipairs(elements) do
 							if (getElementType(e) == "sound") then
 								if (vehicleid == 487 or vehicleid == 497) then
-									local rtr_spd = getHelicopterRotorSpeed(vehicle)*4.5;
+									local rtr_spd = getVehicleRotorSpeed(vehicle)*4.5;
 									setSoundSpeed(e,rtr_spd);
 									setSoundMaxDistance(e,300);
 									if (rtr_spd == 0) then
@@ -1350,7 +1350,7 @@ addEventHandler("onClientRender", root, function()
 				for i = 1, 7 do
 					if (i ~= 3) then
 						local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-						if (tohide ~= "NONE") then
+						if isElement(tohide) then
 							setElementPosition(tohide,0,0,0);
 							setElementAlpha(tohide, 0);
 						end
@@ -1367,7 +1367,7 @@ addEventHandler("onClientRender", root, function()
 				for i = 1, 7 do
 					if (i ~= 3) then
 						local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-						if (tohide ~= "NONE") then
+						if isElement(tohide) then
 							setElementAlpha(tohide, 255);
 						end
 					end
@@ -1426,7 +1426,7 @@ bindKey("aim_weapon", "both", function(key, press)
 			for i = 1, 7 do
 				if (i ~= 3) then
 					local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-					if (tohide ~= "NONE") then
+					if isElement(tohide) then
 						setElementAlpha(tohide, 0);
 					end
 				end
@@ -1435,7 +1435,7 @@ bindKey("aim_weapon", "both", function(key, press)
 			for i = 1, 7 do
 				if (i ~= 3) then
 					local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-					if (tohide ~= "NONE") then
+					if isElement(tohide) then
 						setElementAlpha(tohide, 255);
 					end
 				end
@@ -1449,7 +1449,7 @@ addEventHandler("onClientVehicleStartExit", root, function()
 		if (getElementModel(source) ~= 468) then
 			for i = 2, 4 do
 				local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-				if (tohide ~= "NONE") then
+				if isElement(tohide) then
 					setElementAlpha(tohide, 255);
 				end
 			end
@@ -1462,7 +1462,7 @@ addEventHandler("onClientVehicleEnter", root, function()
 		if (getElementModel(source) ~= 468) then
 			for i = 2, 4 do
 				local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-				if (tohide ~= "NONE") then
+				if isElement(tohide) then
 					setElementAlpha(tohide, 0);
 				end
 			end

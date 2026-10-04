@@ -173,7 +173,9 @@ end
 -- Initialization and shutdown functions
 --
 function SupermanStart()
+  if Superman.started then return end
   if getElementData(localPlayer,"dutyMode") then
+    Superman.started=true
     local self = Superman
 
     -- Register events
@@ -201,7 +203,9 @@ function SupermanStart()
 end
 
 function SupermanStop()
-  if not getElementData(localPlayer,"dutyMode") then
+  if not Superman.started then return end
+  Superman.started=false
+  do
     local self = Superman
 
     setGravity(serverGravity)

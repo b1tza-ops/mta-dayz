@@ -662,12 +662,15 @@ function spawnDayZVehicles()
 end
 
 addEventHandler("onVehicleExplode", root,  function()
+    if getElementData(source,"helicrash") then return end
 	for _,v in pairs(getVehicleOccupants(source)) do
 		triggerEvent("kilLDayZPlayer", v);
 	end
 	local x1,y1,z1 = getElementPosition(source);
 	local col = getElementData(source, "parent");
-	local id,x,y,z = unpack(getElementData(col, "spawn"));
+	local spawn=isElement(col) and getElementData(col,"spawn")
+    if type(spawn)~="table" then return end
+	local id,x,y,z = unpack(spawn);
 	setDayZData(col, "deadVehicle", true);
 	setDayZData(source, "isExploded", true);
 	if (getElementData(source, "dayzvehicle") == 1) then
@@ -682,13 +685,13 @@ end);
 
 setTimer(function()
 	for _,v in ipairs(getElementsByType("vehicle")) do
-		if (getElementModel(v) ~= 453) then
+		if (getElementModel(v) ~= 453) and not getElementData(v,"helicrash") then
 			local col = getElementData(v, "parent");
 			if col then
 				if not (getElementData(col, "deadVehicle")) then
 					if isElementInWater(v) then
-						local id,x,y,z = unpack(getElementData(col, "spawn"));
-						if (getElementData(v, "dayzvehicle") == 1) then
+						local id,x,y,z = unpack(getElementData(col, "spawn") or {});
+						if (getElementData(v, "dayzvehicle") == 1) and id and x and y and z then
 							setTimer(respawnDayZVehicle, (5*60000), 1, id, x, y, z, v, col);
 						else
 							setTimer(function(col, v)
