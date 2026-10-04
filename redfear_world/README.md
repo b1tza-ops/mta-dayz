@@ -49,3 +49,17 @@ Native IDs verified against the MTA IDE list: https://wiki.multitheftauto.com/wi
 Object creation API: https://wiki.multitheftauto.com/wiki/CreateObject
 3095 native collision panel dimensions: https://dev.prineside.com/en/gtasa_samp_model_id/model/3095-a51_jetdoor/
 3268 hangar dimensions: https://dev.prineside.com/gtasa_samp_model_id/model/3268-mil_hangar1_/
+
+
+## Ground calibration fix (1.0.1)
+
+The initial ground heights were estimates. If compounds float, visit each as Admin, wait for the terrain to stream, and run:
+
+/rfmap camp
+/rfground camp
+
+Repeat with military and quarantine. The client casts against native world collision only, ignoring custom map objects, vehicles and players; the server accepts results only for a requested, nearby Admin calibration. It moves objects, zones, blips and loot together and saves heights in the resource's private ground_heights.xml file. Restarting the resource reloads those heights. Do not delete that generated file.
+
+A small manual adjustment is available if a native model pivot still needs a trim: `/rfheight camp -0.2` lowers that entire compound by 20cm. Maximum adjustment is +/-2m per command, Admin only, nearby. No detected ground leaves the compound unchanged and prints a retry message. Server logs include measured heights and whether saving succeeded.
+
+For this fix only, merge both folders from RedFear-World-Ground-Fix.zip into your existing [dayz] directory, then `refresh`, `restart dayzepoch`, `restart redfear_world`. The initial world expansion must already be installed. No DayZ manifest or database replacement is needed in this patch.

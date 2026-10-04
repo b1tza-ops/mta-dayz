@@ -9,7 +9,7 @@ function createObject(model,x,y,z,rx,ry,rz) local o={kind='object',model=model,x
 function setElementFrozen(e,v) e.frozen=v end
 function setElementCollisionsEnabled(e,v) e.collisions=v end
 function setObjectScale(e,v) e.scale=v end
-function createBlip() return {kind='blip'} end
+function createBlip(x,y,z) return {kind='blip',x=x,y=y,z=z} end
 function createColSphere(x,y,z,r) local c={kind='colshape',x=x,y=y,z=z,r=r,data={}};shapes[#shapes+1]=c;return c end
 function addEventHandler(n,e,f) handlers[n]=handlers[n] or {};handlers[n][#handlers[n]+1]={element=e,fn=f} end
 function addCommandHandler(n,f) commands[n]=f end
@@ -36,6 +36,16 @@ function getResourceFromName() return map end
 function getResourceName(r) return r.name end
 function getResourceState(r) return r.state end
 function getThisResource() return dayz end
+function xmlLoadFile() return false end
+function xmlCreateFile() return {} end
+function xmlNodeSetAttribute() end
+function xmlSaveFile() return true end
+function xmlUnloadFile() end
+function addEvent() end
+function triggerEvent() end
+function triggerClientEvent() end
+function getDistanceBetweenPoints3D(x,y,z,a,b,c) return math.sqrt((x-a)^2+(y-b)^2+(z-c)^2) end
+function getResourceRootElement() return resourceRoot end
 local function emit(n,res) for _,h in ipairs(handlers[n] or {}) do h.fn(res) end end
 dofile('redfear_world/locations.lua');dofile('redfear_world/server.lua')
 emit('onResourceStart',map)
@@ -56,7 +66,7 @@ exports={redfear_world={getRedFearLootSites=function() return sites end}}
 function isDayZItem() return true end
 local created=0
 function createItemLoot(kind,x,y,z)
- created=created+1;local c=createColSphere(x,y,z,1.25);c.data.objectsINloot={{kind='object'},{kind='object'}};return c
+ created=created+1;local c=createColSphere(x,y,z,1.25);c.data.objectsINloot={{kind='object',x=x,y=y,z=z},{kind='object',x=x,y=y,z=z}};return c
 end
 function refreshItemLoot() end
 dofile('dayzepoch/scripts/world_expansion_s.lua')
@@ -71,4 +81,31 @@ lootrespawn=true;destroyElement(shapes[#shapes]);sync();assert(created==2*#sites
 lootrespawn=false;sync();assert(created==2*#sites+2)
 emit('onResourceStop',map)
 for i=4,#shapes do assert(not isElement(shapes[i])) end
+-- Ground correction requires a pending request from a nearby authenticated Admin.
+now=now+3000;commands.rfmap(admin,'rfmap','camp')
+commands.rfground(admin,'rfground','camp')
+client=regular;source=resourceRoot
+emit('redfear:groundMeasured','camp') -- invalid payload and non-admin
+assert(RedFearLocations[1].groundZ==16.5)
+local function measured(id,height)
+ for _,h in ipairs(handlers['redfear:groundMeasured']) do h.fn(id,height) end
+end
+client=admin;source=resourceRoot
+local originalZ=objects[1].z
+measured('camp',12.5)
+assert(RedFearLocations[1].groundZ==12.5 and math.abs(objects[1].z-originalZ+4)<0.001)
+assert(sites[1].z==13.5)
+measured('camp',10);assert(RedFearLocations[1].groundZ==12.5) -- replay
+commands.rfground(admin,'rfground','camp');measured('camp',0/0);assert(RedFearLocations[1].groundZ==12.5)
+commands.rfheight(admin,'rfheight','camp','-0.2');assert(math.abs(RedFearLocations[1].groundZ-12.3)<0.001)
+commands.rfheight(admin,'rfheight','camp','-50');assert(math.abs(RedFearLocations[1].groundZ-12.3)<0.001)
+sync()
+local found=false
+for _,col in ipairs(shapes) do if isElement(col) and col.x==sites[1].x and col.y==sites[1].y then
+ assert(math.abs(col.z-sites[1].z)<0.001)
+ for _,e in ipairs(col.data.objectsINloot) do assert(math.abs(e.z-col.z)<0.001) end
+ found=true
+end end
+assert(found)
+print('PASS terrain correction moves compounds and loot; Admin, request, replay, NaN and trim bounds checked')
 print('PASS native collision objects, site loot, Admin teleport and return, vehicle rejection, loot deduplication, respawn recovery and stop cleanup')

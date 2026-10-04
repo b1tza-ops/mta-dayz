@@ -1,7 +1,8 @@
 <meta>
- <info author="RedFear Romania DayZ" name="RedFear World Expansion" version="1.0.0" type="script" />
+ <info author="RedFear Romania DayZ" name="RedFear World Expansion" version="1.0.1" type="script" />
  <min_mta_version server="1.6.0" client="1.6.0" />
  <script src="locations.lua" type="server" />
  <script src="server.lua" type="server" />
+ <script src="ground_c.lua" type="client" cache="false" />
  <export function="getRedFearLootSites" type="server" />
 </meta>
