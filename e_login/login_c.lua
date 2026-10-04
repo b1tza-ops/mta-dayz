@@ -1,225 +1,158 @@
-login = {window={},button = {},edit={},label = {}};
-local register = {window={},button = {},edit={},label = {}};
-local logedin = {window={},button = {},edit={},label = {}};
-local errortext = {grid={},button={},label = {}};
-local language = {window={},staticimage={},combobox={},label={}};
-
-local sW, sH = guiGetScreenSize();
-
-login.window[1] = guiCreateWindow(sW*0.320, sH*0.384, 243, 152, "Please, sign in to continue!", false)
-guiWindowSetMovable(login.window[1], false)
-guiWindowSetSizable(login.window[1], false)
-
-login.label[1] = guiCreateLabel(16, 25, 211, 15, "Username:", false, login.window[1])
-login.edit[1] = guiCreateEdit(10, 40, 224, 24, "", false, login.window[1])
-guiEditSetMaxLength(login.edit[1], 100)
-login.button[1] = guiCreateButton(10, 114, 107, 29, "Sign In", false, login.window[1])
-login.button[2] = guiCreateButton(127, 114, 107, 29, "> register?", false, login.window[1])
-login.label[2] = guiCreateLabel(16, 68, 211, 15, "Password:", false, login.window[1])
-login.edit[2] = guiCreateEdit(9, 83, 224, 24, "", false, login.window[1])
-guiEditSetMasked(login.edit[2], true)
-guiEditSetMaxLength(login.edit[2], 100)
-
-guiSetVisible(login.window[1],false);
-
-
-register.window[1] = guiCreateWindow(sW*0.320, sH*0.384, 243, 237, "Register your account.", false)
-guiWindowSetMovable(register.window[1], false)
-guiWindowSetSizable(register.window[1], false)
-
-register.label[1] = guiCreateLabel(16, 25, 211, 15, "Username:", false, register.window[1])
-register.edit[1] = guiCreateEdit(10, 40, 224, 24, "", false, register.window[1])
-register.label[2] = guiCreateLabel(16, 68, 211, 15, "E-Mail:", false, register.window[1])
-register.edit[2] = guiCreateEdit(9, 83, 224, 24, "", false, register.window[1])
-guiEditSetMaxLength(register.edit[2], 100)
-register.label[3] = guiCreateLabel(16, 110, 211, 15, "Password:", false, register.window[1])
-register.edit[3] = guiCreateEdit(10, 125, 224, 24, "", false, register.window[1])
-guiEditSetMasked(register.edit[3], true)
-guiEditSetMaxLength(register.edit[3], 100)
-register.label[4] = guiCreateLabel(16, 153, 211, 15, "Password 2x:", false, register.window[1])
-register.edit[4] = guiCreateEdit(10, 168, 224, 24, "", false, register.window[1])
-guiEditSetMasked(register.edit[4], true)
-guiEditSetMaxLength(register.edit[4], 100)
-register.button[1] = guiCreateButton(10, 198, 107, 29, "Register", false, register.window[1])
-register.button[2] = guiCreateButton(127, 198, 107, 29, "> back?", false, register.window[1])
-
-guiSetVisible(register.window[1],false);
-
---[[logedin.window[1] = guiCreateWindow(sW*0.320, sH*0.384, 243, 163, "Welcome, kaasis!", false)
-guiWindowSetMovable(logedin.window[1], false)
-guiWindowSetSizable(logedin.window[1], false)
-
-logedin.label[1] = guiCreateLabel(20, 25, 207, 15, "Main:", false, logedin.window[1])
-guiSetFont(logedin.label[1], "default-bold-small")
-logedin.button[1] = guiCreateButton(10, 40, 223, 48, "Play Game", false, logedin.window[1])
-logedin.label[2] = guiCreateLabel(20, 94, 207, 15, "Other:", false, logedin.window[1])
-guiSetFont(logedin.label[2], "default-bold-small")
-logedin.button[2] = guiCreateButton(10, 109, 107, 38, "Settings", false, logedin.window[1])
-logedin.button[3] = guiCreateButton(126, 109, 107, 38, "Quit", false, logedin.window[1])
-guiSetVisible(logedin.window[1],false);
-
-logedin.window[2] = guiCreateWindow(sW*0.320, sH*0.6, 243, 125, "MOTD", false)
-guiWindowSetMovable(logedin.window[2], false)
-guiWindowSetSizable(logedin.window[2], false)
-
-logedin.label[3] = guiCreateLabel(10, 24, 223, 73, "Hello there! You're always welcome here and in any time. If you have any type of suggestion or want to report something, go ahead and do it through /report or through our forums.", false, logedin.window[2])
-guiLabelSetHorizontalAlign(logedin.label[3], "left", true)
-logedin.label[4] = guiCreateLabel(10, 102, 223, 15, "Server Version: v0.3 alpha1 release1", false, logedin.window[2])
-guiSetFont(logedin.label[4], "default-bold-small")
-
-guiSetVisible(logedin.window[2],false);]]
-
-language.window[1] = guiCreateWindow(0, 0, 243, 75, "Choose Language", false)
-language.staticimage[1] = guiCreateStaticImage(0, 0, 243, 152, "empty.png", false)
-language.staticimage[2] = guiCreateStaticImage(15, 25, 140, 140, "logo.png", false)
-guiSetProperty(language.staticimage[1], "AlwaysOnTop", "True");
---guiWindowSetSizable(language.window[1], false)
-
-language.label[1] = guiCreateLabel(16, 25, 211, 15, "Language:", false, language.staticimage[1])
-guiSetFont(language.label[1], "default-bold-small")
-language.combobox[1] = guiCreateComboBox(10, 40, 223, 102, "", false, language.staticimage[1])
-
-local languages = {
-    en = "English",
-    lv = "Latviešu",
-    ru = "Русский",
-}
-
-addEventHandler("onClientResourceStart",resourceRoot,function()
-    if (languages) then
-        local num=0;
-        for i,v in pairs(languages) do
-            guiComboBoxAddItem(language.combobox[1],v)
-            if i == getElementData(localPlayer,"language") then
-                guiComboBoxSetSelected(language.combobox[1],num);
-            end
-            num = num+1;
-        end
-    end
-end);
-
-function getLang(langid)
-    for i,v in pairs(languages) do
-        local language = guiComboBoxGetItemText(language.combobox[1],langid)
-        if (language == v) then
-            return i;
-        end
-    end
+-- Survival-themed account screen. Native edits retain keyboard input and masking.
+login={window={},button={},edit={},label={}}
+local register={window={},button={},edit={},label={}}
+local sw,sh=guiGetScreenSize()
+local scale=math.min(1,sw/1100,sh/760)
+local w,h=980*scale,650*scale
+local x,y=(sw-w)/2,(sh-h)/2
+local formX=x+550*scale
+local formW=390*scale
+local active=false
+local mode='login'
+local errorMessage=''
+local pendingUntil=0
+local loginped
+local languages={{'en','English'},{'lv','Latviešu'},{'ru','Русский'}}
+local language=guiCreateComboBox(formX,y+558*scale,formW,130*scale,'English',false)
+for _,entry in ipairs(languages) do guiComboBoxAddItem(language,entry[2]) end
+guiComboBoxSetSelected(language,0)
+guiSetVisible(language,false)
+local function label(parent,top,text)
+ local e=guiCreateLabel(0,top*scale,formW,22*scale,text,false,parent)
+ guiSetFont(e,'default-bold-small');guiLabelSetColor(e,170,179,159)
+ return e
 end
-
-guiSetVisible(language.window[1],false)
-guiSetVisible(language.staticimage[1],false)
-guiSetVisible(language.staticimage[2],false)
-
-local lX,lY = guiGetPosition(login.window[1],false);
-
-errortext.grid[1] = guiCreateGridList(lX, lY-42, 243, 38, false)
-guiSetAlpha(errortext.grid[1], 0.80)
-
-errortext.label[1] = guiCreateLabel(10, 6, 188, 21, "", false, errortext.grid[1])
-guiLabelSetVerticalAlign(errortext.label[1], "center")
-errortext.button[1] = guiCreateButton(203, 6, 30, 26, "OK", false, errortext.grid[1])
-
-guiSetVisible(errortext.grid[1],false);
-
-addEventHandler("onClientResourceStart",resourceRoot,function()
-    if (not getElementData(localPlayer, "logedin")) then
-        setCameraMatrix (-1440.9035644531,-1506.8837890625,79.716201782227,-1500)
-        loginped = createPed(73,-1440,-1503.599609375,79.699996948242,157.994018)
-        setPedAnimation(loginped,"DEALER","DEALER_IDLE")
-        setElementRotation(localPlayer,180,5,0)
-        setPlayerHudComponentVisible("radar",false)
-        fadeCamera(true)
-        showChat(false)
-        showCursor(true)
-        guiSetVisible(login.window[1],true)
-        guiSetVisible(language.window[1],true)
-        guiSetVisible(language.staticimage[1],true)
-        guiSetVisible(language.staticimage[2],true)
-        local nX, nY = guiGetPosition(login.window[1],false);
-        local nW, nH = guiGetSize(login.window[1],false);
-        guiSetPosition(language.window[1], nX, nY+nH+4, false);
-        guiSetPosition(language.staticimage[1], nX, nY+nH+4, false);
-    end
-end);
-
-addEventHandler("onClientGUIClick",resourceRoot,function()
-    if (source == login.button[1]) then
-        clientSubmitLogin()
-    elseif (source == login.button[2]) then
-        guiSetVisible(login.window[1],false);
-        guiSetVisible(register.window[1],true);
-        local nX, nY = guiGetPosition(register.window[1],false);
-        local nW, nH = guiGetSize(register.window[1],false);
-        guiSetPosition(language.window[1], nX, nY+nH+4, false);
-        guiSetPosition(language.staticimage[1], nX, nY+nH+4, false);
-    elseif (source == register.button[1]) then
-        clientSubmitRegister()
-    elseif (source == register.button[2]) then
-        guiSetVisible(login.window[1],true);
-        guiSetVisible(register.window[1],false);
-        local nX, nY = guiGetPosition(login.window[1],false);
-        local nW, nH = guiGetSize(login.window[1],false);
-        guiSetPosition(language.window[1], nX, nY+nH+4, false);
-        guiSetPosition(language.staticimage[1], nX, nY+nH+4, false);
-    elseif (source == errortext.button[1]) then
-        guiSetVisible(errortext.grid[1],false);
-    end
-end);
-
+local function edit(parent,top,masked)
+ local e=guiCreateEdit(0,top*scale,formW,40*scale,'',false,parent)
+ guiEditSetMaxLength(e,masked and 128 or 64)
+ if masked then guiEditSetMasked(e,true) end
+ return e
+end
+local function button(parent,top,text,primary)
+ local e=guiCreateButton(0,top*scale,formW,40*scale,text,false,parent)
+ guiSetFont(e,'default-bold-small')
+ guiSetProperty(e,'NormalTextColour',primary and 'FFF0D2C8' or 'FFB9C2AD')
+ return e
+end
+for _,form in ipairs({login,register}) do
+ form.window[1]=guiCreateStaticImage(formX,y+142*scale,formW,400*scale,'empty.png',false)
+ guiSetVisible(form.window[1],false)
+end
+label(login.window[1],0,'ACCOUNT NAME')
+login.edit[1]=edit(login.window[1],24,false)
+label(login.window[1],80,'PASSWORD')
+login.edit[2]=edit(login.window[1],104,true)
+login.button[1]=button(login.window[1],168,'ENTER THE WASTELAND',true)
+login.button[2]=button(login.window[1],222,'CREATE A SURVIVOR ACCOUNT',false)
+label(register.window[1],0,'ACCOUNT NAME')
+register.edit[1]=edit(register.window[1],22,false)
+label(register.window[1],68,'EMAIL ADDRESS')
+register.edit[2]=edit(register.window[1],90,false);guiEditSetMaxLength(register.edit[2],254)
+label(register.window[1],136,'PASSWORD')
+register.edit[3]=edit(register.window[1],158,true)
+label(register.window[1],204,'CONFIRM PASSWORD')
+register.edit[4]=edit(register.window[1],226,true)
+register.button[1]=button(register.window[1],284,'REGISTER SURVIVOR',true)
+register.button[2]=button(register.window[1],334,'BACK TO SIGN IN',false)
+local function selectedLanguage()
+ local entry=languages[guiComboBoxGetSelected(language)+1]
+ return entry and entry[1] or 'en'
+end
+local function switch(nextMode)
+ mode=nextMode;errorMessage=''
+ guiSetVisible(login.window[1],active and mode=='login')
+ guiSetVisible(register.window[1],active and mode=='register')
+end
 function seterror(text)
-    guiSetText(errortext.label[1],text)
-    guiLabelSetColor(errortext.label[1],200,50,50)
-    guiSetVisible(errortext.grid[1],true)
+ errorMessage=tostring(text or 'Please try again.');pendingUntil=0
 end
-addEvent("seterror",true)
-addEventHandler("seterror",root,seterror)
-
+local function canSubmit()
+ if getTickCount()<pendingUntil then return false end
+ return active
+end
+local function sent()
+ pendingUntil=getTickCount()+2000;errorMessage=''
+end
 function clientSubmitLogin()
-    local username = guiGetText(login.edit[1])
-    local password = guiGetText(login.edit[2])
-    local langid = guiComboBoxGetSelected(language.combobox[1])
-    if (username ~= "" and password ~= "") then
-        triggerServerEvent("submitLogin",localPlayer,localPlayer,username,password,getLang(langid))
-    else
-        seterror("Fields are empty!")
-    end
+ if not canSubmit() then return end
+ local username,password=guiGetText(login.edit[1]),guiGetText(login.edit[2])
+ if username=='' or password=='' then return seterror('Enter your account name and password.') end
+ sent();triggerServerEvent('submitLogin',localPlayer,localPlayer,username,password,selectedLanguage())
 end
-
 function clientSubmitRegister()
-    local username = guiGetText(register.edit[1])
-    local email = guiGetText(register.edit[2])
-    local password = guiGetText(register.edit[3])
-    local password2 = guiGetText(register.edit[4])
-    local langid = guiComboBoxGetSelected(language.combobox[1])
-    if (string.len(username) >= 5 and string.len(email) >= 5 and string.find(email,"@") and string.len(password) >= 5 and password == password2) then
-        triggerServerEvent("submitRegister",localPlayer,localPlayer,username,password,email,getLang(langid))
-    else
-        seterror("Username or password too short.")
-    end
+ if not canSubmit() then return end
+ local username,email=guiGetText(register.edit[1]),guiGetText(register.edit[2])
+ local password,confirmation=guiGetText(register.edit[3]),guiGetText(register.edit[4])
+ if #username<5 then return seterror('Account name must have at least 5 characters.') end
+ if not email:match('^[^%s@]+@[^%s@]+%.[^%s@]+$') then return seterror('Enter a valid email address.') end
+ if #password<5 then return seterror('Password must have at least 5 characters.') end
+ if password~=confirmation then return seterror('The passwords do not match.') end
+ sent();triggerServerEvent('submitRegister',localPlayer,localPlayer,username,password,email,selectedLanguage())
 end
-
-function loginSuccess()
-    guiSetVisible(login.window[1],false)
-    guiSetVisible(register.window[1],false)
-    guiSetVisible(errortext.grid[1],false)
-    --guiSetVisible(logedin.window[1],false)
-    --guiSetVisible(logedin.window[2],false)
-    guiSetVisible(language.window[1],false)
-    guiSetVisible(language.staticimage[1],false)
-    guiSetVisible(language.staticimage[2],false)
-    destroyElement(loginped)
-    showCursor(false)
-    showChat(true)
+addEventHandler('onClientGUIClick',resourceRoot,function()
+ if source==login.button[1] then clientSubmitLogin()
+ elseif source==register.button[1] then clientSubmitRegister()
+ elseif source==login.button[2] then switch('register')
+ elseif source==register.button[2] then switch('login') end
+end)
+addEventHandler('onClientGUIAccepted',resourceRoot,function()
+ if not active then return end
+ if source==login.edit[1] or source==login.edit[2] then clientSubmitLogin()
+ elseif source==register.edit[1] or source==register.edit[2] or source==register.edit[3] or source==register.edit[4] then clientSubmitRegister() end
+end)
+local function rect(px,py,pw,ph,r,g,b,a)
+ dxDrawRectangle(x+px*scale,y+py*scale,pw*scale,ph*scale,tocolor(r,g,b,a or 255))
 end
-addEvent("loginSuccess",true)
-addEventHandler("loginSuccess",root,loginSuccess)
-
-function lowScreenWarn()
-    local x,y = guiGetScreenSize();
-    if (x < 1024) and (y < 768) then
-        outputChatBox("WARNING: YOUR SCREEN RESOLUTION IS TOO LOW, SOME GUI PLACEMENT MAY BE WRONGLY POSITIONED!",200,10,10);
-    end
+local function text(value,px,py,pw,ph,color,size,font,wrap)
+ dxDrawText(value,x+px*scale,y+py*scale,x+(px+pw)*scale,y+(py+ph)*scale,color,size*scale,font or 'default','left','top',false,wrap or false)
 end
-addEvent("lowScreenWarn",true)
-addEventHandler("lowScreenWarn",root,lowScreenWarn)
+addEventHandler('onClientRender',root,function()
+ if not active then return end
+ dxDrawRectangle(0,0,sw,sh,tocolor(6,9,7,190))
+ rect(0,0,980,650,18,22,18,240)
+ rect(0,0,510,650,26,32,24,240)
+ rect(0,0,980,4,146,53,41)
+ rect(509,28,1,594,91,104,75,120)
+ local pale=tocolor(218,225,209);local muted=tocolor(151,163,139)
+ text('D A Y Z',42,46,430,90,tocolor(181,66,49),3.5,'pricedown')
+ text('SURVIVE  /  SCAVENGE  /  REBUILD',44,137,420,25,muted,1,'default-bold')
+ rect(44,188,54,3,146,53,41)
+ text('THE WORLD HAS CHANGED.',44,218,410,45,pale,1.55,'default-bold')
+ text('Every supply matters. Every sound could be your last.\n\nFind shelter, repair a vehicle and choose who you trust.',44,279,408,125,muted,1.15,'default',true)
+ text('SURVIVOR BRIEFING',44,447,420,24,pale,1,'default-bold')
+ text('01   Search towns for food and medical supplies.\n02   Stay alert: noise attracts unwanted company.\n03   Keep your equipment ready. Stay alive.',44,485,415,100,muted,1,'default',true)
+ text('MTA:SA  /  DAYZ SURVIVAL',44,612,420,22,muted,0.9,'default-bold')
+ text(mode=='login' and 'WELCOME BACK' or 'NEW SURVIVOR',550,46,390,34,pale,1.65,'default-bold')
+ text(mode=='login' and 'Sign in to continue your story.' or 'Create an account and begin your story.',550,92,390,30,muted,1)
+ text('LANGUAGE',550,531,390,22,muted,0.9,'default-bold')
+ if errorMessage~='' then
+  text(errorMessage,550,608,390,38,tocolor(240,133,113),0.95,'default',true)
+ elseif getTickCount()<pendingUntil then
+  text('Connecting to the server...',550,608,390,30,muted,0.95)
+ else
+  text('Your next story starts here.',550,608,390,30,muted,0.95)
+ end
+end)
+local function hide()
+ active=false
+ guiSetVisible(login.window[1],false);guiSetVisible(register.window[1],false);guiSetVisible(language,false)
+ for _,e in ipairs({login.edit[2],register.edit[3],register.edit[4]}) do guiSetText(e,'') end
+ if isElement(loginped) then destroyElement(loginped) end
+ showCursor(false);showChat(true)
+end
+function loginSuccess() hide() end
+addEvent('seterror',true);addEventHandler('seterror',root,seterror)
+addEvent('loginSuccess',true);addEventHandler('loginSuccess',root,loginSuccess)
+function lowScreenWarn() end
+addEvent('lowScreenWarn',true);addEventHandler('lowScreenWarn',root,lowScreenWarn)
+addEventHandler('onClientResourceStart',resourceRoot,function()
+ if getElementData(localPlayer,'logedin') then return end
+ active=true;switch('login');guiSetVisible(language,true)
+ for i,entry in ipairs(languages) do if entry[1]==getElementData(localPlayer,'language') then guiComboBoxSetSelected(language,i-1) end end
+ setCameraMatrix(-1440.9035644531,-1506.8837890625,79.716201782227,-1500)
+ loginped=createPed(73,-1440,-1503.599609375,79.699996948242,157.994018)
+ if isElement(loginped) then setPedAnimation(loginped,'DEALER','DEALER_IDLE') end
+ setPlayerHudComponentVisible('radar',false);fadeCamera(true);showChat(false);showCursor(true)
+ outputDebugString('[DayZ login] Survival account screen ready.',3)
+end)
+addEventHandler('onClientResourceStop',resourceRoot,function() if active then hide() end end)

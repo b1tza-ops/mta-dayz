@@ -111,3 +111,12 @@ account list. Names and client element data cannot grant a role. Chat labels
 never grant permissions. Create a VIP ACL group and add `user.ACCOUNTNAME`
 using your MTA ACL administration to label VIP accounts; a VIP group needs no
 administrative rights. Mutes and a shared one-second cooldown cover all channels.
+
+### Survival account screen
+
+The login/register panel uses an olive/charcoal survival theme with a red DayZ
+header, survivor briefing and responsive account forms. It keeps existing
+accounts, masked native password inputs, saved usernames, language selection
+and server authentication events. Enter submits the current form. Errors appear
+inline; repeated requests have a short client cooldown in addition to the server
+rate limit. No password is saved by this panel.
