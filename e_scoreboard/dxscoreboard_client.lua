@@ -847,10 +847,14 @@ function doDrawScoreboard( rtPass, onlyAnim, sX, sY )
 									
 									dxDrawImage ( topX+theX, y, itemWidth, itemHeight, content.src, content.rot, content.rotOffX, content.rotOffY, content.color, drawOverGUI )
 								end
-							elseif column.name == "country" then
-								if (content ~= ":admin/client/images/flags/false.png") then
-									dxDrawImage( topX+theX, y+s(2), 16, 11, content, 0, 0, 0, cWhite, drawOverGUI )
-								end
+                            elseif column.name == "country" then
+                                -- Host admin resources may not provide downloadable flag images.
+                                if type(content) == "string" and fileExists(content) then
+                                    dxDrawImage(topX+theX, y+s(2), 16, 11, content, 0, 0, 0, cWhite, drawOverGUI)
+                                else
+                                    local code = type(content) == "string" and content:match("/([A-Z][A-Z])%.png$") or "--"
+                                    dxDrawText(code or "--", topX+theX, y, topX+x+s(column.width), y+dxGetFontHeight(fontscale(contentFont, scoreboardScale), contentFont), cWhite, fontscale(contentFont,s(0.8)), contentFont, "left", "top", false, false, drawOverGUI)
+                                end
 							else
 								dxDrawText( content, topX+theX+s(1), 	y+s(1), topX+x+s(1+column.width), 	y+s(11)+dxGetFontHeight( fontscale(contentFont, scoreboardScale), contentFont ), 	tocolor( 0, 0, 0, a or 255 ), fontscale(contentFont, s(1)), contentFont, "left", "top", true, false, drawOverGUI )
 								dxDrawText( content, topX+theX, 		y, 		topX+x+s(column.width), 	y+dxGetFontHeight( fontscale(contentFont, scoreboardScale), contentFont ), 			tocolor( r or 255, g or 255, b or 255, a or 255 ), fontscale(contentFont, s(1)), contentFont, "left", "top", true, false, drawOverGUI )

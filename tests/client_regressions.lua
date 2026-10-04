@@ -103,4 +103,21 @@ check('world menu rejects absent destroyed and offscreen targets before drawing'
  run('local newbiePosition={alive=true};local newbieShow=false;'..body)
  assert(draws==1)
 end)
+check('scoreboard missing country flags fall back without image warnings',function()
+ local source=read('e_scoreboard/dxscoreboard_client.lua')
+ local body=assert(source:match('elseif column.name == "country" then(.-)\n\t\t\t\t\t\t\telse'))
+ local images,labels=0,{}
+ fileExists=function(p) return p==':admin/client/images/flags/RO.png' end
+ dxDrawImage=function(_,__,___,____,p) assert(fileExists(p));images=images+1 end
+ dxDrawText=function(t) labels[#labels+1]=t end
+ dxGetFontHeight=function() return 10 end
+ fontscale=function() return 1 end
+ s=function(v) return v end
+ local setup='local topX,theX,x,y=0,0,0,0;local column={width=15};'
+ run(setup..'local content=":admin/client/images/flags/GB.png";'..body)
+ run(setup..'local content=false;'..body)
+ run(setup..'local content=":admin/client/images/flags/false.png";'..body)
+ run(setup..'local content=":admin/client/images/flags/RO.png";'..body)
+ assert(images==1 and labels[1]=='GB' and labels[2]=='--' and labels[3]=='--')
+end)
 print(count..' client regression checks passed')
