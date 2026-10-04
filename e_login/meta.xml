@@ -7,7 +7,6 @@
     <script src="login_c.lua" type="client" cache="false" />
     <script src="server.lua" type="server" />
 
-    <file src="logo.png" />
     <file src="redfear-logo.png" />
     <file src="empty.png" />
 
