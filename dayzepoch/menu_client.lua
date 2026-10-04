@@ -431,16 +431,18 @@ addEventHandler("onClientRender", root, function()
 	if veh then
 		disableMenu();
 	else
-		if not newbieShow then
-			if (newbiePosition) then
-				local x,y,z = getElementPosition(newbiePosition);
-				local x1,y1,z1 = getScreenFromWorldPosition(x, y, z);
-				renderMenu(x1,y1,z1,0,"",wHeight,bxSpace)
-			end
-			return;
-		end
-		local x,y,z = getElementPosition(newbiePosition);
-		local x1,y1,z1 = getScreenFromWorldPosition(x, y, z);
+        -- Menus can outlive their crate, vehicle or pickup after cleanup/destruction.
+        if not isElement(newbiePosition) then
+            if newbieShow or newbiePosition then disableMenu(); end
+            return;
+        end
+        local x,y,z = getElementPosition(newbiePosition);
+        local x1,y1,z1 = getScreenFromWorldPosition(x, y, z);
+        if type(x1) ~= "number" or type(y1) ~= "number" then return; end
+        if not newbieShow then
+            renderMenu(x1,y1,z1,0,"",wHeight,bxSpace);
+            return;
+        end
 		local length = dxGetTextWidth(newbieText, 1, "default-bold");
 		if (type(x1) == "number" and type(y1) == "number" and x1 <= sW and y1 <= sH) then
 			if (newbieText2 == "") then
@@ -567,8 +569,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 		if (itemName == "installengine") then
 			local col = getElementData(localPlayer, "currentCol");
 			if (getElementData(col, "Engine_inVehicle") < getElementData(col, "needengines") and getElementData(localPlayer, "toolbelt4") >= 1) then
-				setElementData(localPlayer, "vehiclepart1", (getElementData(localPlayer, "vehiclepart1") or 0) - 1);
-				setElementData(col, "Engine_inVehicle", getElementData(col, "Engine_inVehicle") + 1);
+				triggerServerEvent("dayz:vehiclePart",localPlayer,"put","Engine_inVehicle",col);
 				triggerServerEvent("setPlayerUseAnimation",localPlayer);
 				startRollMessage(getLanguageTextClient("clientinfotext18").." "..getLanguageTextClient("vehiclepart1").." "..getLanguageTextClient("clientinfotext19"), 40, 160, 40);
 				disableMenu();
@@ -582,8 +583,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 		if (itemName == "installrotor") then
 			local col = getElementData(localPlayer, "currentCol");
 			if (getElementData(col, "Rotor_inVehicle") < getElementData(col, "needrotor") and getElementData(localPlayer, "toolbelt4") >= 1) then
-				setElementData(localPlayer, "vehiclepart2", (getElementData(localPlayer, "vehiclepart2") or 0) - 1);
-				setElementData(col, "Rotor_inVehicle", getElementData(col, "Rotor_inVehicle") + 1);
+				triggerServerEvent("dayz:vehiclePart",localPlayer,"put","Rotor_inVehicle",col);
 				triggerServerEvent("setPlayerUseAnimation",localPlayer);
 				startRollMessage(getLanguageTextClient("clientinfotext18").." "..getLanguageTextClient("vehiclepart2").." "..getLanguageTextClient("clientinfotext19"), 40, 160, 40);
 				disableMenu();
@@ -597,8 +597,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 		if (itemName == "installtire") then
 			local col = getElementData(localPlayer, "currentCol");
 			if (getElementData(col, "Tire_inVehicle") < getElementData(col, "needtires") and getElementData(localPlayer, "toolbelt4") >= 1) then
-				setElementData(localPlayer, "vehiclepart3", (getElementData(localPlayer, "vehiclepart3") or 0) - 1);
-				setElementData(col, "Tire_inVehicle", getElementData(col, "Tire_inVehicle") + 1);
+				triggerServerEvent("dayz:vehiclePart",localPlayer,"put","Tire_inVehicle",col);
 				triggerServerEvent("setPlayerUseAnimation",localPlayer);
 				startRollMessage(getLanguageTextClient("clientinfotext18").." "..getLanguageTextClient("vehiclepart3").." "..getLanguageTextClient("clientinfotext19"), 40, 160, 40);
 				disableMenu();
@@ -612,8 +611,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 		if (itemName == "installtankparts") then
 			local col = getElementData(localPlayer, "currentCol");
 			if (getElementData(col, "Parts_inVehicle") < getElementData(col, "needparts") and getElementData(localPlayer, "toolbelt4") >= 1) then
-				setElementData(localPlayer, "vehiclepart4", (getElementData(localPlayer, "vehiclepart4") or 0) - 1);
-				setElementData(col, "Parts_inVehicle", getElementData(col, "Parts_inVehicle") + 1);
+				triggerServerEvent("dayz:vehiclePart",localPlayer,"put","Parts_inVehicle",col);
 				triggerServerEvent("setPlayerUseAnimation",localPlayer);
 				startRollMessage(getLanguageTextClient("clientinfotext18").." "..getLanguageTextClient("vehiclepart4").." "..getLanguageTextClient("clientinfotext19"), 40, 160, 40);
 				disableMenu();
@@ -627,8 +625,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 		if (itemName == "installscrap") then
 			local col = getElementData(localPlayer, "currentCol");
 			if (getElementData(col, "Scrap_inVehicle") < getElementData(col, "needscrap") and getElementData(localPlayer, "toolbelt4") >= 1) then
-				setElementData(localPlayer, "vehiclepart5", (getElementData(localPlayer, "vehiclepart5") or 0) - 1);
-				setElementData(col, "Scrap_inVehicle", getElementData(col, "Scrap_inVehicle") + 1);
+				triggerServerEvent("dayz:vehiclePart",localPlayer,"put","Scrap_inVehicle",col);
 				triggerServerEvent("setPlayerUseAnimation",localPlayer);
 				startRollMessage(getLanguageTextClient("clientinfotext18").." "..getLanguageTextClient("vehiclepart5").." "..getLanguageTextClient("clientinfotext19"), 40, 160, 40);
 				disableMenu();
@@ -644,8 +641,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			if (getElementData(col, "Engine_inVehicle") == 1 and getElementData(localPlayer, "toolbelt4") >= 1) then
 				if ((getElementCurrentSlots(localPlayer)+getItemSlots("vehiclepart1")) <= getElementMaxSlots(localPlayer)) then
 					local col = getElementData(localPlayer, "currentCol");
-					setElementData(localPlayer, "vehiclepart1", (getElementData(localPlayer, "vehiclepart1") or 0) + 1);
-					setElementData(col, "Engine_inVehicle", getElementData(col, "Engine_inVehicle") - 1);
+					triggerServerEvent("dayz:vehiclePart",localPlayer,"take","Engine_inVehicle",col);
 					triggerServerEvent("setPlayerUseAnimation",localPlayer);
 					startRollMessage(getLanguageTextClient("clientinfotext20").." "..getLanguageTextClient("vehiclepart1").." "..getLanguageTextClient("clientinfotext21"), 40, 160, 40);
 					disableMenu();
@@ -664,8 +660,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			if (getElementData(col, "Rotor_inVehicle") == 1 and getElementData(localPlayer, "toolbelt4") >= 1) then
 				if ((getElementCurrentSlots(localPlayer)+getItemSlots("vehiclepart2")) <= getElementMaxSlots(localPlayer)) then
 					local col = getElementData(localPlayer, "currentCol");
-					setElementData(localPlayer, "vehiclepart2", getElementData(localPlayer, "vehiclepart2") + 1);
-					setElementData(col, "Rotor_inVehicle", getElementData(col, "Rotor_inVehicle") - 1);
+					triggerServerEvent("dayz:vehiclePart",localPlayer,"take","Rotor_inVehicle",col);
 					triggerServerEvent("setPlayerUseAnimation",localPlayer);
 					startRollMessage(getLanguageTextClient("clientinfotext20").." "..getLanguageTextClient("vehiclepart2").." "..getLanguageTextClient("clientinfotext21"), 40, 160, 40);
 					disableMenu();
@@ -684,8 +679,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			if (getElementData(col, "Tire_inVehicle") >= 1 and getElementData(localPlayer, "toolbelt4") >= 1) then
 				if ((getElementCurrentSlots(localPlayer)+getItemSlots("vehiclepart3")) <= getElementMaxSlots(localPlayer)) then
 					local col = getElementData(localPlayer, "currentCol");
-					setElementData(localPlayer, "vehiclepart3", (getElementData(localPlayer, "vehiclepart3") or 0) + 1);
-					setElementData(col, "Tire_inVehicle", getElementData(col, "Tire_inVehicle") - 1);
+					triggerServerEvent("dayz:vehiclePart",localPlayer,"take","Tire_inVehicle",col);
 					triggerServerEvent("setPlayerUseAnimation",localPlayer);
 					startRollMessage(getLanguageTextClient("clientinfotext20").." "..getLanguageTextClient("vehiclepart3").." "..getLanguageTextClient("clientinfotext21"), 40, 160, 40);
 					disableMenu();
@@ -704,8 +698,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			if (getElementData(col, "Parts_inVehicle") == 1 and getElementData(localPlayer, "toolbelt4") >= 1) then
 				if ((getElementCurrentSlots(localPlayer)+getItemSlots("vehiclepart4")) <= getElementMaxSlots(localPlayer)) then
 					local col = getElementData(localPlayer, "currentCol");
-					setElementData(localPlayer, "vehiclepart4", getElementData(localPlayer, "vehiclepart4") + 1);
-					setElementData(col, "Parts_inVehicle", getElementData(col, "Parts_inVehicle") - 1);
+					triggerServerEvent("dayz:vehiclePart",localPlayer,"take","Parts_inVehicle",col);
 					triggerServerEvent("setPlayerUseAnimation",localPlayer);
 					startRollMessage(getLanguageTextClient("clientinfotext20").." "..getLanguageTextClient("vehiclepart4").." "..getLanguageTextClient("clientinfotext21"), 40, 160, 40);
 					disableMenu();
@@ -724,8 +717,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			if (getElementData(col, "Scrap_inVehicle") == 1 and getElementData(localPlayer, "toolbelt4") >= 1) then
 				if ((getElementCurrentSlots(localPlayer)+getItemSlots("vehiclepart5")) <= getElementMaxSlots(localPlayer)) then
 					local col = getElementData(localPlayer, "currentCol");
-					setElementData(localPlayer, "vehiclepart5", getElementData(localPlayer, "vehiclepart5") + 1);
-					setElementData(col, "Scrap_inVehicle", getElementData(col, "Scrap_inVehicle") - 1);
+					triggerServerEvent("dayz:vehiclePart",localPlayer,"take","Scrap_inVehicle",col);
 					triggerServerEvent("setPlayerUseAnimation",localPlayer);
 					startRollMessage(getLanguageTextClient("clientinfotext20").." "..getLanguageTextClient("vehiclepart5").." "..getLanguageTextClient("clientinfotext21"), 40, 160, 40);
 					disableMenu();
@@ -812,8 +804,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			return;
 		end
 		if (itemName == "patrolstation") then
-			setElementData(localPlayer, "item10", getElementData(localPlayer, "item10") - 1);
-			setElementData(localPlayer, "item9", getElementData(localPlayer, "item9") + 1);
+			triggerServerEvent("dayz:fillCanister",localPlayer,getElementData(localPlayer,"currentCol"));
 			triggerServerEvent("setPlayerUseAnimation",localPlayer);
 			startRollMessage(getLanguageTextClient("clientinfotext4").." "..getLanguageTextClient("item10").."!", 40, 160, 40);
 			setElementData(localPlayer,"isInAction",true);
@@ -826,8 +817,7 @@ function onPlayerPressMiddleMouse(key, keyState)
 			return;
 		end
 		if (itemName == "bottlestation") then
-			setElementData(localPlayer, "fooditem2", getElementData(localPlayer, "fooditem2") - 1);
-			setElementData(localPlayer, "Water Bottle", getElementData(localPlayer, "Water Bottle") + 1);
+			triggerServerEvent("onPlayerRefillWaterBottle",localPlayer,"fooditem2");
 			triggerServerEvent("setPlayerUseAnimation",localPlayer);
 			startRollMessage(getLanguageTextClient("clientinfotext4").." "..getLanguageTextClient("fooditem2").."!", 40, 160, 40);
 			disableMenu();

@@ -67,10 +67,10 @@ local function isPlayerFlying(player)
 end
 
 local function setPlayerFlying(player, state)
-  if state == true then state = true
-  else state = false end
+  -- The client can stop its own visuals, but cannot grant flight.
+  state = false
 
-  setElementData(player, "superman:flying", state)
+  setElementData(player, "superman:flying", state, false)
 end
 
 local function iterateFlyingPlayers()
@@ -173,7 +173,9 @@ end
 -- Initialization and shutdown functions
 --
 function SupermanStart()
+  if Superman.started then return end
   if getElementData(localPlayer,"dutyMode") then
+    Superman.started=true
     local self = Superman
 
     -- Register events
@@ -201,7 +203,9 @@ function SupermanStart()
 end
 
 function SupermanStop()
-  if not getElementData(localPlayer,"dutyMode") then
+  if not Superman.started then return end
+  Superman.started=false
+  do
     local self = Superman
 
     setGravity(serverGravity)
@@ -286,6 +290,11 @@ end
 function Superman.onDataChange(dataName, oldValue)
   local self = Superman
 
+  if source==localPlayer and dataName=="superman:flying" and getElementData(source,dataName)==true then
+    self.currentSpeed=0
+    self.extraVelocity={x=0,y=0,z=0}
+    setElementVelocity(localPlayer,0,0,TAKEOFF_VELOCITY)
+  end
   if dataName == "superman:flying" and isElement(source) and getElementType(source) == "player" and
      oldValue ~= getElementData(source, dataName) and oldValue == true and getElementData(source, dataName) == false then
     self:restorePlayer(source)
@@ -298,11 +307,11 @@ end
 function Superman.onJump(key, keyState)
   local self = Superman
 
+  if not getElementData(localPlayer,"superman:allowed") then return end
   local task = getPedSimplestTask(localPlayer)
   if not isPlayerFlying(localPlayer) then
 	if task == "TASK_SIMPLE_IN_AIR" then
-	  setElementVelocity(localPlayer, 0, 0, TAKEOFF_VELOCITY)
-      setTimer(Superman.startFlight, 100, 1)
+	  Superman.startFlight()
 	end
   end
 end
@@ -314,8 +323,7 @@ function Superman.cmdSuperman()
   local self = Superman
 
   if isPedInVehicle(localPlayer) or isPlayerFlying(localPlayer) then return end
-  setElementVelocity(localPlayer, 0, 0, TAKEOFF_VELOCITY)
-  setTimer(Superman.startFlight, TAKEOFF_FLIGHT_DELAY, 1)
+  Superman.startFlight()
 end
 
 function Superman.startFlight()
@@ -323,11 +331,8 @@ function Superman.startFlight()
 
   if isPlayerFlying(localPlayer) then return end
 
-  triggerServerEvent("superman:start", rootElement)
-  setPlayerFlying(localPlayer, true)
-  setElementVelocity(localPlayer, 0, 0, 0)
-  self.currentSpeed = 0
-  self.extraVelocity = { x = 0, y = 0, z = 0 }
+  triggerServerEvent("superman:start", localPlayer)
+  -- Wait for the protected server data change before applying flight physics.
 end
 
 
@@ -491,7 +496,7 @@ function Superman.processFlight()
       self:restorePlayer(player)
       if player == localPlayer then
       	setGravity(serverGravity)
-        triggerServerEvent("superman:stop", getRootElement())
+        triggerServerEvent("superman:stop", localPlayer)
       end
     elseif distanceToGround and distanceToGround < LANDING_DISTANCE then
       self:processLanding(player, Velocity, distanceToGround)

@@ -1,136 +1,4 @@
-local inventoryItems = {
-	[1] = {
-		{"weapon11", 3,"images/inventory/weapons/m4a1holo.png"},
-		{"weapon12", 6,"images/inventory/weapons/mk48.png"},
-		{"weapon13", 5,"images/inventory/weapons/rpk.png"},
-		{"weapon10", 3,"images/inventory/weapons/ak107.png"},
-		{"weapon6", 3,"images/inventory/weapons/aksgold.png"},
-		{"weapon14", 3,"images/inventory/weapons/sa58.png"},
-		{"weapon7", 3,"images/inventory/weapons/winchester1866.png"},
-		{"weapon15", 3,"images/inventory/weapons/saiga12k.png"},
-		{"weapon9", 3,"images/inventory/weapons/aks74u.png"},
-		{"weapon8", 3,"images/inventory/weapons/crossbow.png"},
-		{"weapon2", 3,"images/inventory/weapons/dmr.png"},
-		{"weapon3", 3,"images/inventory/weapons/cz550.png"},
-		{"weapon5", 3,"images/inventory/weapons/m24.png"},
-		{"weapon1", 3,"images/inventory/weapons/vks.png"},
-		{"weapon4", 3,"images/inventory/weapons/svdcamo.png"}
-	},
-	[2] = {
-		{"weapon21", 2,"images/inventory/weapons/m1911.png"},
-		{"weapon23", 2,"images/inventory/weapons/m9sd.png"},
-		{"weapon25", 2,"images/inventory/weapons/g17.png"},
-		{"weapon20", 2,"images/inventory/weapons/microuzi.png"},
-		{"weapon18", 3,"images/inventory/weapons/mp5a5.png"},
-		{"weapon19", 2,"images/inventory/weapons/revolver.png"},
-		{"weapon24", 2,"images/inventory/weapons/huntingknife.png"},
-		{"weapon22", 2,"images/inventory/weapons/hatchet.png"},
-		{"weapon26", 2,"images/inventory/weapons/bat.png"},
-		{"weapon27", 2,"images/inventory/weapons/shovel.png"},
-		{"weapon17", 2,"images/inventory/weapons/machete.png"}
-	},
-	[3] = {
-		{"weapon16", 1,"images/inventory/weapons/grenade.png"},
-		{"weapon28", 1,"images/inventory/weapons/binoculars.png", "inventorydescription6"}
-	},
-	[4] = {
-		{"mag1", 0.0666666666666667,"images/inventory/mags/pistol.png","mag1description"},
-		{"mag2", 0.1428571428571429,"images/inventory/mags/revolver.png","mag2description"},
-		{"mag3", 0.0666666666666667,"images/inventory/mags/semirifle.png","mag3description"},
-		{"mag4", 0.0666666666666667,"images/inventory/mags/rifle.png","mag4description"},
-		{"mag7", 0.1428571428571429,"images/inventory/mags/shotgun.png","mag7description"},
-		{"mag5", 0.05,"images/inventory/mags/m4rifle.png","mag5description"},
-		{"mag6", 0.03,"images/inventory/mags/heavy.png","mag6description"},
-		{"mag8", 0.1,"images/inventory/mags/sniper.png","mag8description"},
-		{"mag9", 1,"images/inventory/mags/bolt.png","mag9description"},
-		{"mag10", 0.1,"images/inventory/mags/sniper2.png","mag10description"}
-	},
-	[5] = {
-		{"fooditem1", 1,"images/inventory/waterbottle.png","inventorydescription8"},
-		{"fooditem3", 1,"images/inventory/pasta.png","inventorydescription9"},
-		{"fooditem4", 1,"images/inventory/beans.png","inventorydescription10"},
-		{"fooditem5", 1,"images/inventory/burger.png","inventorydescription10"},
-		{"fooditem9", 1,"images/inventory/pizza.png","inventorydescription10"},
-		{"fooditem7", 1,"images/inventory/soda.png","inventorydescription11"},
-		{"fooditem6", 1,"images/inventory/milk.png","inventorydescription12"},
-		{"fooditem10", 1,"images/inventory/cookedmeat.png","inventorydescription13"}
-	},
-	[6] = {
-		{"medicine5", 1,"images/inventory/bandage.png", "inventorydescription15", "inventoryactiontext9"},
-		{"medicine1", 4,"images/inventory/medicaments/medickit.png","inventorydescription19", "inventoryactiontext11"},
-		{"medicine2", 2,"images/inventory/medicaments/medickit.png","inventorydescription19", "inventoryactiontext11"},
-		{"medicine3", 1,"images/inventory/medicaments/smallmedickit.png","inventorydescription19", "inventoryactiontext11"},
-		{"medicine4", 1,"images/inventory/heatpack.png","inventorydescription20", "inventoryactiontext11"},
-		{"medicine6", 1,"images/inventory/painkiller.png", "inventorydescription21", "inventoryactiontext11"},
-		{"medicine8", 1,"images/inventory/medicaments/morphine.png", "inventorydescription22", "inventoryactiontext11"},
-		{"medicine7", 1,"images/inventory/medicaments/bloodbag.png","inventorydescription23"},
-	},
-	[7] = {
-		{"item1", 2,"images/inventory/woodpile.png","inventorydescription14"},
-		{"item5", 1,"images/inventory/roadflarered.png", "inventorydescription16", "inventoryactiontext10"},
-		{"item11", 1,"images/inventory/roadflaregreen.png", "inventorydescription16", "inventoryactiontext10"},
-		{"item12", 1,"images/inventory/roadflareblue.png", "inventorydescription16", "inventoryactiontext10"},
-		{"item10", 2,"images/inventory/emptycanister.png","inventorydescription17"},
-		{"item9", 2,"images/inventory/fullcanister.png","inventorydescription18"},
-		{"item2", 1,"images/inventory/wirefence.png", "inventorydescription24", "inventoryactiontext12"},
-		{"item13", 1,"images/inventory/mine.png", "inventorydescription25", "inventoryactiontext10"},
-		{"item14", 1,"images/inventory/key.png", "inventorydescription25"},
-		{"fooditem11", 1,"images/inventory/rawmeat.png","inventorydescription26"},
-		{"vehiclepart3", 2,"images/inventory/tire.png", "inventorydescription27"},
-		{"vehiclepart4", 2,"images/inventory/tankpart.png", "inventorydescription27"},
-		{"vehiclepart5", 2,"images/inventory/scrapmetal.png", "inventorydescription27"},
-		{"vehiclepart2", 5,"images/inventory/rotor.png", "inventorydescription27"},
-		{"vehiclepart1", 5,"images/inventory/engine.png", "inventorydescription27"},
-		{"item3", 3,"images/inventory/tent.png", "inventorydescription28", "inventoryactiontext13"},
-		{"item4", 10,"images/inventory/safe.png", "inventorydescription29", "inventoryactiontext14"},
-		{"fooditem2", 1,"images/inventory/emptybottle.png", "inventorydescription31", "inventoryactiontext16"}, 
-		{"fooditem8", 1,"images/inventory/emptysoda.png", "inventorydescription32"},
-		{"item6", 1,"images/inventory/trash.png", "inventorydescription33"},
-		--{"currency1", 0,"images/inventory/briefcase.png", "inventorydescription34"},
-		--{"currency2", 0,"images/inventory/briefcase.png", "inventorydescription35"},
-		--{"currency3", 0,"images/inventory/briefcase.png", "inventorydescription36"},
-		{"item7", 1,"images/inventory/c4.png", "inventorydescription37"},
-		{"item8", 1,"images/inventory/supplysignal.png","inventorydescription38","inventoryactiontext17"},
-	},
-	[8] = {
-		{"clothing2", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing3", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing4", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing5", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing6", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing9", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing1", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing7", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"clothing8", 1,"images/inventory/clothing.png", "inventorydescription30", "inventoryactiontext15"},
-		{"backpack5", 1,"images/inventory/equipment/drybag.png", "inventorydescription51", "inventoryactiontext18"},
-		{"backpack4", 1,"images/inventory/equipment/leathersack.png", "inventorydescription39", "inventoryactiontext18"},
-		{"backpack6", 1,"images/inventory/equipment/tortillabackpack.png", "inventorydescription65", "inventoryactiontext18"},
-		{"backpack7", 1,"images/inventory/equipment/alicebackpack.png", "inventorydescription66", "inventoryactiontext18"},
-		{"backpack3", 1,"images/inventory/equipment/huntingbackpack.png", "inventorydescription40", "inventoryactiontext18"},
-		{"backpack2", 1,"images/inventory/equipment/boulderbackpack.png", "inventorydescription41", "inventoryactiontext18"},
-		{"backpack1", 1,"images/inventory/equipment/coyotebackpack.png", "inventorydescription42", "inventoryactiontext18"},
-		{"helmet1", 1,"images/inventory/equipment/specialforceshelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet2", 1,"images/inventory/equipment/militaryhelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet3", 1,"images/inventory/equipment/motorcyclehelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet4", 1,"images/inventory/equipment/swathelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet5", 1,"images/inventory/equipment/welderhelmet.png", "inventorydescription68", "inventoryactiontext22"},
-		{"helmet6", 1,"images/inventory/equipment/cap.png", "inventorydescription70", "inventoryactiontext22"},
-		{"helmet7", 1,"images/inventory/equipment/ushanka.png", "inventorydescription70", "inventoryactiontext22"},
-		{"vest1", 1,"images/inventory/equipment/policevest.png", "inventorydescription69", "inventoryactiontext23"},
-		{"vest2", 1,"images/inventory/equipment/militaryvest.png", "inventorydescription69", "inventoryactiontext23"},
-	},
-	[9] = {
-		{"toolbelt7", 0,"images/inventory/nvgoggles.png", "inventorydescription43"},
-		{"toolbelt6", 0,"images/inventory/infgoggles.png", "inventorydescription44"},
-		{"toolbelt1", 0,"images/inventory/map.png","inventorydescription45"},
-		{"toolbelt5", 0,"images/inventory/boxofmatches.png", "inventorydescription46", "inventoryactiontext19"},
-		{"toolbelt3", 0,"images/inventory/watch.png", "inventorydescription47"},
-		{"toolbelt2", 0,"images/inventory/gps.png", "inventorydescription45", "inventoryactiontext20"},
-		{"toolbelt4", 0,"images/inventory/toolbox.png", "inventorydescription48"},
-		{"toolbelt9", 0,"images/inventory/toolbox.png", "inventorydescription49"},
-		{"toolbelt8", 0,"images/inventory/radiodevice.png", "inventorydescription50", "inventoryactiontext21"}
-	}
-}
+local inventoryItems = DayZInventoryItems;
 
 local keyTable = {
 	[1] = "inventorycolumntext1",
@@ -275,7 +143,7 @@ addEvent("onPlayerMoveItemOutOFInventory", true);
 addEvent("onPlayerMoveItemInInventory", true);
 
 local sW,sH = guiGetScreenSize();
-local inv_w,inv_h = 450,500;
+local inv_w,inv_h = math.min(450,math.floor((sW-40)*450/778)),math.min(540,sH-50);
 
 inv_bp.parent[1] = guiCreateStaticImage(sW/2-inv_w/2,sH/2-inv_h/2, inv_w, inv_h,"images/empty.png",false);
 guiSetVisible(inv_bp.parent[1],false);
@@ -290,14 +158,14 @@ guiSetAlpha(inv_bp.button[1],0)
 guiSetAlpha(inv_bp.label[2],0);
 guiSetEnabled(inv_bp.label[2],false);
 
-local loot_w = 328;
+local loot_w = math.min(328,math.floor((sW-40)*328/778));
 
 inv_loot.parent[1] = guiCreateStaticImage(sW/2-loot_w/2,sH/2-inv_h/2, loot_w, inv_h,"images/empty.png",false);
 guiSetVisible(inv_loot.parent[1],false);
 inv_loot.scrollpane[1] = guiCreateScrollPane(15, 15+48+5, loot_w-60, inv_h-40-48-5, false, inv_loot.parent[1]);
 inv_loot.button[1] = guiCreateButton(loot_w-40, 10, 30, inv_h-30, ">>", false, inv_loot.parent[1])
 inv_loot.label[1] = guiCreateLabel(15,inv_h-20,loot_w-15,15,"",false,inv_loot.parent[1]);
-guiLabelSetHorizontalAlign(inv_bp.label[1],"right")
+guiLabelSetHorizontalAlign(inv_loot.label[1],"right")
 guiSetFont(inv_loot.label[1],"default-bold-small")
 inv_loot.label[2] = guiCreateLabel(0,0,0,0,"",false);
 guiSetProperty(inv_loot.label[2],"AlwaysOnTop","True");
@@ -309,6 +177,7 @@ function createInventoryItems()
 	for _,v in pairs({1,2,3,4,5,6,7,8,9}) do
 		local label = guiCreateLabel(0,0,300,15,"",false,inv_bp.scrollpane[1]);
 		guiSetFont(label,"default-bold-small")
+        guiLabelSetColor(label,190,200,180)
 		guiSetVisible(label,false)
 		setElementData(localPlayer,"show_".._,true);
 		table.insert(inv_bp.column,label);
@@ -320,7 +189,7 @@ function createInventoryItems()
 			if (native_x == 234) then
 				local item1 = guiCreateStaticImage(x, y, 117, 57, "images/inventory/acons/117.png", false, inv_bp.scrollpane[1])
 				setElementCallPropagationEnabled(item1, false)
-				guiSetProperty (item1, "ImageColours", "tl:FF8e6d4b tr:FF8e6d4b bl:FF8e6d4b br:FF8e6d4b")
+				guiSetProperty (item1, "ImageColours", "tl:FFB5BBAE tr:FFB5BBAE bl:FFB5BBAE br:FFB5BBAE")
 				local item2 = guiCreateStaticImage(0, 0, 1, 1, item[3], true, item1)
 				setElementCallPropagationEnabled(item2, false)
 				local item3 = guiCreateStaticImage(0, 0, 1, 1, "images/empty.png", true, item1)
@@ -349,7 +218,7 @@ function createInventoryItems()
 			elseif (native_x == 114) then
 				local item1 = guiCreateStaticImage(x, y, 57, 57, "images/inventory/acons/57.png", false, inv_bp.scrollpane[1])
 				setElementCallPropagationEnabled(item1, false)
-				guiSetProperty (item1, "ImageColours", "tl:FF8e6d4b tr:FF8e6d4b bl:FF8e6d4b br:FF8e6d4b")
+				guiSetProperty (item1, "ImageColours", "tl:FFB5BBAE tr:FFB5BBAE bl:FFB5BBAE br:FFB5BBAE")
 				local item2 = guiCreateStaticImage(0, 0, 1, 1, item[3], true, item1)
 				setElementCallPropagationEnabled(item2, false)
 				local item3 = guiCreateStaticImage(0, 0, 1, 1, "images/empty.png", true, item1)
@@ -391,7 +260,7 @@ function createLootItems()
 			if (native_x == 234) then
 				local item1 = guiCreateStaticImage(x, y, 117, 57, "images/inventory/acons/117.png", false, inv_loot.scrollpane[1])
 				setElementCallPropagationEnabled(item1, false)
-				guiSetProperty (item1, "ImageColours", "tl:FF8e6d4b tr:FF8e6d4b bl:FF8e6d4b br:FF8e6d4b")
+				guiSetProperty (item1, "ImageColours", "tl:FFB5BBAE tr:FFB5BBAE bl:FFB5BBAE br:FFB5BBAE")
 				local item2 = guiCreateStaticImage(0, 0, 1, 1, item[3], true, item1)
 				setElementCallPropagationEnabled(item2, false)
 				local item3 = guiCreateStaticImage(0, 0, 1, 1, "images/empty.png", true, item1)
@@ -412,7 +281,7 @@ function createLootItems()
 			elseif (native_x == 114) then
 				local item1 = guiCreateStaticImage(x, y, 57, 57, "images/inventory/acons/57.png", false, inv_loot.scrollpane[1])
 				setElementCallPropagationEnabled(item1, false)
-				guiSetProperty (item1, "ImageColours", "tl:FF8e6d4b tr:FF8e6d4b bl:FF8e6d4b br:FF8e6d4b")
+				guiSetProperty (item1, "ImageColours", "tl:FFB5BBAE tr:FFB5BBAE bl:FFB5BBAE br:FFB5BBAE")
 				local item2 = guiCreateStaticImage(0, 0, 1, 1, item[3], true, item1)
 				setElementCallPropagationEnabled(item2, false)
 				local item3 = guiCreateStaticImage(0, 0, 1, 1, "images/empty.png", true, item1)
@@ -680,7 +549,7 @@ function refreshInventory()
 end
 
 function refreshLoot(loot, gearName)
-	if not loot then
+	if not isElement(loot) then
 		return false;
 	end
 	local x, y = 0, 0
@@ -737,29 +606,29 @@ addEventHandler("onClientElementDataChange",localPlayer,function(dataName)
 	if (dataName == "setting.servertheme") then
 		if (getElementData(localPlayer,"setting.servertheme") == 1) then
 			for _,v in pairs(inv_bp.staticimage) do
-				local hex = "8e6d4b";
+				local hex = "B5BBAE";
 				guiSetProperty(v,"ImageColours","tl:FF"..hex.." tr:FF"..hex.." bl:FF"..hex.." br:FF"..hex.."");
 			end
 			for _,v in pairs(inv_loot.staticimage) do
-				local hex = "8e6d4b";
+				local hex = "B5BBAE";
 				guiSetProperty(v,"ImageColours","tl:FF"..hex.." tr:FF"..hex.." bl:FF"..hex.." br:FF"..hex.."");
 			end
 		elseif (getElementData(localPlayer,"setting.servertheme") == 2) then
 			for _,v in pairs(inv_bp.staticimage) do
-				local hex = "5487b1";
+				local hex = "A7BAC8";
 				guiSetProperty(v,"ImageColours","tl:FF"..hex.." tr:FF"..hex.." bl:FF"..hex.." br:FF"..hex.."");
 			end
 			for _,v in pairs(inv_loot.staticimage) do
-				local hex = "5487b1";
+				local hex = "A7BAC8";
 				guiSetProperty(v,"ImageColours","tl:FF"..hex.." tr:FF"..hex.." bl:FF"..hex.." br:FF"..hex.."");
 			end
 		elseif (getElementData(localPlayer,"setting.servertheme") == 3) then
 			for _,v in pairs(inv_bp.staticimage) do
-				local hex = "a0d15c";
+				local hex = "B7C5A0";
 				guiSetProperty(v,"ImageColours","tl:FF"..hex.." tr:FF"..hex.." bl:FF"..hex.." br:FF"..hex.."");
 			end
 			for _,v in pairs(inv_loot.staticimage) do
-				local hex = "a0d15c";
+				local hex = "B7C5A0";
 				guiSetProperty(v,"ImageColours","tl:FF"..hex.." tr:FF"..hex.." bl:FF"..hex.." br:FF"..hex.."");
 			end
 		end
@@ -767,10 +636,12 @@ addEventHandler("onClientElementDataChange",localPlayer,function(dataName)
 end);
 
 function getElementMaxSlots(element)
+	if not isElement(element) then return 0 end
 	return getElementData(element, "MAX_Slots") or 0;
 end
 
 function getElementCurrentSlots(element)
+	if not isElement(element) then return 0 end
 	local current_SLOTS = 0;
 	for _,k in pairs({1,2,3,4,5,6,7,8,9}) do
 		for _,v in ipairs(inventoryItems[k]) do
@@ -815,31 +686,8 @@ function getVehicleMaxFuel(loot)
 end
 
 function fillgas(veh)
-	if ((getElementData(veh, "fuel")+20) < getVehicleMaxFuel(veh)) then
-		addingfuel = 20;
-	elseif ((getElementData(veh, "fuel")+20) > (getVehicleMaxFuel(veh) + 15)) then
-		startRollMessage("clientinfotext13", 160, 40, 40);
-		return;
-	else
-		addingfuel = getVehicleMaxFuel(veh)-getElementData(veh, "fuel");
-	end
-	triggerServerEvent("setPlayerUseAnimation",localPlayer);
-	setTimer(function()
-		setElementData(veh, "fuel", getElementData(veh, "fuel")+addingfuel);
-		setElementData(localPlayer, "item9", getElementData(localPlayer, "item9") - 1);
-		setElementData(localPlayer, "item10", getElementData(localPlayer, "item10") + 1);
-		refreshInventory();
-		startRollMessage("clientinfotext14", 40, 160, 40);
-	end,2000,1);
-	local sound = playSound("sounds/refuel.ogg",false);
-	setElementData(localPlayer,"isInAction",true);
-	setTimer(function()
-		setElementData(localPlayer,"isInAction",false);
-		stopSound(sound);
-	end, 3000, 1);
+    triggerServerEvent("dayz:refuel",localPlayer,veh)
 end
-addEvent("onClientFillGas",true);
-addEventHandler("onClientFillGas", root, fillgas);
 
 function moveInventoryItemOut()
 	if (getElementData(localPlayer,"isInAction")) then return; end
@@ -891,44 +739,14 @@ addEventHandler("onClientGUIClick", inv_bp.button[1], moveInventoryItemOut,false
 addEventHandler("onClientGUIDoubleClick", inv_bp.scrollpane[1], moveInventoryItemOut);
 
 addEventHandler("onPlayerMoveItemOutOFInventory", root, function(itemName, loot)
-	local itemPlus = 1;
-	if (getMagazineSize(itemName)) then itemPlus = getMagazineSize(itemName); end
-	local itemName2 = itemName;
-	if (itemName == "Tire_inVehicle") then itemName2 = "vehiclepart3"; end
-	if (itemName == "Engine_inVehicle") then itemName2 = "vehiclepart1"; end
-	if (itemName == "Parts_inVehicle") then itemName2 = "vehiclepart4"; end
-	if (itemName == "Scrap_inVehicle") then itemName2 = "vehiclepart5"; end
-	if (itemName == "Rotor_inVehicle") then itemName2 = "vehiclepart2"; end
-	if ((getElementData(localPlayer, itemName2)/itemPlus) < 1) then
-		itemPlus = getElementData(localPlayer, itemName2);
-	end
-	for i=1,3 do
-		if (itemName == getElementData(localPlayer,"currentweapon_"..tostring(i))) then
-			triggerServerEvent("removeBackWeaponOnDrop", localPlayer, true, i);
-		end
-	end
-	if loot then
-		setElementData(loot, itemName, (getElementData(loot, itemName) or 0) + itemPlus);
-		if (#getElementsWithinColShape(loot, "player") > 1) then
-			triggerServerEvent("onPlayerChangeLoot", root, loot);
-		end
-	else
-		triggerServerEvent("playerDropAItem", localPlayer, itemName, itemPlus);
-	end
-	if (itemName == "Tire_inVehicle") then itemName = "vehiclepart3"; end
-	if (itemName == "Engine_inVehicle") then itemName = "vehiclepart1"; end
-	if (itemName == "Parts_inVehicle") then itemName = "vehiclepart4"; end
-	if (itemName == "Scrap_inVehicle") then itemName = "vehiclepart5"; end
-	if (itemName == "Rotor_inVehicle") then itemName = "vehiclepart2"; end
-	setElementData(localPlayer, itemName, getElementData(localPlayer, itemName) - itemPlus);
-	if (loot and getElementData(loot, "itemloot")) then
-		triggerServerEvent("refreshItemLoot", root, loot, getElementData(loot, "parent"));
-	end
+    if loot then triggerServerEvent("dayz:transferItem",localPlayer,"put",itemName,loot)
+    else triggerServerEvent("dayz:dropItem",localPlayer,itemName) end
 end);
 
 function moveLootItemOut()
 	if (getElementData(localPlayer,"isInAction")) then return; end
-	if (not getLootSelectedItem() or getElementData(isPlayerInLoot(), getLootSelectedItem()) <= 0) then return end
+	local loot, item = isPlayerInLoot(), getLootSelectedItem()
+	if not isElement(loot) or not item or (tonumber(getElementData(loot,item)) or 0) <= 0 then return end
 	local realdoubleclick = false;
 	if getElementType(source) == "gui-staticimage" then
 		if source == getLootSelectedGUI() then
@@ -970,21 +788,7 @@ addEventHandler("onClientGUIClick", inv_loot.button[1], moveLootItemOut,false);
 addEventHandler("onClientGUIDoubleClick", inv_loot.scrollpane[1], moveLootItemOut);
 
 addEventHandler("onPlayerMoveItemInInventory", root, function(itemName, loot)
-	local itemPlus = 1;
-	if (getMagazineSize(itemName)) then itemPlus = getMagazineSize(itemName); end
-	if ((getElementData(loot, itemName)/itemPlus) < 1) then
-		itemPlus = getElementData(loot, itemName);
-	end
-	if loot then
-		setElementData(localPlayer, itemName, getElementData(localPlayer, itemName) + itemPlus);
-		if (itemPlus ~= 0) then
-			setElementData(loot, itemName, getElementData(loot, itemName) - itemPlus);
-		end
-		if (#getElementsWithinColShape(loot, "player") > 1) then triggerServerEvent("onPlayerChangeLoot", root, loot); end
-	end
-	if getElementData(loot, "itemloot") then
-		triggerServerEvent("refreshItemLoot", root, loot, getElementData(loot, "parent"));
-	end
+    triggerServerEvent("dayz:transferItem",localPlayer,"take",itemName,loot)
 end);
 
 function onClientOpenInventoryStopMenu()
@@ -993,7 +797,8 @@ end
 
 function isPlayerInLoot()
 	if getElementData(localPlayer, "loot") then
-		return getElementData(localPlayer, "currentCol");
+		local col = getElementData(localPlayer, "currentCol");
+		return isElement(col) and col or false;
 	end
 	return false;
 end
@@ -1040,8 +845,27 @@ function getInventoryInfosForRightClickMenu(itemName)
 	end
 end
 
+-- Inventory-only palette: existing menu actions and item hitboxes remain native GUI.
+local function inventorySurface(x,y,w,h,color,postGUI,style)
+    dxDrawRectangle(x,y,w,h,tocolor(23,28,27,245),postGUI or false)
+    dxDrawRectangle(x,y,w,2,tocolor(172,58,49,255),postGUI or false)
+    dxDrawRectangle(x,y+h-1,w,1,tocolor(70,79,70,255),postGUI or false)
+    dxDrawRectangle(x,y,1,h,tocolor(70,79,70,255),postGUI or false)
+    dxDrawRectangle(x+w-1,y,1,h,tocolor(70,79,70,255),postGUI or false)
+end
+local function capacityBar(x,y,w,h)
+    local used=tonumber(getElementCurrentSlots(localPlayer)) or 0
+    local total=tonumber(getElementMaxSlots(localPlayer)) or 0
+    local ratio=total>0 and math.min(1,math.max(0,used/total)) or 0
+    dxDrawRectangle(x+45,y+h-27,w-60,3,tocolor(50,59,53,255))
+    dxDrawRectangle(x+45,y+h-27,(w-60)*ratio,3,ratio>=0.9 and tocolor(195,76,60,255) or tocolor(151,169,118,255))
+end
 -- [[ NEW INVENTORY FUNCTIONS *REQUIRED* ]]
 addEventHandler("onClientRender", root, function()
+    if guiGetVisible(inv_bp.parent[1]) or guiGetVisible(inv_loot.parent[1]) then
+        dxSetBlendMode("blend")
+        dxDrawRectangle(0,0,sW,sH,tocolor(8,12,10,100))
+    end
 	if (guiGetVisible(inv_loot.parent[1])) then
 		local x,y = guiGetPosition(inv_loot.parent[1],false);
 		local w,h = guiGetSize(inv_loot.parent[1],false);
@@ -1049,18 +873,18 @@ addEventHandler("onClientRender", root, function()
 		local tWidth = dxGetTextWidth(text);
 		local tHeight = dxGetFontHeight(1,"default");
 		local isInAction = getElementData(localPlayer,"isInAction");
-		dxDrawDayzWindow(x, y, w, h, dxServerTheme, false, "corner");
-		dxDrawDayzWindow(x+w-40, y+10, 30, h-30, dxServerTheme, false, "right");
+		inventorySurface(x, y, w, h, dxServerTheme, false, "corner");
+		inventorySurface(x+w-40, y+10, 30, h-30, dxServerTheme, false, "right");
 		dxDrawText(text,(x+w-40)+(tWidth*0.4),(y+h/2)-tHeight);
-		dxDrawRectangle(x+10, y+10, w-50, 48, tocolor(0, 0, 0, 100));
+		dxDrawRectangle(x+10, y+10, w-50, 48, tocolor(15,20,18,170));
 		dxDrawText(getLanguageTextClient("inventorytext2"),x+10+5+1, y+10,x+50+1, y+10+48+1,tocolor(0,0,0),0.8,"default-bold","left","center");
 		dxDrawText(getLanguageTextClient("inventorytext2"),x+10+5, y+10,x+50, y+10+48,tocolor(255,255,255),0.8,"default-bold","left","center");
-		dxDrawRectangle(x+10, y+10+48+5, w-50, h-30-48-5, tocolor(0, 0, 0, 100));
+		dxDrawRectangle(x+10, y+10+48+5, w-50, h-30-48-5, tocolor(15,20,18,170));
 		if (not isInAction and isCursorOnElement(x+w-40, y+10, 30, h-30)) then
-			dxDrawDayzWindow(x+w-40, y+10, 30, h-30, tocolor(0, 0, 0, 20), false, "right");
+			inventorySurface(x+w-40, y+10, 30, h-30, tocolor(0, 0, 0, 20), false, "right");
 		end
 		if (isInAction) then
-			dxDrawDayzWindow(x+w-40, y+10, 30, h-30, tocolor(0, 0, 0, 100), false, "right");
+			inventorySurface(x+w-40, y+10, 30, h-30, tocolor(0, 0, 0, 100), false, "right");
 		end
 	end
 	if (guiGetVisible(inv_bp.parent[1])) then
@@ -1077,33 +901,36 @@ addEventHandler("onClientRender", root, function()
 		local vdr;
 		local alphaV = 200;
 		if helmet ~= "" and helmet ~= "helmet6" and helmet ~= "helmet7" then
-			hdr = (helmetDamageReduction[helmet]*100)-100;
+			hdr = ((tonumber(helmetDamageReduction[helmet]) or 1)*100)-100;
 		else
 			hdr = 0;
 		end
 		if vest ~= "" then
-			vdr = (vestDamageReduction[vest]*100)-100;
+			vdr = ((tonumber(vestDamageReduction[vest]) or 1)*100)-100;
 		else
 			vdr = 0;
 		end
 		if (hdr == 0) then alphaH = 150; end
 		if (vdr == 0) then alphaV = 150; end
-		dxDrawDayzWindow(x, y, w, h, dxServerTheme, false, "corner");
-		dxDrawDayzWindow(x+10, y+10, 30, h-30, dxServerTheme, false, "left");
+		inventorySurface(x, y, w, h, dxServerTheme, false, "corner");
+        capacityBar(x,y,w,h)
+        dxDrawText("REDFEAR",x+165,y+14,x+w-15,y+32,tocolor(212,100,86),1,"default-bold","right","center")
+        dxDrawText("SURVIVOR INVENTORY",x+165,y+32,x+w-15,y+52,tocolor(174,187,170),0.8,"default-bold","right","center")
+		inventorySurface(x+10, y+10, 30, h-30, dxServerTheme, false, "left");
 		dxDrawText(text,x+10+(tWidth*0.4),(y+h/2)-tHeight);
-		dxDrawRectangle(x+40, y+10, w-50, 48, tocolor(0, 0, 0, 100));
+		dxDrawRectangle(x+40, y+10, w-50, 48, tocolor(15,20,18,170));
 		dxDrawImage(x+50-5, y+11.5, 48, 48, "images/armor.png",0,0,0,tocolor(255,255,255,alphaV));
-		dxDrawText(vdr.."%",x+50-5+1, y+11.5+30+1,x+50-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
-		dxDrawText(vdr.."%",x+50-5, y+11.5+30,x+50-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
+		dxDrawText("V "..math.floor(vestDamageReduction[vest] and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(vest))) or 100) or 0).."%",x+50-5+1, y+11.5+30+1,x+50-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
+		dxDrawText("V "..math.floor(vestDamageReduction[vest] and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(vest))) or 100) or 0).."%",x+50-5, y+11.5+30,x+50-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
 		dxDrawImage(x+50+5+48-5, y+11.5, 48, 48, "images/helmet.png",0,0,0,tocolor(255,255,255,alphaH));
-		dxDrawText(hdr.."%",x+50+5+48-5+1, y+11.5+30+1,x+50+5+48-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
-		dxDrawText(hdr.."%",x+50+5+48-5, y+11.5+30,x+50+5+48-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
-		dxDrawRectangle(x+40, y+10+48+5, w-50, h-30-48-5, tocolor(0, 0, 0, 100));
+		dxDrawText("H "..math.floor((helmetDamageReduction[helmet] or 1)>1 and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(helmet))) or 100) or 0).."%",x+50+5+48-5+1, y+11.5+30+1,x+50+5+48-5+48+1, y+11.5+30+1,tocolor(0,0,0),1,"default-bold","center","top");
+		dxDrawText("H "..math.floor((helmetDamageReduction[helmet] or 1)>1 and (tonumber(getElementData(localPlayer,"armorCondition."..tostring(helmet))) or 100) or 0).."%",x+50+5+48-5, y+11.5+30,x+50+5+48-5+48, y+11.5+30,tocolor(255,255,255),1,"default-bold","center","top");
+		dxDrawRectangle(x+40, y+10+48+5, w-50, h-30-48-5, tocolor(15,20,18,170));
 		if (not isInAction and isCursorOnElement(x+10, y+10, 30, h-30)) then
-			dxDrawDayzWindow(x+10, y+10, 30, h-30, tocolor(0, 0, 0, 20), false, "left");
+			inventorySurface(x+10, y+10, 30, h-30, tocolor(0, 0, 0, 20), false, "left");
 		end
 		if (isInAction) then
-			dxDrawDayzWindow(x+10, y+10, 30, h-30, tocolor(0, 0, 0, 100), false, "left");
+			inventorySurface(x+10, y+10, 30, h-30, tocolor(0, 0, 0, 100), false, "left");
 		end
 	end
 end);
@@ -1117,7 +944,7 @@ function drawInfoBox(itemName,itemInfo,mX,mY)
 		if (isCursorOnElement(mX+5, mY+5, tWidth+20, tHeight+12)) then
 			color = tocolor(220,220,220,220)
 		end
-		dxDrawDayzWindow(mX+5, mY+5, tWidth+20, tHeight+12, dxServerTheme, true);
+		inventorySurface(mX+5, mY+5, tWidth+20, tHeight+12, dxServerTheme, true);
 		dxDrawText(getLanguageTextClient(itemInfo), mX+15, mY+10, tWidth+20, tHeight+12, color,1,"default","left","top",false,false,true);
 	end
 	addEventHandler("onClientRender",root,onClientRenderInfoBox);
@@ -1138,11 +965,11 @@ function drawDescription(element)
 		local text = name2;
 		local text2 = "";
 		if (getItemDescription(name)) then
-			text = text.."\n#202020"..getItemCapacity(name).." "..getLanguageTextClient("inventorydescription52");
+			text = text.."\n#BAC6AB"..getItemCapacity(name).." "..getLanguageTextClient("inventorydescription52");
 			text2 = getLanguageTextClient(getItemDescription(name));
 		end
 		if (getWeaponDamageFromName(name)) then
-			text = text.."\n#202020"..getItemCapacity(name).." "..getLanguageTextClient("inventorydescription52");
+			text = text.."\n#BAC6AB"..getItemCapacity(name).." "..getLanguageTextClient("inventorydescription52");
 			text2 = getLanguageTextClient("inventorydescription60").."\n  "..getLanguageTextClient("inventorydescription1")..": "..getWeaponDamageFromName(name).."\n  "..getLanguageTextClient("inventorydescription53")..": "..getWeaponVehicleDamageFromName(name).."\n  "..getLanguageTextClient("inventorydescription54")..": "..fireRateToText(getWeaponFireRateFromName(name)).."\n  "..getLanguageTextClient("inventorydescription61")..": "..getWeaponNoiseName(name);
 		end
 		local lineCount = select(2, text:gsub('\n', '\n')) + select(2, text2:gsub('\n', '\n'));
@@ -1153,7 +980,7 @@ function drawDescription(element)
 			tWidth = dxGetTextWidth(text2,1,"default",true)
 		end
 		local tHeight = dxGetFontHeight(1,"default")*(lineCount+1);
-		dxDrawDayzWindow(mX+5, mY+5, tWidth+20, tHeight+44, dxServerTheme, true);
+		inventorySurface(mX+5, mY+5, tWidth+20, tHeight+44, dxServerTheme, true);
 		dxDrawText(text, mX+15, mY+18, 0, 0, tocolor(255,255,255,255),1,"default","left","top",false,false,true,true);
 		dxDrawText(text2, mX+15, mY+53, 0, 0, tocolor(255,255,255,255),1,"default","left","top",false,false,true,true);
 	end
@@ -1375,6 +1202,21 @@ function isCursorOnElement(x,y,w,h)
 		return false
 	end
 end
+-- Inventory-only palette: existing menu actions and item hitboxes remain native GUI.
+local function inventorySurface(x,y,w,h,color,postGUI,style)
+    dxDrawRectangle(x,y,w,h,tocolor(23,28,27,245),postGUI or false)
+    dxDrawRectangle(x,y,w,2,tocolor(172,58,49,255),postGUI or false)
+    dxDrawRectangle(x,y+h-1,w,1,tocolor(70,79,70,255),postGUI or false)
+    dxDrawRectangle(x,y,1,h,tocolor(70,79,70,255),postGUI or false)
+    dxDrawRectangle(x+w-1,y,1,h,tocolor(70,79,70,255),postGUI or false)
+end
+local function capacityBar(x,y,w,h)
+    local used=tonumber(getElementCurrentSlots(localPlayer)) or 0
+    local total=tonumber(getElementMaxSlots(localPlayer)) or 0
+    local ratio=total>0 and math.min(1,math.max(0,used/total)) or 0
+    dxDrawRectangle(x+45,y+h-27,w-60,3,tocolor(50,59,53,255))
+    dxDrawRectangle(x+45,y+h-27,(w-60)*ratio,3,ratio>=0.9 and tocolor(195,76,60,255) or tocolor(151,169,118,255))
+end
 -- [[ NEW INVENTORY FUNCTIONS *REQUIRED* ]]
 
 function showChannelEdit(cType)
@@ -1527,23 +1369,6 @@ function getWeaponAmmoType(weapon)
 	return false, false;
 end
 
-addEventHandler("onClientPlayerWeaponFire", localPlayer, function(weapon, ammor)
-	local slot = getSlotFromWeapon(weapon);
-	if (slot == 3 or slot == 5 or slot == 6 or slot == 7) then
-		local ammo,_ = getWeaponAmmoType(getElementData(localPlayer, "currentweapon_1"));
-		if (getElementData(localPlayer, ammo) > 0) then
-			setElementData(localPlayer, ammo, getElementData(localPlayer, ammo) - 1);
-		end
-	elseif (slot == 2 or slot == 4) then
-		local ammo,_ = getWeaponAmmoType(getElementData(localPlayer, "currentweapon_2"));
-		if (getElementData(localPlayer, ammo) > 0) then
-			setElementData(localPlayer, ammo, getElementData(localPlayer, ammo) - 1);
-		end
-	else
-		local weap = getElementData(localPlayer, "currentweapon_3");
-		local ammo,_ = getWeaponAmmoType(weap);
-		if (getElementData(localPlayer, ammo) > 0) then
-			setElementData(localPlayer, ammo, getElementData(localPlayer, ammo) - 1);
-		end
-	end
-end);
+-- Ammo consumption is handled by native server weapon/projectile events.
+
+outputDebugString("[RedFear inventory] Modern panels and responsive layout loaded.",3)

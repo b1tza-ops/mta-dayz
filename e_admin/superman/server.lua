@@ -46,10 +46,36 @@ function Superman.Start()
 end
 addEventHandler("onResourceStart", getResourceRootElement(thisResource), Superman.Start, false)
 
+local function allowed(player)
+ return isDayZAdmin(player) and getElementData(player,"logedin") and not isPedDead(player)
+end
+local function refresh(player)
+ local permission=allowed(player) or false
+ setElementData(player,"superman:allowed",permission,"broadcast","deny")
+ if not permission then setElementData(player,"superman:flying",false,"broadcast","deny") end
+end
 function Superman.clientStart()
-  setElementData(client, "superman:flying", true)
+ if client~=source or not isElement(client) then return end
+ refresh(client)
+ if not allowed(client) then
+  outputChatBox("[DayZ] Superman requires a logged-in Admin account.",client,220,100,100)
+  return
+ end
+ setElementData(client,"superman:flying",true,"broadcast","deny")
 end
-
 function Superman.clientStop()
-  setElementData(client, "superman:flying", false)
+ if client~=source or not isElement(client) then return end
+ setElementData(client,"superman:flying",false,"broadcast","deny")
 end
+addEventHandler("onPlayerLogin",rootElement,function() refresh(source) end)
+addEventHandler("onPlayerLogout",rootElement,function()
+ setElementData(source,"superman:allowed",false,"broadcast","deny")
+ setElementData(source,"superman:flying",false,"broadcast","deny")
+end)
+addEventHandler("onPlayerWasted",rootElement,function()
+ setElementData(source,"superman:flying",false,"broadcast","deny")
+end)
+setTimer(function()
+ for _,player in ipairs(getElementsByType("player")) do refresh(player) end
+end,3000,0)
+outputDebugString("[DayZ Superman] Server-approved Admin flight only; permission rechecked every 3 seconds.",3)

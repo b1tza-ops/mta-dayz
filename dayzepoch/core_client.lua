@@ -261,6 +261,8 @@ local bloodsplash = guiCreateStaticImage(0,0,1,1,"images/bloodsplash.png",true)
 guiSetEnabled(bloodsplash,false)
 guiSetVisible(bloodsplash,false)
 
+unbindKey("t", "down", "chatbox", "localchat");
+bindKey("t", "down", "chatbox", "chatboxsay");
 bindKey("x", "down", "chatbox", "globalchat");
 bindKey("u", "down", "chatbox", "radiochat");
 
@@ -587,7 +589,7 @@ addEventHandler("onClientPlayerDamage", localPlayer, function(attacker, weapon, 
 		return;
 	end
 	if (attacker and getElementType(attacker) == "ped") then
-		setElementData(localPlayer, "blood", (getElementData(localPlayer, "blood")-math.random(400, 900)));
+		setElementData(localPlayer, "blood", (getElementData(localPlayer, "blood")-(math.random(400, 900)*((getElementData(attacker,"zombie") and DayZZombieTypes[getElementData(attacker,"zombie:type")] or {}).damage or 1))));
 		local number = math.random(1, 7);
 		if (number == 4) then
 			setElementData(localPlayer, "bleeding", getElementData(localPlayer, "bleeding")+math.floor(loss*10));
@@ -616,57 +618,9 @@ addEventHandler("onClientPlayerDamage", localPlayer, function(attacker, weapon, 
 			end
 		end
 	elseif (weapon and weapon > 1 and weapon < 40 and attacker and getElementType(attacker) == "player") then
-		local number = math.random(1, 8);
-		if (number >= 6 or number <= 8) then
-			setElementData(localPlayer, "bleeding", getElementData(localPlayer, "bleeding") + math.floor(loss*10));
-		end
-		local number2 = math.random(1, 7);
-		if (number2 == 2) then
-			setElementData(localPlayer, "pain", true);
-		end
-		local damage = getWeaponDamage(attacker, weapon);
-		local helmet = getElementData(localPlayer,"helmet");
-		local vest = getElementData(localPlayer,"vest");
-		if (bodypart == 9) then
-			if (helmet ~= "" and helmet ~= "helmet6" and helmet ~= "helmet7") then
-				damage = damage/helmetDamageReduction[helmet];
-			else
-				setElementData(localPlayer, "blood", -9000);
-			end
-			headshot = true;
-		end
-		if (bodypart == 3) then
-			if (vest ~= "") then
-				damage = damage/vestDamageReduction[vest];
-			end
-		end
-		if (bodypart == 7 or bodypart == 8) then
-			damage = damage/2;
-			setElementData(localPlayer, "brokenbone", true);
-			local x,y,z = getElementPosition(localPlayer);
-			playSound3D("sounds/breakbone.mp3", x, y, z);
-		end
-		if (bodypart == 5 or bodypart == 6) then
-			damage = damage/2;
-		end
-		if not isElementInWater(localPlayer) then
-			playSound("sounds/hit"..math.random(1, 3)..".mp3");
-		end
-		setElementData(localPlayer, "blood", getElementData(localPlayer, "blood") - math.random(damage*0.8, damage*1.2));
-		--[[if (getElementData(localPlayer, "humanity") >= 1) then
-			setElementData(attacker, "humanity", getElementData(attacker, "humanity") - math.random(40, 200));
-		elseif (getElementData(localPlayer, "humanity") <= 0 and getElementData(attacker, "humanity") >= 1) then
-			setElementData(attacker, "humanity", getElementData(attacker, "humanity") + math.random(40, 200));
-			if (getElementData(attacker,"humanity") > 5000) then
-				setElementData(attacker, "humanity", 5000);
-			end
-		end]]--
-		if (getElementData(localPlayer, "blood") <= 0) then
-			if not getElementData(localPlayer, "isDead") then
-				triggerServerEvent("kilLDayZPlayer", localPlayer, attacker, headshot, getWeaponNameFromID(weapon));
-				setElementData(localPlayer, "isDead", true);
-			end
-		end
+        -- Victim reports the hit; server derives damage from protected equipment.
+        triggerServerEvent("dayz:combatHit",localPlayer,attacker,weapon,bodypart)
+
 	elseif (weapon == 54 or weapon == 49) then
 		setElementData(localPlayer, "blood", getElementData(localPlayer, "blood") - math.random(100, 1000));
 		local number = math.random(1, 5);
@@ -727,6 +681,7 @@ addEventHandler("onClientPedDamage", root, function(attacker, weapon, bodypart, 
 					return;
 				end
 				local damage = getWeaponDamage(attacker, weapon);
+		if type(damage) ~= "number" or damage <= 0 then return end;
 				if (weapon == 16) then
 					local aX,aY,aZ = getElementPosition(attacker);
 					local tX,tY,tZ = getElementPosition(source);
@@ -944,7 +899,7 @@ addEventHandler("onClientPreRender",root,function()
 			local vehicleid = getElementModel(vehicle);
 			if (vehicleid == 487 or vehicleid == 497) then
 				if getVehicleEngineState(vehicle) == false then
-					setHelicopterRotorSpeed(vehicle,0);
+					setVehicleRotorSpeed(vehicle,0);
 				end
 			end
 		end
@@ -956,25 +911,6 @@ end);
 local counter = 0 
 local starttick 
 local fps =0 
-
--- vehicle sounds
-local vehsounds = {
-	{487,"heli.mp3"},
-	{497,"heli.mp3"},
-	{528,"armoredtruck.mp3"},
-	{470,"hmmwv.mp3"},
-	{422,"pickuptruck.mp3"},
-	{468,"motorcycle.mp3"},
-	{433,"uralmilitary.mp3"},
-	{473,"pbx.mp3"},
-	{471,"atv.mp3"},
-	{463,"motorbike.mp3"},
-	{490,"suv.mp3"},
-	{531,"tractor.mp3"},
-	{579,"uaz.mp3"},
-	{421,"golfiw211.mp3"},
-	{456,"modernvan.mp3"},
-};
 
 addEventHandler("onClientRender",root,function()
 	if (getElementData(localPlayer,"logedin")) then
@@ -989,55 +925,6 @@ addEventHandler("onClientRender",root,function()
 	        end
 		    local text = fps.." FPS | "..getPlayerPing(localPlayer).." PING";
 		    dxDrawText(text, (sW*0.98)-dxGetTextWidth(text),0,0,0,tocolor(255,255,255,180));
-		end
-		-- vehicle custom sounds :D
-		for _,v in pairs(getElementsByType("vehicle")) do
-			local vehicle = v;
-			local vehicleid = getElementModel(vehicle);
-			local vehiclestate = getVehicleEngineState(vehicle)
-			if (vehicleid ~= 509) then
-				for _,v in pairs(vehsounds) do
-					if (v[1] == vehicleid) then
-						local soundpath = "sounds/vehicles/"..v[2];
-						local elements = getAttachedElements(vehicle);
-						for i,e in ipairs(elements) do
-							if (getElementType(e) == "sound") then
-								if (vehicleid == 487 or vehicleid == 497) then
-									local rtr_spd = getHelicopterRotorSpeed(vehicle)*4.5;
-									setSoundSpeed(e,rtr_spd);
-									setSoundMaxDistance(e,300);
-									if (rtr_spd == 0) then
-										setSoundPaused(e,true);
-									else
-										setSoundPaused(e,false);
-									end
-								else
-									local vx, vy, vz = getElementVelocity(vehicle);
-									local mph = ((vx^2 + vy^2 + vz^2)^(0.5)) * 180;
-									local soundenginespeed = (mph+20)/50;
-									if soundenginespeed > 2 then soundenginespeed = 2 end
-									setSoundSpeed(e,soundenginespeed);
-									if (not vehiclestate) then
-										setSoundPaused(e,true);
-									else
-										setSoundPaused(e,false);
-									end
-								end
-								if getElementData(vehicle,"isExploded") then
-									destroyElement(e);
-								end
-							elseif not getElementData(vehicle,"soundexists") then
-								local x,y,z = getElementPosition(vehicle);
-								local sound = playSound3D(soundpath,x,y,z,true);
-								setSoundMinDistance(sound,10);
-								setSoundMaxDistance(sound,150);
-								attachElements(sound,vehicle);
-								setElementData(vehicle,"soundexists",true,false);
-							end
-						end
-					end
-				end
-			end
 		end
 	end
 end);
@@ -1186,10 +1073,10 @@ addEventHandler("onClientRender", root, function()
 		dxDrawImage(sW*0.96, sH*0.92, 50, 50, "images/dayzicons/eat/100.png", 0, 0, 0, tocolor(0,0,0,20));
 		dxDrawImage(sW*0.96, sH*0.92, 50, 50, "images/dayzicons/eat/"..f_number..".png", 0, 0, 0, tocolor(r5,g5,b5, 180));
 		local veh = getPedOccupiedVehicle(localPlayer);
-		if (veh and getElementModel(veh) ~= 509) then --[[If it's not a bike]]
-			local col = getElementData(veh, "parent");
+		local col = isElement(veh) and getElementData(veh, "parent");
+		if (isElement(veh) and isElement(col) and getElementModel(veh) ~= 509) then --[[DayZ vehicles except bikes]]
 			local maxfuel = tonumber(getElementData(veh, "maxfuel")) or 0;
-			local fuel = math.floor(tonumber(getElementData(col, "fuel"))) or 0;
+			local fuel = math.floor(tonumber(getElementData(col, "fuel")) or 0);
 			local needengine = tonumber(getElementData(veh, "needengines")) or 0;
 			local needtires = tonumber(getElementData(veh, "needtires")) or 0;
 			local needparts = tonumber(getElementData(veh, "needparts")) or 0;
@@ -1268,7 +1155,7 @@ addEventHandler("onClientRender", root, function()
 				if (getDistanceBetweenPoints3D(x, y, z, px, py, pz) <= 3 or getPedTarget(localPlayer) == v) then
 					local sx,sy = getScreenFromWorldPosition(px, py, pz+0.50, 0.06);
 					if (sx and sy) then
-						local tHumanity = getElementData(v,"humanity");
+						local tHumanity = tonumber(getElementData(v,"humanity")) or 0;
 						local text = (getPlayerName(v):gsub("#%x%x%x%x%x%x", ""));
 						local w = dxGetTextWidth(text, 1, "default-bold");
 						if (getElementData(v,"gang") == getElementData(localPlayer,"gang")) then
@@ -1278,10 +1165,10 @@ addEventHandler("onClientRender", root, function()
 						dxDrawText(text, sx-(w/2)+1, sy+1, sx-(w/2)+1, sy+1, tocolor(0, 0, 0, 255), 1, "default-bold");
 						if (tHumanity <= 0) then
 							dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(150, 50, 50, 255), 1, "default-bold");
-						elseif (tHumanity >= 1) then
-							dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(50, 150, 50, 255), 1, "default-bold");
 						elseif (tHumanity >= 5000) then
 							dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(50, 50, 150, 255), 1, "default-bold");
+                        else
+                            dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(50,150,50,255), 1, "default-bold");
 						end
 					end
 				end
@@ -1346,7 +1233,7 @@ addEventHandler("onClientRender", root, function()
 				for i = 1, 7 do
 					if (i ~= 3) then
 						local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-						if (tohide ~= "NONE") then
+						if isElement(tohide) then
 							setElementPosition(tohide,0,0,0);
 							setElementAlpha(tohide, 0);
 						end
@@ -1363,7 +1250,7 @@ addEventHandler("onClientRender", root, function()
 				for i = 1, 7 do
 					if (i ~= 3) then
 						local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-						if (tohide ~= "NONE") then
+						if isElement(tohide) then
 							setElementAlpha(tohide, 255);
 						end
 					end
@@ -1422,7 +1309,7 @@ bindKey("aim_weapon", "both", function(key, press)
 			for i = 1, 7 do
 				if (i ~= 3) then
 					local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-					if (tohide ~= "NONE") then
+					if isElement(tohide) then
 						setElementAlpha(tohide, 0);
 					end
 				end
@@ -1431,7 +1318,7 @@ bindKey("aim_weapon", "both", function(key, press)
 			for i = 1, 7 do
 				if (i ~= 3) then
 					local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-					if (tohide ~= "NONE") then
+					if isElement(tohide) then
 						setElementAlpha(tohide, 255);
 					end
 				end
@@ -1445,7 +1332,7 @@ addEventHandler("onClientVehicleStartExit", root, function()
 		if (getElementModel(source) ~= 468) then
 			for i = 2, 4 do
 				local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-				if (tohide ~= "NONE") then
+				if isElement(tohide) then
 					setElementAlpha(tohide, 255);
 				end
 			end
@@ -1458,7 +1345,7 @@ addEventHandler("onClientVehicleEnter", root, function()
 		if (getElementModel(source) ~= 468) then
 			for i = 2, 4 do
 				local tohide = getElementData(localPlayer, "tohide"..tostring(i)) or "NONE";
-				if (tohide ~= "NONE") then
+				if isElement(tohide) then
 					setElementAlpha(tohide, 0);
 				end
 			end
@@ -1504,8 +1391,8 @@ end);
 
 setTimer(function()
 	if getElementData(localPlayer, "logedin") then
-		setElementData(localPlayer, "alivetime", getElementData(localPlayer, "alivetime") + 1);
-		setElementData(localPlayer, "stats.playtime", getElementData(localPlayer, "stats.playtime") + 1);
+		setElementData(localPlayer, "alivetime", (tonumber(getElementData(localPlayer, "alivetime")) or 0) + 1);
+		setElementData(localPlayer, "stats.playtime", (tonumber(getElementData(localPlayer, "stats.playtime")) or 0) + 1);
 		if (bpml > 0) then
 			setElementData(localPlayer, "blood", getElementData(localPlayer, "blood") - bpml);
 			if (getElementData(localPlayer,"cold")) then
@@ -1555,3 +1442,18 @@ end, 4000, 0);
 setTimer(function()
 	playSound("sounds/ambience/dayz"..tostring(math.random(3))..".mp3",false);
 end, 30*60000, 0);
+-- Recovery after interrupted map/login resource restarts.
+addCommandHandler("fixchat",function()
+    if not getElementData(localPlayer,"logedin") then return end
+    local map=getResourceFromName("e_map")
+    if map and getResourceState(map)=="running" then exports.e_map:setPlayerMapVisible(false) end
+    showChat(true)
+    unbindKey("t","down","chatbox","chatboxsay")
+    bindKey("t","down","chatbox","chatboxsay")
+    unbindKey("x","down","chatbox","globalchat")
+    unbindKey("u","down","chatbox","radiochat")
+    bindKey("x","down","chatbox","globalchat")
+    bindKey("u","down","chatbox","radiochat")
+    outputChatBox("[DayZ] Chat restored. T: local, X: global, U: radio.",100,220,140)
+    outputDebugString("[DayZ chat] Client visibility and channel bindings restored.",3)
+end)

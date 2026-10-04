@@ -410,10 +410,10 @@ local weaponAmmoTable = {
 
 local lootrespawn = false;
 
-addEvent("refreshItemLoot", true);
+addEvent("refreshItemLoot", false);
 addEvent("onPlayerTakeItemFromGround", true);
-addEvent("playerDropAItem", true);
-addEvent("onPlayerChangeLoot", true);
+addEvent("playerDropAItem", false);
+addEvent("onPlayerChangeLoot", false);
 
 function getWeaponAmmoType(weaponName)
 	for _,v in ipairs(weaponAmmoTable["Weapons"]) do
@@ -432,11 +432,12 @@ function createItemPickup(item, x, y, z, tableStringName, itemPlus)
 		setElementCollisionsEnabled(object, false);
 		setElementFrozen(object, true);
 		local col = createColSphere(x, y, z, 0.75);
-		setElementData(col, "item", itemTable[tostring(tableStringName)][item][1]);
+		setDayZData(col, "item", itemTable[tostring(tableStringName)][item][1]);
 		if (itemPlus) then
-			setElementData(col, "item2", itemPlus);
+			setDayZData(col, "item2", itemPlus);
 		end
-		setElementData(col, "parent", object);
+		setDayZData(col, "parent", object);
+		setDayZData(object, "parent", col);
 		setTimer(function(col, object)
 			if isElement(col) then destroyElement(col); end
 			if isElement(object) then destroyElement(object); end
@@ -457,15 +458,15 @@ end
 
 function createItemLoot(lootPlace, x, y, z)
 	local col = createColSphere(x, y, z, 1.25);
-	setElementData(col, "itemloot", true);
-	setElementData(col, "parent", lootPlace);
-	setElementData(col, "MAX_Slots", 12);
+	setDayZData(col, "itemloot", true);
+	setDayZData(col, "parent", lootPlace);
+	setDayZData(col, "MAX_Slots", 12);
 	for _,v in ipairs(itemTable[lootPlace]) do
 		local value = math.percentChance(v[5], math.random(1, 2));
-		setElementData(col, v[1], value);
+		setDayZData(col, v[1], value);
 		local ammoData, weapID = getWeaponAmmoType(v[1], true);
 		if (ammoData and value > 0) then
-			setElementData(col, ammoData, getMagazineSize(ammoData)*math.random(1, 2));
+			setDayZData(col, ammoData, getMagazineSize(ammoData)*math.random(1, 2));
 		end
 	end
 	refreshItemLoot(col, lootPlace);
@@ -501,7 +502,7 @@ function refreshItemLoot(col, place)
 			setElementFrozen(obejctItem[i], true);
 		end
 	end
-	setElementData(col, "objectsINloot", {obejctItem[1], obejctItem[2], obejctItem[3]});
+	setDayZData(col, "objectsINloot", {obejctItem[1], obejctItem[2], obejctItem[3]});
 end
 addEventHandler("refreshItemLoot", root, refreshItemLoot);
 
@@ -513,34 +514,17 @@ function createLootPickups()
 	end
 end
 
-addEventHandler("onPlayerTakeItemFromGround", root, function(itemName, col)
-	local itemPlus = 1;
-	itemPlus = getMagazineSize(itemName);
-	if (getElementData(col, "item2") and (getElementData(col, "item2")/itemPlus) < 1) then
-		itemPlus = getElementData(col, "item2");
-	end
-	setElementData(source, itemName, (getElementData(source, itemName) or 0) + itemPlus);
-	destroyElement(getElementData(col, "parent"));
-	destroyElement(col);
-end);
-
 addEventHandler("onPlayerChangeLoot", root, function(loot)
 	for _,v in ipairs(getElementsWithinColShape(loot, "player")) do 
 		triggerClientEvent(v, "refreshLootManual", v, loot);
 	end
 end);
 
-addEventHandler("playerDropAItem", root, function(itemName, itemPlus)
-	local x,y,z = getElementPosition(source);
-	local item,itemString = getItemTablePosition(itemName);
-	createItemPickup(item, x+math.random(-1.25,1.25), y+math.random(-1.25,1.25), z, itemString, itemPlus);
-end);
-
 function getItemTablePosition(itema)
 	for i,v in ipairs(itemTable["other"]) do
 		if (itema == v[1]) then return i, "other"; end
 	end
-	return v, itemString;
+	return false, false;
 end
 
 function refreshItemLoots()

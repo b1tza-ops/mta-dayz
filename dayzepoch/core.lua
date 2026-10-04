@@ -202,6 +202,7 @@ addEventHandler("onResourceStart", resourceRoot, function()
 end);
 
 addEventHandler("onCreateWeaponSound", root, function(soundname,noise,x,y,z)
+	if not dayZValidateAction("onCreateWeaponSound", {soundname,noise,x,y,z}) then return end
 	triggerClientEvent(root,"onClientCreateWeaponSound",source,soundname,noise,x,y,z);
 end);
 
@@ -224,7 +225,7 @@ function removeBackpack(source)
 		detachElementFromBone(elementBackpack[source]);
 		destroyElement(elementBackpack[source]);
 		elementBackpack[source] = false;
-		setElementData(source, "tohide2", "NONE");
+		setDayZData(source, "tohide2", "NONE");
 	end
 end
 
@@ -233,7 +234,7 @@ function removeHelmet(source)
 		detachElementFromBone(elementHelmet[source]);
 		destroyElement(elementHelmet[source]);
 		elementHelmet[source] = false;
-		setElementData(source, "tohide6", "NONE");
+		setDayZData(source, "tohide6", "NONE");
 	end
 end
 
@@ -242,7 +243,7 @@ function removeVest(source)
 		detachElementFromBone(elementVest[source]);
 		destroyElement(elementVest[source]);
 		elementVest[source] = false;
-		setElementData(source, "tohide7", "NONE");
+		setDayZData(source, "tohide7", "NONE");
 	end
 end
 
@@ -251,7 +252,7 @@ function removeWeaponBack(source)
 		detachElementFromBone(elementWeaponBack[source]);
 		destroyElement(elementWeaponBack[source]);
 		elementWeaponBack[source] = false;
-		setElementData(source, "tohide3", "NONE");
+		setDayZData(source, "tohide3", "NONE");
 	end
 end
 
@@ -260,7 +261,7 @@ function removeWeaponBack2(source)
 		detachElementFromBone(elementWeaponBack2[source]);
 		destroyElement(elementWeaponBack2[source]);
 		elementWeaponBack2[source] = false;
-		setElementData(source, "tohide4", "NONE");
+		setDayZData(source, "tohide4", "NONE");
 	end
 end
 
@@ -269,7 +270,7 @@ function removeWeaponReplace(source)
 		detachElementFromBone(elementWeaponRaplace[source]);
 		destroyElement(elementWeaponRaplace[source]);
 		elementWeaponRaplace[source] = false;
-		setElementData(source, "tohide1", "NONE");
+		setDayZData(source, "tohide1", "NONE");
 	end
 end
 
@@ -278,27 +279,31 @@ function removeWeaponReplace2(source)
 		detachElementFromBone(elementWeaponRaplace2[source]);
 		destroyElement(elementWeaponRaplace2[source]);
 		elementWeaponRaplace2[source] = false;
-		setElementData(source, "tohide5", "NONE");
+		setDayZData(source, "tohide5", "NONE");
 	end
 end
 
 addEventHandler("onPlayerEquipBackpack", root, function(backpack,currSlots)
+	if not dayZValidateAction("onPlayerEquipBackpack", {backpack,currSlots}) then return end
 	local nSlots = getBackpackSlotsFromName(backpack);
+	currSlots = getDayZSlots(source);
 	local oSlots = getElementData(source, "MAX_Slots");
 	if (currSlots <= nSlots) then
 		setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 		setTimer(function(source, backpack)
-			setElementData(source, "MAX_Slots", nSlots);
-			setElementData(source, backpack, getElementData(source, backpack) - 1);
+		if not isElement(source) then return end
+			setDayZData(source, "MAX_Slots", nSlots);
+			setDayZData(source, backpack, getElementData(source, backpack) - 1);
 			if not (oSlots == 8) then
 				local oName = getBackpackNameFromSlots(oSlots);
-				setElementData(source, oName, getElementData(source, oName) + 1);
+				setDayZData(source, oName, getElementData(source, oName) + 1);
 			end
 			triggerClientEvent(source, "refreshInventoryManual", source);
 		end,2000,1, source, backpack);
-		setElementData(source,"isInAction",true);
+		setDayZData(source,"isInAction",true);
 		setTimer(function(source)
-			setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+			setDayZData(source,"isInAction",false);
 		end, 3000, 1, source);
 	else
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext0",source)..(currSlots-nSlots)..getLanguageTextServer("clientinfotext1",source), 160, 40, 40);
@@ -306,20 +311,23 @@ addEventHandler("onPlayerEquipBackpack", root, function(backpack,currSlots)
 end);
 
 addEventHandler("onPlayerEquipHelmet", root, function(helmet)
+	if not dayZValidateAction("onPlayerEquipHelmet", {helmet}) then return end
 	local currHelmet = getElementData(source, "helmet");
 	if (helmet ~= currHelmet) then
 		setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 		setTimer(function(source, helmet)
-			setElementData(source, "helmet", helmet);
-			setElementData(source, helmet, getElementData(source, helmet) - 1);
+		if not isElement(source) then return end
+			setDayZData(source, "helmet", helmet);
+			setDayZData(source, helmet, getElementData(source, helmet) - 1);
 			if currHelmet ~= "" then
-				setElementData(source, currHelmet, getElementData(source, currHelmet) + 1);
+				setDayZData(source, currHelmet, getElementData(source, currHelmet) + 1);
 			end
 			triggerClientEvent(source, "refreshInventoryManual", source);
 		end,2000,1, source, helmet);
-		setElementData(source,"isInAction",true);
+		setDayZData(source,"isInAction",true);
 		setTimer(function(source)
-			setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+			setDayZData(source,"isInAction",false);
 		end, 3000, 1, source);
 	else
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext45",source), 160, 40, 40);
@@ -327,20 +335,23 @@ addEventHandler("onPlayerEquipHelmet", root, function(helmet)
 end);
 
 addEventHandler("onPlayerEquipVest", root, function(vest)
+	if not dayZValidateAction("onPlayerEquipVest", {vest}) then return end
 	local currVest = getElementData(source, "vest");
 	if (vest ~= currVest) then
 		setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 		setTimer(function(source, vest)
-			setElementData(source, "vest", vest);
-			setElementData(source, vest, getElementData(source, vest) - 1);
+		if not isElement(source) then return end
+			setDayZData(source, "vest", vest);
+			setDayZData(source, vest, getElementData(source, vest) - 1);
 			if currVest ~= "" then
-				setElementData(source, currVest, getElementData(source, currVest) + 1);
+				setDayZData(source, currVest, getElementData(source, currVest) + 1);
 			end
 			triggerClientEvent(source, "refreshInventoryManual", source);
 		end,2000,1, source, vest);
-		setElementData(source,"isInAction",true);
+		setDayZData(source,"isInAction",true);
 		setTimer(function(source)
-			setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+			setDayZData(source,"isInAction",false);
 		end, 3000, 1, source);
 	else
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext45",source), 160, 40, 40);
@@ -348,12 +359,14 @@ addEventHandler("onPlayerEquipVest", root, function(vest)
 end);
 
 addEventHandler("onPlayerUnequipWeapon", root, function(eweapon, slot)
+	if not dayZValidateAction("onPlayerUnequipWeapon", {eweapon, slot}) then return end
 	setTimer(function(source, eweapon, slot)
+		if not isElement(source) then return end
 		local weap = getElementData(source, "currentweapon_"..tostring(slot));
 		local name,id,model = getWeaponAmmoType(weap);
 		takeWeapon(source, id);
 		if (slot < 3) then
-			setElementData(source, "currentweapon_"..tostring(slot), "");
+			setDayZData(source, "currentweapon_"..tostring(slot), "");
 			if (slot == 1) then
 				removeWeaponBack(source);
 				removeWeaponReplace(source);
@@ -362,22 +375,25 @@ addEventHandler("onPlayerUnequipWeapon", root, function(eweapon, slot)
 				removeWeaponReplace2(source);
 			end
 		else
-			setElementData(source, "currentweapon_"..tostring(slot), "");
+			setDayZData(source, "currentweapon_"..tostring(slot), "");
 		end
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end,175,1, source, eweapon, slot);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 350, 1, source);
 end);
 
 addEventHandler("onPlayerRearmWeapon", root, function(weapon, slot)
+	if not dayZValidateAction("onPlayerRearmWeapon", {weapon, slot}) then return end
 	setTimer(function(source, weapon, slot)
+		if not isElement(source) then return end
 		takeAllWeapons(source);
 		local wAmmo,id,_ = getWeaponAmmoType(weapon);
-		local ammos = wAmmo;
-		if (id ~= 8 or id ~= 5 or id ~= 6 or id ~= 2) then
+		local ammos = tonumber(getElementData(source,wAmmo)) or 0;
+		if (id == 8 or id == 5 or id == 6 or id == 2 or id == 4 or id == 43 or id == 16) then
 			ammos = 1;
 		end
 		if (getElementData(source,wAmmo) < 1) then
@@ -392,25 +408,26 @@ addEventHandler("onPlayerRearmWeapon", root, function(weapon, slot)
 				return;
 			end
 			if (slot < 3) then
-				setElementData(source, "currentweapon_"..tostring(slot), weapon);
+				setDayZData(source, "currentweapon_"..tostring(slot), weapon);
 				triggerClientEvent(source,"playSoundForClient",source,"equip"..tostring(slot));
 			else
 				if (old ~= "") then
 					local oldq = getElementData(source, old);
 					if (oldq > 0) then
-						setElementData(source, old, oldq);
+						setDayZData(source, old, oldq);
 					end
 				end
-				setElementData(source, "currentweapon_"..tostring(slot), weapon);
+				setDayZData(source, "currentweapon_"..tostring(slot), weapon);
 				triggerClientEvent(source,"playSoundForClient",source,"equip"..tostring(slot));
 			end
 		end
 		triggerClientEvent(source, "refreshInventoryManual", source);
 		equipThem(source, slot);
 	end,175,1, source, weapon, slot);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 350, 1, source);
 end);
 
@@ -480,7 +497,7 @@ function attachWeaponReplace(source, model)
 	if (model > 1000) then
 		elementWeaponRaplace[source] = createObject(model, x, y, z);
 		if elementWeaponRaplace[source] then
-			setElementData(source, "tohide1", elementWeaponRaplace[source]);
+			setDayZData(source, "tohide1", elementWeaponRaplace[source]);
 		end
 		if elementBackpack[source] then
 			attachElementToBone(elementWeaponRaplace[source], source, 12, 0, 0, 0, 180, 90, 180);
@@ -496,7 +513,7 @@ function attachWeaponReplace2(source, model)
 	if (model > 1000) then
 		elementWeaponRaplace2[source] = createObject(model, x, y, z);
 		if elementWeaponRaplace2[source] then
-			setElementData(source, "tohide5", elementWeaponRaplace2[source]);
+			setDayZData(source, "tohide5", elementWeaponRaplace2[source]);
 		end
 		if elementBackpack[source] then
 			attachElementToBone(elementWeaponRaplace2[source], source, 12, 0, 0, 0, 180, 90, 180);
@@ -512,7 +529,7 @@ function attachWeaponBack(source, model)
 	elementWeaponBack[source] = createObject(model, x, y, z);
 	if elementWeaponBack[source] then
 		setObjectScale(elementWeaponBack[source], 0.8);
-		setElementData(source, "tohide3", elementWeaponBack[source]);
+		setDayZData(source, "tohide3", elementWeaponBack[source]);
 	end
 	local bpValue = getElementData(source,"MAX_Slots");
 	if (elementBackpack[source] and bpValue == 12) then
@@ -537,7 +554,7 @@ function attachWeaponBack2(source, model, id)
 		elseif (id == 8) then
 			setObjectScale(elementWeaponBack2[source], 0.8);
 		end
-		setElementData(source, "tohide4", elementWeaponBack2[source]);
+		setDayZData(source, "tohide4", elementWeaponBack2[source]);
 	end
 	local bpValue = getElementData(source,"MAX_Slots");
 	if elementBackpack[source] then
@@ -599,6 +616,7 @@ addEventHandler("onPlayerWeaponSwitch", root, function(previousWeaponID, current
 end);
 
 addEventHandler("removeBackWeaponOnDrop", root, function(check, slot)
+	if not dayZValidateAction("removeBackWeaponOnDrop", {check, slot}) then return end
 	if (slot == 1) then
 		removeWeaponBack(source);
 		removeWeaponReplace(source);
@@ -614,10 +632,10 @@ addEventHandler("removeBackWeaponOnDrop", root, function(check, slot)
 			takeWeapon(client, id);
 			local weapon = getElementData(client, "currentweapon_3");
 			if weapon then
-				setElementData(client, "currentweapon_3", "");
+				setDayZData(client, "currentweapon_3", "");
 			end
 		end
-		setElementData(source, "currentweapon_"..tostring(slot), "");
+		setDayZData(source, "currentweapon_"..tostring(slot), "");
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end
 end);
@@ -633,6 +651,7 @@ addEventHandler("onPlayerQuit", root, function()
 end);
 
 addEventHandler("kilLDayZPlayer", root, function()
+	if not dayZValidateAction("kilLDayZPlayer", {}) then return end
 	removeBackpack(source);
 	removeHelmet(source);
 	removeVest(source);
@@ -658,7 +677,7 @@ addEventHandler("onElementDataChange", root, function(dataName, oldValue)
 			elseif (newValue >= 72) then elementBackpack[source] = createObject(1736, x, y, z); -- Alice Backpack
 			elseif (newValue == 8) then return; end
 			if elementBackpack[source] then
-				setElementData(source, "tohide2", elementBackpack[source]);
+				setDayZData(source, "tohide2", elementBackpack[source]);
 				if (newValue >= 36) then
 					--setObjectScale(elementBackpack[source], 0.95);
 				end
@@ -704,7 +723,7 @@ addEventHandler("onElementDataChange", root, function(dataName, oldValue)
 			end
 			if elementHelmet[source] then
 				setElementCollisionsEnabled(elementHelmet[source],false)
-				setElementData(source, "tohide6", elementHelmet[source]);
+				setDayZData(source, "tohide6", elementHelmet[source]);
 				if (model == 179) then 								--left/right --middle --up/down
 					attachElementToBone(elementHelmet[source], source, 1, -0.005, 0.04, 0.06, 0, 0, -180);
 				elseif (model == 287) then
@@ -720,7 +739,7 @@ addEventHandler("onElementDataChange", root, function(dataName, oldValue)
 			end
 			if elementVest[source] then
 				setElementCollisionsEnabled(elementVest[source],false)
-				setElementData(source, "tohide7", elementVest[source]);
+				setDayZData(source, "tohide7", elementVest[source]);
 				if (model == 179 or model == 287) then--left/right --middle --up/down
 					attachElementToBone(elementVest[source], source, 3, 0, 0.06, 0.03, 0, 0, -180);
 					setObjectScale(elementVest[source],1.2)
@@ -808,48 +827,48 @@ function addPlayerStats(player, data, value)
 	if (data == "food") then
 		local current = getElementData(player, data);
 		if (current + value > 100) then
-			setElementData(player, data, 100);
+			setDayZData(player, data, 100);
 		elseif (current + value < 1) then
-			setElementData(player, data, 0);
-			setElementData(player, "blood", (getElementData(player, "blood") - math.random(50, 120)));
+			setDayZData(player, data, 0);
+			setDayZData(player, "blood", (getElementData(player, "blood") - math.random(50, 120)));
 		else
-			setElementData(player, data, (current + value));
+			setDayZData(player, data, (current + value));
 		end
 	elseif (data == "thirst") then
 		local current = getElementData(player, data);
 		if (current + value > 100) then
-			setElementData(player, data, 100);
+			setDayZData(player, data, 100);
 		elseif (current + value < 1) then
-			setElementData(player, data, 0);
-			setElementData(player, "blood", (getElementData(player, "blood") - math.random(50, 120)));
+			setDayZData(player, data, 0);
+			setDayZData(player, "blood", (getElementData(player, "blood") - math.random(50, 120)));
 		else
-			setElementData(player, data, (current + value));
+			setDayZData(player, data, (current + value));
 		end
 	elseif (data == "blood") then
 		local current = getElementData(player, data);
 		if (current + value > 12000) then
-			setElementData(player, data, 12000);
+			setDayZData(player, data, 12000);
 		elseif (current + value < 1) then
-			setElementData(player, data, 0);
+			setDayZData(player, data, 0);
 		else
-			setElementData(player, data, (current + value));
+			setDayZData(player, data, (current + value));
 		end
 	elseif (data == "temperature") then
 		local current = getElementData(player, data);
 		if (current + value > 41) then
-			setElementData(player, data, 41);
+			setDayZData(player, data, 41);
 		elseif (current + value <= 31) then
-			setElementData(player, data, 31);
+			setDayZData(player, data, 31);
 		else
-			setElementData(player, data, (current + value));
+			setDayZData(player, data, (current + value));
 		end
 	elseif (data == "humanity") then
 		local current = getElementData(player, data);
 		local new = current + value;
 		if (new > 5000) then
-			setElementData(player, data, 5000);
+			setDayZData(player, data, 5000);
 		else
-			setElementData(player, data, new);
+			setDayZData(player, data, new);
 		end
 	end
 end
@@ -886,6 +905,8 @@ setTimer(function()
 end, 60000, 0);
 
 addEventHandler("onPlayerRequestChangingStats", root, function(itemName, itemInfo, data)
+	local blood = 0;
+	if not dayZValidateAction("onPlayerRequestChangingStats", {itemName, itemInfo, data}) then return end
 	if (data == "food") then
 		if (itemName == "fooditem5") then blood = math.random(200, 300);
 		elseif (itemName == "fooditem9") then blood = math.random(300, 350);
@@ -893,27 +914,29 @@ addEventHandler("onPlayerRequestChangingStats", root, function(itemName, itemInf
 		elseif (itemName == "fooditem4") then blood = math.random(150, 250);
 		elseif (itemName == "fooditem3") then blood = math.random(320, 400); end
 		setPedAnimation(source, "FOOD", "EAT_Burger", -1, false, false, nil, false);
-		setElementData(source, itemName, getElementData(source, itemName)-1);
+		setDayZData(source, itemName, getElementData(source, itemName)-1);
 		addPlayerStats(source, "blood", blood);
 		addPlayerStats(source, data, math.random(60, 100));
 		triggerClientEvent(source,"playSoundForClient",source,"eatstart");
-		setElementData(source,"isInAction",true);
+		setDayZData(source,"isInAction",true);
 		setTimer(function(source)
+		if not isElement(source) then return end
 			triggerClientEvent(source,"playSoundForClient",source,"eatstop");
-			setElementData(source,"isInAction",false);
+			setDayZData(source,"isInAction",false);
 		end, 5000, 1, source);
 	elseif (data == "thirst") then
-		setElementData(source, itemName, getElementData(source, itemName)-1);
+		setDayZData(source, itemName, getElementData(source, itemName)-1);
 		addPlayerStats(source, data, math.random(60, 100));
 		setPedAnimation(source, "VENDING", "VEND_Drink2_P", -1, false, false, nil, false);
 		if (itemName == "fooditem1") then
-			setElementData(source, "fooditem2", getElementData(source, "fooditem2") + 1);
+			setDayZData(source, "fooditem2", getElementData(source, "fooditem2") + 1);
 		end
 		triggerClientEvent(source,"playSoundForClient",source,"drinkstart");
-		setElementData(source,"isInAction",true);
+		setDayZData(source,"isInAction",true);
 		setTimer(function(source)
+		if not isElement(source) then return end
 			triggerClientEvent(source,"playSoundForClient",source,"drinkstop");
-			setElementData(source,"isInAction",false);
+			setDayZData(source,"isInAction",false);
 		end, 3500, 1, source);
 	end
 	triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext3",source).." "..getLanguageTextServer(itemName,source), 40, 160, 40);
@@ -921,14 +944,16 @@ addEventHandler("onPlayerRequestChangingStats", root, function(itemName, itemInf
 end);
 
 addEventHandler("onPlayerUseMedicObject", root, function(itemName)
+	if not dayZValidateAction("onPlayerUseMedicObject", {itemName}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source)
+		if not isElement(source) then return end
 		if (itemName == "medicine5") then
-			setElementData(source, "bleeding", 0);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "bleeding", 0);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		elseif (itemName == "medicine1") then
-			setElementData(source, "bleeding", 0);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "bleeding", 0);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 			sleepFunction(function()
 				sleep(2000)
 				addPlayerStats(source, "blood", 289);
@@ -940,8 +965,8 @@ addEventHandler("onPlayerUseMedicObject", root, function(itemName)
 				addPlayerStats(source, "blood", 3664);
 			end);
 		elseif (itemName == "medicine2") then
-			setElementData(source, "bleeding", 0);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "bleeding", 0);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 			sleepFunction(function()
 				sleep(2000)
 				addPlayerStats(source, "blood", 50);
@@ -953,8 +978,8 @@ addEventHandler("onPlayerUseMedicObject", root, function(itemName)
 				addPlayerStats(source, "blood", 2921);
 			end);
 		elseif (itemName == "medicine3") then
-			setElementData(source, "bleeding", 0);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "bleeding", 0);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 			sleepFunction(function()
 				sleep(2000)
 				addPlayerStats(source, "blood", 50);
@@ -966,36 +991,39 @@ addEventHandler("onPlayerUseMedicObject", root, function(itemName)
 				addPlayerStats(source, "blood", 1481);
 			end);
 		elseif (itemName == "medicine4") then
-			setElementData(source, "cold", false);
-			setElementData(source, "temperature", 37);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "cold", false);
+			setDayZData(source, "temperature", 37);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		elseif (itemName == "medicine6") then
-			setElementData(source, "pain", false);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "pain", false);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		elseif (itemName == "medicine8") then
-			setElementData(source, "brokenbone", false)
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, "brokenbone", false)
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		elseif (itemName == "medicine7") then
 			addPlayerStats(source, "blood", 12000);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		end
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end, 1500, 1, source);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerGiveMedicObject", root, function(itemName, player)
+	if not dayZValidateAction("onPlayerGiveMedicObject", {itemName, player}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source)
+		if not isElement(source) then return end
 		if (itemName == "givebandage") then
-			setElementData(player, "bleeding", 0);
-			setElementData(source, "medicine5", getElementData(source, "medicine5") - 1);
+			setDayZData(player, "bleeding", 0);
+			setDayZData(source, "medicine5", getElementData(source, "medicine5") - 1);
 			addPlayerStats(source, "humanity", 40);
 		elseif (itemName == "giveblood") then
-			setElementData(source, "medicine7", getElementData(source, "medicine7") - 1);
+			setDayZData(source, "medicine7", getElementData(source, "medicine7") - 1);
 			addPlayerStats(source, "humanity", 250);
 			sleepFunction(function()
 				sleep(2000)
@@ -1008,9 +1036,10 @@ addEventHandler("onPlayerGiveMedicObject", root, function(itemName, player)
 		end
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end, 1500, 1, source);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
@@ -1027,35 +1056,41 @@ function getSkinNameFromID(id)
 end
 
 addEventHandler("setPlayerUseAnimation", root, function()
+	if not dayZValidateAction("setPlayerUseAnimation", {}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 end);
 
 addEventHandler("onPlayerChangeSkin", root, function(skin)
+	if not dayZValidateAction("onPlayerChangeSkin", {skin}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source, skin)
+		if not isElement(source) then return end
 		local name = getSkinNameFromID(getElementData(source, "skin"));
-		setElementData(source, name, getElementData(source, name)+1);
-		setElementData(source, skin, getElementData(source, skin)-1);
+		setDayZData(source, name, getElementData(source, name)+1);
+		setDayZData(source, skin, getElementData(source, skin)-1);
 		local id = getSkinIDFromName(skin);
-		setElementData(source, "skin", id);
+		setDayZData(source, "skin", id);
 		setElementModel(source, id);
 		triggerClientEvent(source, "refreshInventoryManual", source);
-		setElementData(source,"isInAction",false);
+		setDayZData(source,"isInAction",false);
 	end,3000,1, source, skin);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 end);
 
 addEventHandler("onPlayerRefillWaterBottle", root, function(itemName)
+	if not dayZValidateAction("onPlayerRefillWaterBottle", {itemName}) then return end
 	if isElementInWater(source) then
 		setTimer(function(source, itemName)
-			setElementData(source, "fooditem1", getElementData(source, "fooditem1") + 1);
-			setElementData(source, itemName, getElementData(source, itemName) - 1);
+		if not isElement(source) then return end
+			setDayZData(source, "fooditem1", getElementData(source, "fooditem1") + 1);
+			setDayZData(source, itemName, getElementData(source, itemName) - 1);
 			triggerClientEvent(source, "refreshInventoryManual", source);
 			triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext4",source).." "..getLanguageTextServer(itemName,source), 40, 160, 40);
 		end, 175, 1, source, itemName);
-		setElementData(source,"isInAction",true);
+		setDayZData(source,"isInAction",true);
 		setTimer(function(source)
-			setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+			setDayZData(source,"isInAction",false);
 		end, 350, 1, source);
 	else
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext5",source), 160, 40, 40);
@@ -1063,9 +1098,11 @@ addEventHandler("onPlayerRefillWaterBottle", root, function(itemName)
 end);
 
 addEventHandler("onPlayerPitchATent", root, function(itemName)
+	if not dayZValidateAction("onPlayerPitchATent", {itemName}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source,itemName)
-		setElementData(source, itemName, getElementData(source, itemName) - 1);
+		if not isElement(source) then return end
+		setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		triggerClientEvent(source, "hideInventoryManual", source);
 		local x,y,z = getElementPosition(source);
 		local xr,yr,zr = getElementRotation(source);
@@ -1077,21 +1114,24 @@ addEventHandler("onPlayerPitchATent", root, function(itemName)
 		setObjectScale(tent, 1.3);
 		local tentCol = createColSphere(x, y, z, 4);
 		attachElements(tentCol, tent, 0, 0, 0);
-		setElementData(tentCol, "parent", tent);
-		setElementData(tent, "parent", tentCol);
-		setElementData(tentCol, "tent", true);
-		setElementData(tentCol, "MAX_Slots", 100);
+		setDayZData(tentCol, "parent", tent);
+		setDayZData(tent, "parent", tentCol);
+		setDayZData(tentCol, "tent", true);
+		setDayZData(tentCol, "MAX_Slots", 100);
 	end, 2000, 1, source,itemName);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerBuildASafe", root, function(itemName,code)
+	if not dayZValidateAction("onPlayerBuildASafe", {itemName,code}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source, itemName)
-		setElementData(source, itemName, getElementData(source, itemName) - 1);
+		if not isElement(source) then return end
+		setDayZData(source, itemName, getElementData(source, itemName) - 1);
 		triggerClientEvent(source, "refreshInventoryManual", source);
 		local x,y,z = getElementPosition(source);
 		local xr,yr,zr = getElementRotation(source);
@@ -1105,24 +1145,26 @@ addEventHandler("onPlayerBuildASafe", root, function(itemName,code)
 		local safeCol = createColSphere(x, y, z, 2.5);
 		local safe_id = (tostring(math.random(999999999))..""..tostring(math.random(999999999)));
 		attachElements(safeCol, safe, 0, 0, 0);
-		setElementData(safeCol, "parent", safe);
-		setElementData(safe, "parent", safeCol);
-		setElementData(safeCol, "safe", true);
-		setElementData(safeCol, safe_id, code);
-		setElementData(safeCol, "id", safe_id);
-		setElementData(safeCol, "MAX_Slots", 50);
+		setDayZData(safeCol, "parent", safe);
+		setDayZData(safe, "parent", safeCol);
+		setDayZData(safeCol, "safe", true);
+		setDayZData(safeCol, safe_id, code);
+		setDayZData(safeCol, "id", safe_id);
+		setDayZData(safeCol, "MAX_Slots", 50);
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext23",source), 40, 160, 40);
 	end, 2000, 1, source, itemName);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerPlaceC4", root, function(source,safe_col)
+	if not dayZValidateAction("onPlayerPlaceC4", {source,safe_col}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function()
-		setElementData(source, "item7", getElementData(source, "item7") - 1);
+		setDayZData(source, "item7", getElementData(source, "item7") - 1);
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("item7",source).." "..getLanguageTextServer("clientinfotext26",source), 40, 160, 40);
 		local safe = getElementData(safe_col,"parent");
 		local x,y,z = getElementPosition(safe);
@@ -1130,7 +1172,7 @@ addEventHandler("onPlayerPlaceC4", root, function(source,safe_col)
 		setTimer(function()
 			setElementModel(safe,1829)
 			setElementCollisionsEnabled(safe,false)
-			setElementData(safe_col,getElementData(safe_col,"id"),"raided");
+			setDayZData(safe_col,getElementData(safe_col,"id"),"raided");
 			createExplosion(x,y,z,2);
 			setTimer(function()
 				if (safe) then destroyElement(safe); end
@@ -1138,18 +1180,20 @@ addEventHandler("onPlayerPlaceC4", root, function(source,safe_col)
 			end,60000*10,1)
 		end,5000,1);
 	end,2000,1);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerEnterSafeCode", root, function(code,safe_col)
+	if not dayZValidateAction("onPlayerEnterSafeCode", {code,safe_col}) then return end
 	if (code and safe_col) then
 		local safe_id = getElementData(safe_col,"id");
 		local safe_code = getElementData(safe_col,safe_id);
 		if (safe_code == code) then
-			setElementData(source,safe_id,code)
+			setDayZData(source,safe_id,code)
 			triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext24",source), 40, 160, 40);
 		else
 			triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext25",source), 160, 40, 40);
@@ -1158,21 +1202,23 @@ addEventHandler("onPlayerEnterSafeCode", root, function(code,safe_col)
 end);
 
 addEventHandler("onPlayerChangeSafeCode", root, function(code,safe_col)
+	if not dayZValidateAction("onPlayerChangeSafeCode", {code,safe_col}) then return end
 	if (safe_col) then
 		local safe_id = getElementData(safe_col,"id");
 		removeElementData(source,safe_id)
-		setElementData(safe_col,safe_id,code)
+		setDayZData(safe_col,safe_id,code)
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext27",source), 40, 160, 40);
 	end
 end);
 
 addEventHandler("onPlayerCallAirdrop", root, function()
+	if not dayZValidateAction("onPlayerCallAirdrop", {}) then return end
 	if (source) then
 		setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 		local x,y,z = getElementPosition(source);
 		local splayer = source;
 		setTimer(function()
-			setElementData(splayer,"item8",getElementData(splayer,"item8") - 1);
+			setDayZData(splayer,"item8",getElementData(splayer,"item8") - 1);
 			triggerClientEvent(splayer, "refreshInventoryManual", splayer);
 			triggerClientEvent(splayer, "displayClientInfo", splayer, getLanguageTextServer("clientinfotext28",splayer), 40, 160, 40);
 			local crate = createObject(2975,x,y,z+150,0,0,0,true);
@@ -1188,10 +1234,10 @@ addEventHandler("onPlayerCallAirdrop", root, function()
 				local airdrop = createObject(2975,x,y,z-1);
 				local airdropCol = createColSphere(x, y, z, 4);
 				attachElements(airdropCol, airdrop, 0, 0, 0);
-				setElementData(airdropCol, "parent", airdrop);
-				setElementData(airdrop, "parent", airdropCol);
-				setElementData(airdropCol, "airdrop", true);
-				setElementData(airdropCol, "MAX_Slots", 100);
+				setDayZData(airdropCol, "parent", airdrop);
+				setDayZData(airdrop, "parent", airdropCol);
+				setDayZData(airdropCol, "airdrop", true);
+				setDayZData(airdropCol, "MAX_Slots", 100);
 				setTimer(function()
 					if (airdrop) then destroyElement(airdrop); end
 					if (airdropCol) then destroyElement(airdropCol); end
@@ -1201,17 +1247,19 @@ addEventHandler("onPlayerCallAirdrop", root, function()
 				end,15*60000,1);
 			end,fallingTime,1);
 		end,2000,1);
-		setElementData(splayer,"isInAction",true);
+		setDayZData(splayer,"isInAction",true);
 		setTimer(function(splayer)
-			setElementData(splayer,"isInAction",false);
+			setDayZData(splayer,"isInAction",false);
 		end, 3000, 1, splayer);
 	end
 end);
 
 addEventHandler("onPlayerBuildAWireFence", root, function(itemName)
-	setElementData(source, itemName, getElementData(source, itemName)-1);
+	if not dayZValidateAction("onPlayerBuildAWireFence", {itemName}) then return end
+	setDayZData(source, itemName, getElementData(source, itemName)-1);
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source)
+		if not isElement(source) then return end
 		local x,y,z = getElementPosition(source);
 		local xr,yr,zr = getElementRotation(source);
 		local offsetRot = math.rad(zr+90);
@@ -1222,26 +1270,29 @@ addEventHandler("onPlayerBuildAWireFence", root, function(itemName)
 		setObjectScale(wFence, 1);
 		local wFenceCol = createColSphere(x, y, z, 2);
 		attachElements(wFenceCol, wFence, 0, 0, 0);
-		setElementData(wFenceCol, "parent", wFence);
-		setElementData(wFence, "parent", wFenceCol);
-		setElementData(wFenceCol, "wirefence", true);
+		setDayZData(wFenceCol, "parent", wFence);
+		setDayZData(wFence, "parent", wFenceCol);
+		setDayZData(wFenceCol, "wirefence", true);
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end, 2000, 1, source);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("removeWirefence", root, function(object)
+	if not dayZValidateAction("removeWirefence", {object}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(object)
 		destroyElement(getElementData(object, "parent"));
 		destroyElement(object);
 	end, 2000, 1, object);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
@@ -1254,13 +1305,14 @@ addEventHandler("removeTent",root, function(object,player)
 		local itemPickup = createItemPickup(item, x, y, (z+1), itemString);
 		if col then destroyElement(col); end
 		if object then destroyElement(object); end
-		setElementData(player, "loot", false);
-		setElementData(player, "currentCol", false);
-		setElementData(player, "lootname", false);
+		setDayZData(player, "loot", false);
+		setDayZData(player, "currentCol", false);
+		setDayZData(player, "lootname", false);
 	end, 2000, 1, col, object);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
@@ -1279,13 +1331,14 @@ addEventHandler("removeSafe",root, function(object,player)
 		end
 		if col then destroyElement(col); end
 		if object then destroyElement(object); end
-		setElementData(player, "loot", false);
-		setElementData(player, "currentCol", false);
-		setElementData(player, "lootname", false);
+		setDayZData(player, "loot", false);
+		setDayZData(player, "currentCol", false);
+		setDayZData(player, "lootname", false);
 	end, 2000, 1, col, object);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
@@ -1294,35 +1347,42 @@ addEventHandler("removeMine",root, function(detonateCol)
 	local object = getElementData(mineCol, "parent");
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source, detonateCol, object, mineCol)
+		if not isElement(source) then return end
 		if isElement(detonateCol) then destroyElement(detonateCol); end
 		if isElement(mineCol) then destroyElement(mineCol); end
 		if isElement(object) then destroyElement(object); end
 		triggerClientEvent(source, "disableMenu", source);
 	end, 2000, 1, source, detonateCol, object, mineCol);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("addPlayerCookMeat", root, function()
+	if not dayZValidateAction("addPlayerCookMeat", {}) then return end
 	setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source)
-		setElementData(source, "fooditem11", getElementData(source, "fooditem11")-1);
-		setElementData(source, "fooditem10", getElementData(source, "fooditem10")+1);
+		if not isElement(source) then return end
+		setDayZData(source, "fooditem11", getElementData(source, "fooditem11")-1);
+		setDayZData(source, "fooditem10", getElementData(source, "fooditem10")+1);
 		triggerClientEvent(source, "displayClientInfo", source, getLanguageTextServer("clientinfotext6",source).." "..getLanguageTextServer("fooditem11",source)..".", 40, 160, 40);
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end, 2000, 1, source);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerMakeAFire", root, function(itemName)
+	if not dayZValidateAction("onPlayerMakeAFire", {itemName}) then return end
 	setPedAnimation(source, "BOMBER","BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source,itemName)
-		setElementData(source, "item1", getElementData(source, "item1")-1);
+		if not isElement(source) then return end
+		setDayZData(source, "item1", getElementData(source, "item1")-1);
 		local x,y,z = getElementPosition(source);
 		local xr,yr,zr = getElementRotation(source);
 		local offsetRot = math.rad(zr+90);
@@ -1336,9 +1396,9 @@ addEventHandler("onPlayerMakeAFire", root, function(itemName)
 		local fire = createObject(3525, vx, vy, (z-0.75), xr, yr, vrot);
 		setObjectScale(fire, 0);
 		local fireCol = createColSphere(vx, vy, z, 2);
-		setElementData(fireCol, "parent", wood);
-		setElementData(wood, "parent", fireCol);
-		setElementData(fireCol, "fireplace", true);
+		setDayZData(fireCol, "parent", wood);
+		setDayZData(wood, "parent", fireCol);
+		setDayZData(fireCol, "fireplace", true);
 		triggerClientEvent(root,"playSoundForClient",source,"fireplace",x,y,z,2*60000);
 		triggerClientEvent(source, "refreshInventoryManual", source);
 		setTimer(function(fireCol, fire, wood)
@@ -1347,16 +1407,19 @@ addEventHandler("onPlayerMakeAFire", root, function(itemName)
 			if wood then destroyElement(wood); end
 		end, (2*60000), 1, fireCol, fire, wood);
 	end,2000, 1, source,itemName);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerPlaceRoadflare", root, function(itemName,r,g,b)
+	if not dayZValidateAction("onPlayerPlaceRoadflare", {itemName,r,g,b}) then return end
 	setPedAnimation(source, "BOMBER","BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source,itemName, r, g, b)
-		setElementData(source, itemName, getElementData(source, itemName)-1);
+		if not isElement(source) then return end
+		setDayZData(source, itemName, getElementData(source, itemName)-1);
 		local x,y,z = getElementPosition(source);
 		local object1 = createObject(354, x, y, (z-0.6));
 		local object2 = createObject(354, x, y, (z-0.6));
@@ -1368,38 +1431,42 @@ addEventHandler("onPlayerPlaceRoadflare", root, function(itemName,r,g,b)
 		setTimer(destroyElement, 300000, 1, color2);
 		triggerClientEvent(source, "refreshInventoryManual", source);
 	end,2000, 1, source, itemName, r, g, b);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
 addEventHandler("onPlayerPlaceMine", root, function(itemName)
+	if not dayZValidateAction("onPlayerPlaceMine", {itemName}) then return end
 	setPedAnimation(source, "BOMBER","BOM_Plant", -1, false, false, nil, false);
 	setTimer(function(source,itemName)
-		setElementData(source, itemName, getElementData(source, itemName)-1);
+		if not isElement(source) then return end
+		setDayZData(source, itemName, getElementData(source, itemName)-1);
 		local x,y,z = getElementPosition(source);
 		local mine = createObject(1510, x, y, (z-1));
 		local mineCol = createColSphere(x, y, z, 0.5);
 		local detonateCol = createColSphere(x, y, z, 0.7);
 		attachElements(mineCol,mine,0,0,0.5);
-		setElementData(mineCol,"parent",mine)
-		setElementData(mineCol,"detonateCol",detonateCol)
-		setElementData(mine,"parent",mineCol)
-		setElementData(detonateCol,"mineCol",mineCol)
-		setElementData(detonateCol,"mine",true);
+		setDayZData(mineCol,"parent",mine)
+		setDayZData(mineCol,"detonateCol",detonateCol)
+		setDayZData(mine,"parent",mineCol)
+		setDayZData(detonateCol,"mineCol",mineCol)
+		setDayZData(detonateCol,"mine",true);
 		triggerClientEvent(source, "refreshInventoryManual", source);
 		local selfdestroyer = setTimer(function(mine,mineCol)
 			destroyElement(mine);
 			destroyElement(mineCol);
 			destroyElement(detonateCol);
 		end,15*60000,1,mine,mineCol);
-		setElementData(mineCol,"selfdestroyer",selfdestroyer);
+		setDayZData(mineCol,"selfdestroyer",selfdestroyer);
 		addEventHandler("onColShapeHit", mineCol, detectMine);
 	end,2000, 1, source, itemName);
-	setElementData(source,"isInAction",true);
+	setDayZData(source,"isInAction",true);
 	setTimer(function(source)
-		setElementData(source,"isInAction",false);
+		if not isElement(source) then return end
+		setDayZData(source,"isInAction",false);
 	end, 3000, 1, source);
 end);
 
@@ -1420,39 +1487,13 @@ function detectMine(player)
 	end
 end
 
-addEventHandler("onPlayerChat", root, function(message, mType)
-	if (mType == 0 or mType == 1) then
-		cancelEvent();
-	end
-	if (mType == 0) then
-		if isPlayerMuted(source) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",source), source, 160, 40, 40);
-			return;
-		end
-		local x,y,z = getElementPosition(source);
-		local chatSphere = createColSphere(x, y, z, 15);
-		local nearbyPlayers = getElementsWithinColShape(chatSphere, "player");
-		if (getElementData(source,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",source), source, 160, 40, 40);
-			return;
-		else
-			setElementData(source,"antichat",true)
-			setTimer(setElementData, 1000, 1, source, "antichat", false);
-		end
-		destroyElement(chatSphere);
-		for _,v in ipairs(nearbyPlayers) do
-			outputChatBox("#D3D3D3[LOCAL]#D3D3D3"..string.gsub((getPlayerName(source)..": #D3D3D3"..message), '#%x%x%x%x%x%x', ''), v, 211, 211, 211, true);
-		end
-	end
-end);
-
 addCommandHandler("give", function(source, _, target, amount)
 	local target = getPlayerFromPartialName(target);
 	local zKills = getElementData(source,"zombieskilled");
 	if target and target ~= source then
 		if tonumber(amount) >= 1 and zKills >= tonumber(amount) then
-			setElementData(source,"zombieskilled",getElementData(source,"zombieskilled")-amount);
-			setElementData(target,"zombieskilled",getElementData(target,"zombieskilled")+amount);
+			setDayZData(source,"zombieskilled",getElementData(source,"zombieskilled")-amount);
+			setDayZData(target,"zombieskilled",getElementData(target,"zombieskilled")+amount);
 			outputChatBox(tostring(amount).." zKills has been sent to "..getPlayerName(target):gsub("#%x%x%x%x%x%x", "").."!",source,50,150,50)
 			outputChatBox("You received "..tostring(amount).." zKills from "..getPlayerName(source):gsub("#%x%x%x%x%x%x", "").."!",target,50,150,50)
 		else
@@ -1460,50 +1501,6 @@ addCommandHandler("give", function(source, _, target, amount)
 		end
 	else
 		outputChatBox("Player not found!",source,150,50,50)
-	end
-end);
-
-addCommandHandler("globalchat", function(player, _, ...)
-	if (configVar.globalchat) then
-		if isPlayerMuted(player) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",player), player, 160, 40, 40);
-			return;
-		end
-		if (getElementData(player,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",player), player, 160, 40, 40);
-			return;
-		else
-			setElementData(player,"antichat",true)
-			setTimer(setElementData, 1000, 1, player, "antichat", false);
-		end
-		for _,v in ipairs(getElementsByType("player")) do
-			outputChatBox("#154360[GLOBAL]#1A5276"..getPlayerName(player):gsub("#%x%x%x%x%x%x", "").."#154360: #FFFFFF"..table.concat({...}, " "):gsub("#%x%x%x%x%x%x", ""), v, 255, 255, 255, true);
-		end
-	end
-end);
-
-addCommandHandler("radiochat", function(player, _, ...)
-	if (getElementData(player, "toolbelt8") >= 1) then
-		if isPlayerMuted(player) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",player), player, 160, 40, 40);
-			return;
-		end
-		if (getElementData(player,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",player), player, 160, 40, 40);
-			return;
-		else
-			setElementData(player,"antichat",true)
-			setTimer(setElementData, 1000, 1, player, "antichat", false);
-		end
-		for _,v in ipairs(getElementsByType("player")) do
-			if (getElementData(v, "toolbelt8") >= 1) then
-				if (getElementData(v, "radiochannel") == getElementData(player, "radiochannel")) then
-					outputChatBox("#7D6608[RADIO]#9A7D0A"..getPlayerName(player):gsub("#%x%x%x%x%x%x", "").."#7D6608: #FFFFFF"..table.concat({...}, " "):gsub("#%x%x%x%x%x%x", ""), v, 255, 255, 255, true);
-				end
-			end
-		end
-	else
-		triggerClientEvent(player, "displayClientInfo", player, getLanguageTextServer("clientinfotext7",player), 160, 40, 40);
 	end
 end);
 
@@ -1539,6 +1536,7 @@ addEventHandler("onPlayerCommand", root, function(cmd)
 end);
 
 addEventHandler("kickPlayerOnHighPing", root, function()
+	if not dayZValidateAction("kickPlayerOnHighPing", {}) then return end
 	kickPlayer(source, "Ping > 450!");
 end);
 
@@ -1581,7 +1579,7 @@ function funcBindFriendly(player, key, keyState)
 	if (getElementData(player,"antichat_friendly")) then
 		return;
 	else
-		setElementData(player,"antichat_friendly",true)
+		setDayZData(player,"antichat_friendly",true)
 		setTimer(setElementData, 3000, 1, player, "antichat_friendly", false);
 	end
 	if (keyState == "down") then
@@ -1591,6 +1589,7 @@ function funcBindFriendly(player, key, keyState)
 end
 
 addEventHandler("relWep", resourceRoot, function()
+	if not dayZValidateAction("relWep", {}) then return end
 	reloadPedWeapon(client);
 end);
 
@@ -1612,13 +1611,14 @@ addEventHandler("onPlayerLogin", root, function()
 end);
 
 addEventHandler("onPlayerBuryBody", root, function()
+	if not dayZValidateAction("onPlayerBuryBody", {}) then return end
 	if (getElementData(source, "weapon27") >= 1) then
 		setPedAnimation(source, "BOMBER", "BOM_Plant", -1, false, false, nil, false);
 		local cCol = getElementData(source, "currentCol");
 		if cCol then
 			if getElementData(cCol, "deadman") then
-				setElementData(source, "loot", false);
-				setElementData(source, "currentCol", false);
+				setDayZData(source, "loot", false);
+				setDayZData(source, "currentCol", false);
 				setTimer(function(cCol)
 					if cCol then
 						local element = getElementData(cCol, "parent");
@@ -1641,7 +1641,7 @@ end);
 function spawnDayZAnimals()
 	for _,v in ipairs(animalsSpawns) do
 		local ped = createPed(math.random(12, 14), v[1], v[2], v[3]);
-		setElementData(ped, "animal", true);
+		setDayZData(ped, "animal", true);
 	end
 end
 
@@ -1650,27 +1650,28 @@ function destroyDeadAnimalAndRespawn(ped, pedCol, x, y, z)
 		destroyElement(ped);
 		destroyElement(pedCol);
 		local ped = createPed(math.random(12, 14), x, y, z);
-		setElementData(ped, "animal", true);
+		setDayZData(ped, "animal", true);
 		setPedAnimation(ped, "ped", "pikcup_box");
 		setElementSyncer(ped, getRandomPlayer());
 	end
 end
 
 addEventHandler("createDeadAnimal", root, function()
+	if not dayZValidateAction("createDeadAnimal", {}) then return end
 	local x,y,z = getElementPosition(source);
 	local skin = getElementModel(source);
 	local ped = createPed(skin, x, y, z);
 	local pedCol = createColSphere(x, y, z, 1.5);
 	killPed(ped);
-	setElementData(pedCol, "parent", ped);
-	setElementData(pedCol, "playername", "Animal");
-	setElementData(pedCol, "deadman", true);
-	setElementData(pedCol, "MAX_Slots", 8);
+	setDayZData(pedCol, "parent", ped);
+	setDayZData(pedCol, "playername", "Animal");
+	setDayZData(pedCol, "deadman", true);
+	setDayZData(pedCol, "MAX_Slots", 8);
 	local time = getRealTime();
-	setElementData(pedCol, "deadreason", {"other","deadanimaltext",time.hour,time.minute,"clocktext"});
-	if (getElementModel(source) == 12) then setElementData(pedCol, "fooditem11", math.random(8));
-	elseif (getElementModel(source) == 13) then setElementData(pedCol, "fooditem11", math.random(4));
-	elseif (getElementModel(source) == 14) then setElementData(pedCol, "fooditem11", math.random(2)); end
+	setDayZData(pedCol, "deadreason", {"other","deadanimaltext",time.hour,time.minute,"clocktext"});
+	if (getElementModel(source) == 12) then setDayZData(pedCol, "fooditem11", math.random(8));
+	elseif (getElementModel(source) == 13) then setDayZData(pedCol, "fooditem11", math.random(4));
+	elseif (getElementModel(source) == 14) then setDayZData(pedCol, "fooditem11", math.random(2)); end
 	destroyElement(source);
 	setTimer(destroyDeadAnimalAndRespawn, 1800000, 1, ped, pedCol, x, y, z);
 end);
@@ -1685,7 +1686,7 @@ end);
 
 addEventHandler("onPlayerJoin", root, function()
 	setPlayerNametagShowing(source, false);
-	--if (not getElementData(source,"language")) then setElementData(source,"language","en"); end
+	--if (not getElementData(source,"language")) then setDayZData(source,"language","en"); end
 	triggerClientEvent("showJQCtext", root, source, "jointext", 40, 160, 40)
 	for i = 70, 79 do
 		if (i ~= 73) then

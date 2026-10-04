@@ -23,6 +23,14 @@ local playerDataTable = {
 	{"MAX_Slots", 8},
 	{"helmet", ""},
 	{"vest", ""},
+	{"armorCondition.helmet1", 100},
+	{"armorCondition.helmet2", 100},
+	{"armorCondition.helmet3", 100},
+	{"armorCondition.helmet4", 100},
+	{"armorCondition.helmet5", 100},
+	{"armorCondition.vest1", 100},
+	{"armorCondition.vest2", 100},
+
 	{"blood", 12000},
 	{"food", math.random(80, 100)},
 	{"thirst", math.random(80, 100)},
@@ -171,6 +179,10 @@ local playerDataTable = {
 
 -- player statistics or any other data that will save and load when player join/quit game (note: theese data does not and will not reset upon's player death)
 local playerData2Table = {
+    {"stats.xp",0},
+    {"stats.level",1},
+    {"stats.title","none"},
+    {"stats.cosmeticSkin","none"},
 	{"stats.email",""},
 	{"stats.zombieskilled",0},
 	{"stats.headshots",0},
@@ -178,18 +190,35 @@ local playerData2Table = {
 	{"stats.banditskilled",0},
 	{"stats.deaths",0},
 	{"stats.playtime",0},
-	{"stats.joined",""},
+	{"stats.joined",0},
 }
 
-addEvent("onPlayerDayZRegister", true);
-addEvent("onPlayerDayZLogin", true);
+addEvent("onPlayerDayZRegister", false);
+addEvent("onPlayerDayZLogin", false);
 addEvent("kilLDayZPlayer", true);
 
 addEventHandler("onPlayerDayZLogin", root, function(player)
+	if not isElement(player) or getElementType(player) ~= "player" then return end
 	local account = getPlayerAccount(player);
+	if not account or isGuestAccount(account) then return end
+	-- Console-created accounts have no character statistics yet. Initialize these
+	-- before the fresh-spawn path and preserve existing statistics on respawn.
+	for _,v in ipairs(playerData2Table) do
+		local value = getAccountData(account,v[1]);
+		if v[1] == "stats.joined" then
+			value = tonumber(value);
+			if not value or value ~= value or value <= 0 or value == math.huge then
+				value = getTimestamp();
+			end
+			setAccountData(account,v[1],value);
+		elseif type(value) ~= type(v[2]) then
+			value = v[2]; setAccountData(account,v[1],value);
+		end
+		setDayZData(player,v[1],value);
+	end
 	local x,y,z = getAccountData(account, "last_x"), getAccountData(account, "last_y"), getAccountData(account, "last_z");
-	local skin = getAccountData(account, "skin");
-	if getAccountData(account, "isDead") then
+	local skin = tonumber(getAccountData(account, "skin")) or 71;
+	if getAccountData(account, "isDead") or type(x) ~= "number" or type(y) ~= "number" or type(z) ~= "number" then
 		return spawnDayZPlayer(player);
 	end
 	spawnPlayer(player, x, y, z+0.5, math.random(360), skin, 0, 0);
@@ -197,40 +226,40 @@ addEventHandler("onPlayerDayZLogin", root, function(player)
 	setTimer(setElementFrozen, 1000, 1, player, false);
 	fadeCamera(player, true);
 	setCameraTarget(player, player);
+	local previousCol = getElementData(player,"playerCol");
+	if isElement(previousCol) then destroyElement(previousCol) end
 	local playerCol = createColSphere(x, y, z, 1.5);
-	setElementData(player, "playerCol", playerCol);
+	setDayZData(player, "playerCol", playerCol);
 	attachElements(playerCol, player, 0, 0, 0);
-	setElementData(playerCol, "parent", player);
-	setElementData(playerCol, "player", true);
+	setDayZData(playerCol, "parent", player);
+	setDayZData(playerCol, "player", true);
 	for _,v in ipairs(playerDataTable) do
 		local data = getAccountData(account,v[1]);
 		if not data then
 			setAccountData(account,v[1],v[2]);
 			data = getAccountData(account,v[1]);
 		end
-		setElementData(player,v[1],data);
+		setDayZData(player,v[1],data);
 	end
-	setElementData(player, "logedin", true);
+	setDayZData(player, "logedin", true);
 	setElementModel(player, getElementData(player, "skin"));
 	setTimer(checkBuggedAccont, (25*1000), 1, player);
-	setElementData(player, "spawnedzombies", 0);
-	for _,v in ipairs(playerData2Table) do
-		setElementData(player,v[1],getAccountData(account,v[1]));
-	end
+	setDayZData(player, "spawnedzombies", 0);
 	equipThem(player, 0);
 	loadPlayerSafeCodes(player);
 end);
 
 addEventHandler("onPlayerDayZRegister", getRootElement(), function(player,email)
+	if not isElement(player) or isGuestAccount(getPlayerAccount(player)) then return end
 	spawnDayZPlayer(player);
-	setElementData(player, "radiochannel", "99999");
-	setElementData(player, "gpschannel", "");
-	setElementData(player, "gang", "None");
+	setDayZData(player, "radiochannel", "99999");
+	setDayZData(player, "gpschannel", "");
+	setDayZData(player, "gang", "None");
 	for _,v in ipairs(playerData2Table) do
-		setElementData(player,v[1],v[2]);
+		setDayZData(player,v[1],v[2]);
 	end
-	setElementData(player, "stats.email", email);
-	setElementData(player, "stats.joined", getTimestamp());
+	setDayZData(player, "stats.email", email);
+	setDayZData(player, "stats.joined", getTimestamp());
 	savePlayerData(player);
 	savePlayerData2(player);
 end);
@@ -243,33 +272,36 @@ function spawnDayZPlayer(player)
 		setCameraTarget(player, player);
 		fadeCamera(player, true);
 		setPedHeadless(player,false);
-		local playerCol = createColSphere(x, y, z, 1.5);
-		setElementData(player, "playerCol", playerCol);
+		local previousCol = getElementData(player,"playerCol");
+	if isElement(previousCol) then destroyElement(previousCol) end
+	local playerCol = createColSphere(x, y, z, 1.5);
+		setDayZData(player, "playerCol", playerCol);
 		attachElements(playerCol, player, 0, 0, 0);
-		setElementData(playerCol, "parent", player);
-		setElementData(playerCol, "player", true);
+		setDayZData(playerCol, "parent", player);
+		setDayZData(playerCol, "player", true);
 		setAccountData(getPlayerAccount(player), "isDead", false);
-		setElementData(player, "isDead", false);
-		setElementData(player, "logedin", true);
-		setElementData(player, "skin", skin);
+		setDayZData(player, "isDead", false);
+		setDayZData(player, "logedin", true);
+		setDayZData(player, "skin", skin);
 		for _,v in ipairs(playerDataTable) do
 			if (v[1] ~= "skin" and v[1] ~= "radiochannel" and v[1] ~= "gpschannel") then
-				setElementData(player, v[1], v[2]);
+				setDayZData(player, v[1], v[2]);
 			end
 		end
-		setElementData(player, "weapon25", 1);
-		setElementData(player, "mag1", 30);
-		setElementData(player, "toolbelt2", 1);
-		setElementData(player, "toolbelt1", 1);
-		setElementData(player, "MAX_Slots", 12);
-		setElementData(player, "logedin", true);
+		setDayZData(player, "weapon25", 1);
+		setDayZData(player, "mag1", 30);
+		setDayZData(player, "toolbelt2", 1);
+		setDayZData(player, "toolbelt1", 1);
+		setDayZData(player, "MAX_Slots", 12);
+		setDayZData(player, "logedin", true);
 		setTimer(checkBuggedAccont, (25*1000), 1, player);
-		setElementData(player, "spawnedzombies", 0);
+		setDayZData(player, "spawnedzombies", 0);
 		showhelp(player,true);
 	end
 end
 
 addEventHandler("kilLDayZPlayer", root, function(killer, headshot, weapon)
+	if not dayZValidateAction("kilLDayZPlayer",{killer,headshot,weapon}) then return end
 	local account = getPlayerAccount(source);
 	if not account then return; end
 	if (getElementData(source,"isDead")) then return; end
@@ -280,7 +312,7 @@ addEventHandler("kilLDayZPlayer", root, function(killer, headshot, weapon)
 	killPed(source);
 	triggerClientEvent(source, "hideInventoryManual", source);
 	triggerClientEvent(source,"playSoundForClient",source,"death");
-	setElementData(source, "stats.deaths", getElementData(source, "stats.deaths") + 1);
+	setDayZData(source, "stats.deaths", getElementData(source, "stats.deaths") + 1);
 	if (getElementData(source, "alivetime") >= 2) then
 		--if not isElementInWater(source) then
 			local x,y,z = getElementPosition(source);
@@ -299,25 +331,25 @@ addEventHandler("kilLDayZPlayer", root, function(killer, headshot, weapon)
 					if isElement(pedCol) then destroyElement(pedCol); end
 				end, (15*60000), 1, ped, pedCol);
 				attachElements(pedCol, ped, 0, 0, 0);
-				setElementData(pedCol, "parent", ped);
-				setElementData(pedCol, "playername", getPlayerName(source));
-				setElementData(pedCol, "deadman", true);
-				setElementData(pedCol, "MAX_Slots", getElementData(source, "MAX_Slots"));
+				setDayZData(pedCol, "parent", ped);
+				setDayZData(pedCol, "playername", getPlayerName(source));
+				setDayZData(pedCol, "deadman", true);
+				setDayZData(pedCol, "MAX_Slots", getElementData(source, "MAX_Slots"));
 				local time = getRealTime();
-				setElementData(pedCol, "deadreason",{"player",getPlayerName(source),"deadplayertext1",weapon,"deadplayertext2","deadplayertext3",time.hour,time.minute,"clocktext"});
+				setDayZData(pedCol, "deadreason",{"player",getPlayerName(source),"deadplayertext1",weapon,"deadplayertext2","deadplayertext3",time.hour,time.minute,"clocktext"});
 				if (pedCol) then
 					for _,v in ipairs(playerDataTable) do
 						local itemPlus = getElementData(source, v[1]);
-						setElementData(pedCol, v[1], itemPlus);
+						setDayZData(pedCol, v[1], itemPlus);
 					end
 					local skin = getSkinNameFromID(getElementData(source, "skin"));
-					setElementData(pedCol, skin, getElementData(pedCol, skin) + 1);
+					setDayZData(pedCol, skin, getElementData(pedCol, skin) + 1);
 					local backpack = getBackpackNameFromSlots(getElementData(source, "MAX_Slots"));
-					setElementData(pedCol, backpack, (getElementData(pedCol, backpack) or 0) + 1);
+					setDayZData(pedCol, backpack, (getElementData(pedCol, backpack) or 0) + 1);
 					local helmet = getElementData(source,"helmet");
 					local vest = getElementData(source,"vest");
-					if (helmet ~= "") then setElementData(pedCol,helmet,getElementData(pedCol,helmet)+1); end
-					if (vest ~= "") then setElementData(pedCol,vest,getElementData(pedCol,vest)+1); end
+					if (helmet ~= "") then setDayZData(pedCol,helmet,getElementData(pedCol,helmet)+1); end
+					if (vest ~= "") then setDayZData(pedCol,vest,getElementData(pedCol,vest)+1); end
 				end
 			end
 		--end
@@ -328,37 +360,39 @@ addEventHandler("kilLDayZPlayer", root, function(killer, headshot, weapon)
 		else
 			addPlayerStats(killer, "humanity", math.random(1000, 2500));
 		end
-		setElementData(killer, "murders", getElementData(killer, "murders") + 1);
-		setElementData(killer, "stats.murders", getElementData(killer, "stats.murders") + 1);
+		setDayZData(killer, "murders", getElementData(killer, "murders") + 1);
+		setDayZData(killer, "stats.murders", getElementData(killer, "stats.murders") + 1);
 		if (getElementData(source, "humanity") <= 0) then
-			setElementData(killer, "banditskilled", getElementData(killer, "banditskilled") + 1);
-			setElementData(killer, "stats.banditskilled", getElementData(killer, "stats.banditskilled") + 1);
+			setDayZData(killer, "banditskilled", getElementData(killer, "banditskilled") + 1);
+			setDayZData(killer, "stats.banditskilled", getElementData(killer, "stats.banditskilled") + 1);
 		end
 		if (headshot == true) then
-			setElementData(killer, "headshots", getElementData(killer, "headshots") + 1);
-			setElementData(killer, "stats.headshots", getElementData(killer, "stats.headshots") + 1);
+			setDayZData(killer, "headshots", getElementData(killer, "headshots") + 1);
+			setDayZData(killer, "stats.headshots", getElementData(killer, "stats.headshots") + 1);
 		end
-		setElementData(killer,"zombieskilled",getElementData(killer,"zombieskilled")+getElementData(source,"zombieskilled"))
+		setDayZData(killer,"zombieskilled",getElementData(killer,"zombieskilled")+getElementData(source,"zombieskilled"))
 		triggerClientEvent("displayClientInfo", root, getPlayerName(source):gsub("#%x%x%x%x%x%x", ""), 255, 255, 255, 3, getPlayerName(killer):gsub("#%x%x%x%x%x%x", ""));
 	else
 		triggerClientEvent("displayClientInfo", root, getPlayerName(source):gsub("#%x%x%x%x%x%x", ""), 255, 255, 255, 2);
 	end
 	for _,v in ipairs({1,2,3,4,5,6,7,8}) do
-		setElementData(source,"show_"..v,true)
+		setDayZData(source,"show_"..v,true)
 	end
 	setTimer(setElementPosition, 500, 1, source, 6000, 6000, 0);
 	setAccountData(account, "isDead", true);
-	setElementData(source, "isDead", true);
+	setDayZData(source, "isDead", true);
 	setTimer(spawnDayZPlayer, configVar.respawntime*1000+1000, 1, source);
 end);
 
 addEventHandler("onPlayerQuit", root, function()
+	local previousCol = getElementData(source,"playerCol");
+	if isElement(previousCol) then destroyElement(previousCol) end
 	savePlayerData(source);
 	savePlayerData2(source);
 	savePlayerSafeCodes(source);
 end);
 
-addEventHandler("onResourceStop", root, function()
+addEventHandler("onResourceStop", resourceRoot, function()
 	for _,v in pairs(getElementsByType("player")) do
 		savePlayerData(v);
 		savePlayerData2(v);
@@ -368,7 +402,7 @@ end);
 
 function savePlayerData(player)
 	local account = getPlayerAccount(player);
-	if account then
+	if account and not isGuestAccount(account) and getElementData(player,"logedin") then
 		for _,v in ipairs(playerDataTable) do
 			setAccountData(account, v[1], getElementData(player, v[1]));
 		end
@@ -381,7 +415,7 @@ end
 
 function savePlayerData2(player)
 	local account = getPlayerAccount(player);
-	if (account) then
+	if account and not isGuestAccount(account) and getElementData(player,"logedin") then
 		for _,v in ipairs(playerData2Table) do
 			setAccountData(account,v[1],getElementData(player,v[1]));
 		end
@@ -390,9 +424,9 @@ end
 
 function savePlayerSafeCodes(player)
 	local account = getPlayerAccount(player);
-	if (account) then
+	if account and not isGuestAccount(account) and getElementData(player,"logedin") then
 		for _,v in ipairs(getElementsByType("colshape")) do
-			if (getElementData(v,"item4") and getElementData(v,"id")) then
+			if (getElementData(v,"safe") and getElementData(v,"id")) then
 				local safe_id = getElementData(v,"id");
 				local safe_code = getElementData(v,safe_id);
 				local player_code = getElementData(player,safe_id)
@@ -413,13 +447,13 @@ function loadPlayerSafeCodes(player)
 			local data = _;
 			local value = v;
 			for _,v in ipairs(getElementsByType("colshape")) do
-				if (getElementData(v,"item4")) then
+				if (getElementData(v,"safe")) then
 					local safe_id = getElementData(v,"id");
 					local safe_code = getElementData(v,safe_id);
 					if (safe_code == "raided") then
 						setAccountData(account,safe_id,false);
 					elseif (string.find(data,safe_id)) then
-						setElementData(player,data,value);
+						setDayZData(player,data,value);
 					end
 				end
 			end
@@ -445,7 +479,7 @@ function checkBuggedAccont(player)
 				end
 				for _,v in ipairs(playerDataTable) do
 					if (not getElementData(player,v[1])) then
-						setElementData(player,v[1],v[2]);
+						setDayZData(player,v[1],v[2]);
 					end
 					if (type(getElementData(player, v[1])) ~= type(v[2])) then
 						removeBackpack(player);
@@ -467,3 +501,8 @@ end
 addCommandHandler("kill", function(player)
 	triggerEvent("kilLDayZPlayer", player);
 end);
+setTimer(function()
+    for _, player in ipairs(getElementsByType("player")) do
+        savePlayerData(player); savePlayerData2(player); savePlayerSafeCodes(player)
+    end
+end,60000,0)

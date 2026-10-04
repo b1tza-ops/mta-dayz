@@ -1,25 +1,9 @@
-setElementData(localPlayer,"dutyMode",false)
 defaultBlood = nil;
 
 function main()
 	function dutyMode()
-		if not getElementData(localPlayer,"dutyMode") then
-			setElementData(localPlayer,"dutyMode",true)
-			guiSetText(labelDutyText,"ON")
-			guiLabelSetColor(labelDutyText, 0, 255, 0)
-			SupermanStart()
-			defaultBlood = getElementData(localPlayer,"blood")
-			dutyInvincibility(true)
-			setElementData(localPlayer,"zombie",true)
-		else
-			setElementData(localPlayer,"dutyMode",false)
-			guiSetText(labelDutyText,"OFF")
-			guiLabelSetColor(labelDutyText, 255, 0, 0)
-			SupermanStop()
-			dutyInvincibility(false)
-			setElementData(localPlayer,"zombie",false)
-		end
-	end
+        triggerServerEvent("dayz:adminDuty",localPlayer)
+    end
 
 	function drawTextOnDuty()
 		local players = getElementsByType("player");
@@ -260,9 +244,9 @@ function main()
 
 	function give()
 		if (guiGridListGetSelectedItem(giveWindowGridlist) ~= -1) then
-			local item = guiGridListGetItemText(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist))
+			local item = guiGridListGetItemData(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist),1)
 			local quantity = guiGetText(giveWindowEditboxQuant)
-			local selectedPlayer = getPlayerFromName(guiGridListGetItemText(gridlistPlayers1,item,1))
+			local selectedPlayer = getPlayerFromName(guiGridListGetItemText(gridlistPlayers1,guiGridListGetSelectedItem(gridlistPlayers1),1))
 			if selectedPlayer then
 				triggerServerEvent("giveEvent",localPlayer,selectedPlayer,item,quantity)
 			end
@@ -271,7 +255,7 @@ function main()
 
 	function giveAll()
 		if (guiGridListGetSelectedItem(giveWindowGridlist) ~= -1) then
-			local item = guiGridListGetItemText(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist))
+			local item = guiGridListGetItemData(giveWindowGridlist,guiGridListGetSelectedItem(giveWindowGridlist),1)
 			local quantity = guiGetText(giveWindowEditboxQuant)
 			triggerServerEvent("giveAllEvent",localPlayer,item,quantity)
 		end
@@ -404,3 +388,11 @@ function hasPermission(key,keyState)
 	end
 end
 bindKey("o", "down", hasPermission)
+addEvent("dayz:adminDutyChanged",true)
+addEventHandler("dayz:adminDutyChanged",resourceRoot,function(enabled)
+    if enabled then defaultBlood = getElementData(localPlayer,"blood") end
+    guiSetText(labelDutyText,enabled and "ON" or "OFF")
+    guiLabelSetColor(labelDutyText,enabled and 0 or 255,enabled and 255 or 0,0)
+    if enabled then SupermanStart() else SupermanStop() end
+    dutyInvincibility(enabled)
+end)

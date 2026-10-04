@@ -1,0 +1,7 @@
+<!-- Merge these entries into the existing Admin group in your server's acl.xml.
+     Create and secure the b1tza account first. Do not replace the full ACL file. -->
+<group name="Admin">
+    <acl name="Admin" />
+    <object name="user.b1tza" />
+    <object name="resource.e_admin" />
+</group>

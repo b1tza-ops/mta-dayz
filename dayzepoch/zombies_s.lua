@@ -89,6 +89,8 @@ end
 function chaseAnim(ped)
 	if isElement(ped) then
 		setPedAnimation(ped, chaseblock, chaseanim, -1, true, true, true);
+        local variant=DayZZombieTypes[getElementData(ped,"zombie:type")] or DayZZombieTypes.civilian
+        setPedAnimationSpeed(ped,chaseanim,variant.speed);
 	end
 end
 
@@ -109,7 +111,7 @@ function Zomb_chase(ped, Zx, Zy, Zz)
 				if not getElementData(ped, "target") then
 					local giveup = math.random(1, 15);
 					if (giveup == 1) then
-						setElementData(ped, "status", "idle");
+						setDayZData(ped, "status", "idle");
 					else
 						local action = math.random(1, 2);
 						if (action == 2) then
@@ -135,7 +137,7 @@ function Zomb_chase(ped, Zx, Zy, Zz)
 								setPedAnimation(ped, "MEDIC", "cpr", -1, false, true, false);
 								setTimer(function(ped)
 									if (ped) then
-										setElementData(ped,"status","idle");
+										setDayZData(ped,"status","idle");
 										setElementRotation(ped,0,0,getElementRotation(ped)-180);
 									end
 								end,10000,1,ped)
@@ -156,14 +158,18 @@ function Zomb_chase(ped, Zx, Zy, Zz)
 							end
 						else
 							setPedAnimation(ped, chaseblock, chaseanim, -1, true, true, true);
+        local variant=DayZZombieTypes[getElementData(ped,"zombie:type")] or DayZZombieTypes.civilian
+        setPedAnimationSpeed(ped,chaseanim,variant.speed);
 							setTimer(Zomb_chase, checkspeed, 1, ped, x, y, z);
 						end
 					else
-						setElementData(ped, "status", "idle");
+						setDayZData(ped, "status", "idle");
 					end
 				end
 			else
 				setPedAnimation(ped, chaseblock, chaseanim, -1, true, true, true);
+        local variant=DayZZombieTypes[getElementData(ped,"zombie:type")] or DayZZombieTypes.civilian
+        setPedAnimationSpeed(ped,chaseanim,variant.speed);
 				setTimer(Zomb_chase, checkspeed, 1, ped, x, y, z);
 			end
 		end
@@ -181,7 +187,7 @@ function setangle()
 						x,y,z = getElementPosition(ptarget);
 						px,py,pz = getElementPosition(ped);
 					else
-						setElementData(ped, "status", "idle");
+						setDayZData(ped, "status", "idle");
 						x,y,z = getElementPosition(ped);
 						px,py,pz = getElementPosition(ped);
 					end
@@ -226,12 +232,12 @@ addEventHandler("onElementDataChange", root, function(dataName)
 							setPedAnimation(source, "knife", "KILL_Knife_Player", -1, false, false, true);
 							setPedAnimation(ptarget, "knife", "KILL_Knife_Ped_Damage", -1, false, false, true);
 							setTimer(Playerthroatbitten, 2300, 1, ptarget, source);
-							setTimer(function(source) if (isElement(source)) then setElementData(source, "status", "idle"); end end, 5000, 1, source);
+							setTimer(function(source) if (isElement(source)) then setDayZData(source, "status", "idle"); end end, 5000, 1, source);
 						else
-							setElementData(source, "status", "idle");
+							setDayZData(source, "status", "idle");
 						end
 					else
-						setElementData(source, "status", "idle");
+						setDayZData(source, "status", "idle");
 					end
 				end
 			elseif (getElementData(source, "status") ==  "dead") then
@@ -254,10 +260,10 @@ addEventHandler("onResourceStart", root, function(startedResource)
 	WoodTimer = setTimer(WoodSetup, 2000, 1);
 	if (startedResource == getThisResource()) then
 		for _,thep in ipairs(getElementsByType("player")) do
-			setElementData(thep, "dangercount", 0);
+			setDayZData(thep, "dangercount", 0);
 		end	
 		for _,playerValue in ipairs(getAlivePlayers()) do
-			setElementData(playerValue, "alreadyspawned", true);
+			setDayZData(playerValue, "alreadyspawned", true);
 		end
 		if (ZombieSpeed == 2) then
 			MainTimer1 = setTimer(setangle, 200, 0);
@@ -274,7 +280,7 @@ addEventHandler("onResourceStart", root, function(startedResource)
 end);
 
 addEventHandler("onPlayerJoin", root, function()
-	setElementData(source, "dangercount", 0);
+	setDayZData(source, "dangercount", 0);
 end);
 
 function WoodSetup()
@@ -288,7 +294,7 @@ function WoodSetup()
 			setElementDimension(objectValue, 26);
 			local x,y,z = getElementPosition(objectValue);
 			local thecol = createColSphere(x, y, z, 1.6 );
-			setElementData(thecol, "purpose", "zombiewood" );
+			setDayZData(thecol, "purpose", "zombiewood" );
 			setElementParent(thecol, objectValue);
 		end
 	end	
@@ -331,7 +337,9 @@ function Zomb_delete_player(ped)
 				end
 			end
 			local zOwner = getElementData(ped, "owner");
-			setElementData(zOwner, "spawnedzombies", getElementData(zOwner, "spawnedzombies") - 1);
+			if isElement(zOwner) then
+                setDayZData(zOwner, "spawnedzombies", math.max(0,(tonumber(getElementData(zOwner,"spawnedzombies")) or 0)-1));
+            end
 			destroyElement(ped);
 		end
 	end
@@ -453,18 +461,23 @@ addEventHandler("onPlayerSpawn", root, function()
 		end
 	end
 	if not getElementData(source, "alreadyspawned") then
-		setElementData(source, "alreadyspawned", true);
+		setDayZData(source, "alreadyspawned", true);
 	end
 end);
 
-function createZombie(x, y, z, rot, skin)
+function createZombie(x, y, z, rot, skin, variant)
+    variant=DayZZombieTypes[variant] and variant or DayZChooseZombieType(math.random(100))
+    local kind=DayZZombieTypes[variant]
+    skin=kind.skin or skin
 	if (table.getn(everyZombie) < newZombieLimit) then
 		local zomb = createPed(tonumber(skin), tonumber(x), tonumber(y), tonumber(z));
 		if isElement(zomb) then
-			setElementData(zomb, "zombie", true);
-			setElementData(zomb, "forcedtoexist", true);
+			setDayZData(zomb, "zombie", true);
+            setDayZData(zomb,"zombie:type",variant);
+            setDayZData(zomb,"blood",kind.blood);
+			setDayZData(zomb, "forcedtoexist", true);
 			setElementRotation(zomb, 0, 0, rot);
-			setElementData(zomb, "status", "idle");
+			setDayZData(zomb, "status", "idle");
 			table.insert(everyZombie, zomb);
 			triggerClientEvent("Zomb_STFU", root, zomb);
 			return zomb;
@@ -483,17 +496,25 @@ function isPedZombie(ped)
 end
 
 addEventHandler("onZombieLostPlayer", root, function(x, y, z)
-	setElementData(source, "Tx", x, false);
-	setElementData(source, "Ty", y, false);
-	setElementData(source, "Tz", z, false);
+    if client and (not isElement(source) or not getElementData(source,"zombie")
+        or not dayZNearby(client,source,150) or type(x) ~= "number" or type(y) ~= "number" or type(z) ~= "number") then return end
+	setDayZData(source, "Tx", x, false);
+	setDayZData(source, "Ty", y, false);
+	setDayZData(source, "Tz", z, false);
 end);
 
 addEventHandler("createZomieForPlayer", root, function(x, y, z)
+    if client ~= source or not dayZRequest(client,"zombieSpawn",5000)
+        or type(x) ~= "number" or type(y) ~= "number" or type(z) ~= "number"
+        or x ~= x or y ~= y or z ~= z or math.abs(x)>3000 or math.abs(y)>3000 or math.abs(z)>1500 then return end
+    local px,py,pz = getElementPosition(client)
+    if getDistanceBetweenPoints3D(px,py,pz,x,y,z)>60
+        or (tonumber(getElementData(client,"spawnedzombies")) or 0)>=configVar.maxzombies then return end
 	local zombie = createZombie(x, y, z, math.random(360), zombiePedSkins[math.random(#zombiePedSkins)]);
-	setElementData(zombie, "zombie", true);
-	setElementData(zombie, "blood", math.random(8000, 12000));
-	setElementData(zombie, "owner", client);
-	setElementData(client, "spawnedzombies", getElementData(client, "spawnedzombies") + 1);
+	if not isElement(zombie) then return end
+	setDayZData(zombie, "zombie", true);
+	setDayZData(zombie, "owner", client);
+	setDayZData(client, "spawnedzombies", getElementData(client, "spawnedzombies") + 1);
 end);
 
 addEventHandler("onPlayerQuit", root, function()
@@ -507,13 +528,16 @@ addEventHandler("onPlayerQuit", root, function()
 end);
 
 addEventHandler("onZombieGetsKilled", root, function(killer, headshot, weapon)
-	if (killer and getElementType(killer) == "player") then
+    if not isElement(source) or getElementType(source) ~= "ped" or not getElementData(source,"zombie") then return end
+    if client and (killer ~= client or not getElementData(client,"logedin") or not dayZNearby(client,source,150)) then return end
+	if (isElement(killer) and getElementType(killer) == "player") then
+        DayZAwardZombieXP(killer,source,headshot);
 		if headshot then
-			setElementData(killer, "headshots", getElementData(killer, "headshots") + 1);
-			setElementData(killer, "stats.headshots", getElementData(killer, "stats.headshots") + 1);
+			setDayZData(killer, "headshots", getElementData(killer, "headshots") + 1);
+			setDayZData(killer, "stats.headshots", getElementData(killer, "stats.headshots") + 1);
 		end
-		setElementData(killer, "zombieskilled", getElementData(killer, "zombieskilled") + 1);
-		setElementData(killer, "stats.zombieskilled", getElementData(killer, "stats.zombieskilled") + 1);
+		setDayZData(killer, "zombieskilled", getElementData(killer, "zombieskilled") + 1);
+		setDayZData(killer, "stats.zombieskilled", getElementData(killer, "stats.zombieskilled") + 1);
 	end
 	local x,y,z = getElementPosition(source);
 	local rx,ry,rz = getElementRotation(source);
@@ -528,25 +552,27 @@ addEventHandler("onZombieGetsKilled", root, function(killer, headshot, weapon)
 		if isElement(pedCol) then destroyElement(pedCol); end
 	end, (10*60000), 1, ped, pedCol);
 	attachElements(pedCol, ped);
-	setElementData(pedCol, "parent", ped);
-	setElementData(pedCol, "playername", "zombiename");
-	setElementData(pedCol, "deadman", true);
-	setElementData(pedCol, "MAX_Slots", 8);
-	setElementData(ped, "deadzombie", true);
+	setDayZData(pedCol, "parent", ped);
+	setDayZData(pedCol, "playername", "zombiename");
+	setDayZData(pedCol, "deadman", true);
+	setDayZData(pedCol, "MAX_Slots", 8);
+	setDayZData(ped, "deadzombie", true);
 	local time = getRealTime();
-	setElementData(pedCol, "deadreason",{"other","deadzombietext",time.hour,time.minute,"clocktext"});
+	setDayZData(pedCol, "deadreason",{"other","deadzombietext",time.hour,time.minute,"clocktext"});
 	for _,v in ipairs(itemTableZombies) do
 		local value = math.percentChance(v[2]/2.5, 1);
-		setElementData(pedCol, v[1], value);
+		setDayZData(pedCol, v[1], value);
 		local ammoData,_ = getWeaponAmmoType(v[1]);
 		if (ammoData and value > 0) then
-			setElementData(pedCol, ammoData, getMagazineSize(ammoData));
+			setDayZData(pedCol, ammoData, getMagazineSize(ammoData));
 		end
 	end
 	if (weapon == 33) then
-		setElementData(pedCol, "mag9", 1);
+		setDayZData(pedCol, "mag9", 1);
 	end
 	local zOwner = getElementData(source, "owner");
-	setElementData(zOwner, "spawnedzombies", getElementData(zOwner, "spawnedzombies") - 1);
+	if isElement(zOwner) then
+        setDayZData(zOwner, "spawnedzombies", math.max(0,(tonumber(getElementData(zOwner,"spawnedzombies")) or 0)-1));
+    end
 	destroyElement(source);
 end);

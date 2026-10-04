@@ -32,6 +32,30 @@ local imageOwnerResource                = getThisResource()
 
 toggleControl("radar",false)
 
+local mapTexture,lastTextureAttempt
+local function clearMapTexture()
+ if isElement(mapTexture) then destroyElement(mapTexture) end
+ mapTexture=nil;lastTextureAttempt=nil
+end
+local function ensureMapTexture()
+ if isElement(mapTexture) then return mapTexture end
+ local now=getTickCount()
+ if lastTextureAttempt and now-lastTextureAttempt<5000 then return false end
+ lastTextureAttempt=now
+ mapTexture=dxCreateTexture(mapFile,"dxt1",false,"clamp")
+ if not isElement(mapTexture) then
+  outputDebugString("[DayZ map] Background texture failed to load: "..mapFile.."; retrying in 5 seconds.",2)
+  return false
+ end
+ return mapTexture
+end
+addEventHandler("onClientRestore",getRootElement(),function() clearMapTexture() end)
+addEventHandler("onClientResourceStop",getResourceRootElement(),function()
+ clearMapTexture()
+ if mapchat then showChat(true);mapchat=false end
+ toggleControl("radar",true)
+end)
+
 local abs=math.abs
 
 function calculateFirstCoordinates()  -- This function is for making export functions work without the map having been opened once
@@ -66,7 +90,8 @@ end);
 
 function drawMap()
 	if not toggle then
-		dxDrawImage(0,0,0,0,mapFile,0,0,0,0,false)  -- This is actually important, because otherwise you'd get huge lag when opening the maximap after a while (it seems to unload the image after a short while)
+		-- Keep the texture allocated while the map is closed.
+		ensureMapTexture()
 	else
 		checkMovement()
 		
@@ -76,7 +101,14 @@ function drawMap()
 		x=middleX-hSize/2+xOffset*zoom
 		y=middleY-vSize/2+yOffset*zoom
 		
-		dxDrawImage(x,y,hSize,vSize,mapFile,0,0,0,mapDrawColor,false)
+		dxSetBlendMode("blend")
+        local texture=ensureMapTexture()
+        if texture then
+            dxDrawImage(x,y,hSize,vSize,texture,0,0,0,mapDrawColor,false)
+        else
+            dxDrawRectangle(x,y,hSize,vSize,tocolor(25,30,25,230),false)
+            dxDrawText("Map image unavailable - retrying...",x,y,x+hSize,y+40,normalColor,1,"default","center","center")
+        end
 		
 		drawRadarAreas()
 		drawBlips()
@@ -282,8 +314,13 @@ end
 
 function setPlayerMapVisible(newToggle)
 	if type(newToggle)=="boolean" then
+        if newToggle==toggle then return true end
 		toggle=newToggle
-		
+        if toggle and isChatVisible() then
+            mapchat=true;showChat(false)
+        elseif not toggle and mapchat then
+            mapchat=false;showChat(true)
+        end
 		if toggle then
 			triggerEvent("onClientPlayerMapShow",getRootElement(),true)
 		else
@@ -315,7 +352,9 @@ function setPlayerMapImage(image,tLX,tLY,lRX,lRY)
 			image                             = ":"..sourceResourceName.."/"..image
 		end
 		
-		if dxDrawImage(0,0,0,0,image,0,0,0,0,false) then
+		local replacement=dxCreateTexture(image,"dxt1",false,"clamp")
+		if isElement(replacement) then
+            clearMapTexture();mapTexture=replacement
 			imageOwnerResource                = sourceResource
 			
 			mapFile                           = image
@@ -334,6 +373,7 @@ function setPlayerMapImage(image,tLX,tLY,lRX,lRY)
 		imageOwnerResource                = thisResource
 		
 		mapFile                           = ":e_map/images/world.png"
+        clearMapTexture()
 		topLeftWorldX,topLeftWorldY       = -3000,3000
 		lowerRightWorldX,lowerRightWorldY = 3000,-3000
 		mapWidth,mapHeight                = 6000,6000

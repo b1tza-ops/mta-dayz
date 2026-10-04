@@ -253,11 +253,15 @@ local monthToName = {
 setTimer(function()
     if (getElementData(localPlayer,"logedin")) then
         if (not getElementData(localPlayer,"stats.zombieskilled")) then return; end
-        local days,hours,minutes = formatTime(tonumber(getElementData(localPlayer,"stats.playtime")));
-        local timestamp = getElementData(localPlayer,"stats.joined")
-        local time = getRealTime(timestamp);
-        time.month = time.month+1;
-        time.year = time.year+1900;
+        local days,hours,minutes = formatTime(tonumber(getElementData(localPlayer,"stats.playtime")) or 0);
+        local timestamp = tonumber(getElementData(localPlayer,"stats.joined"));
+        local joined = "Unknown";
+        if timestamp and timestamp == timestamp and timestamp > 0 and timestamp < math.huge then
+            local time = getRealTime(timestamp);
+            if type(time) == "table" then
+                joined = time.monthday.." "..monthToName[time.month+1].." "..(time.year+1900);
+            end
+        end
         guiSetText(ucp.edit[1],getElementData(localPlayer,"stats.email"));
         guiSetText(ucp.label[5],"Total zombies killed: "..getElementData(localPlayer,"stats.zombieskilled"));
         guiSetText(ucp.label[6],"Total headshots: "..getElementData(localPlayer,"stats.headshots"));
@@ -265,7 +269,7 @@ setTimer(function()
         guiSetText(ucp.label[8],"Total bandits killed: "..getElementData(localPlayer,"stats.banditskilled"));
         guiSetText(ucp.label[9],"Total deaths: "..getElementData(localPlayer,"stats.deaths"));
         guiSetText(ucp.label[11],"Total play time: "..days.." Days "..hours.." Hours "..minutes.." Minutes");
-        guiSetText(ucp.label[12],"Joined: "..time.monthday.." "..monthToName[time.month].." "..time.year);
+        guiSetText(ucp.label[12],"Joined: "..joined);
     end
 end,5000,0);
 
