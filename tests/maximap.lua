@@ -31,6 +31,9 @@ function getElementPosition() return 0,0,0 end
 function getPedRotation() return 0 end
 function getElementData() return false end
 function triggerEvent() return true end
+local chatVisible=true
+function isChatVisible() return chatVisible end
+function showChat(value) chatVisible=value end
 function getResourceName() return 'e_map' end
 dofile('e_map/maximap_c.lua')
 setPlayerMapVisible(true)
@@ -44,3 +47,9 @@ assert(setPlayerMapImage('custom.png',-3000,3000,3000,-3000));drawMap();assert(l
 fail=true;assert(not setPlayerMapImage('missing.png',-3000,3000,3000,-3000));drawMap();assert(lastMaterial.path==':e_map/custom.png')
 fail=false;setPlayerMapImage();drawMap();assert(lastMaterial.path==':e_map/images/world.png')
 print('PASS maximap texture persistence, failed allocation cooldown, recovery, restore and replacement')
+
+setPlayerMapVisible(false);assert(chatVisible)
+setPlayerMapVisible(true);assert(not chatVisible)
+for _,fn in ipairs(handlers.onClientResourceStop) do fn(resourceRoot) end
+assert(chatVisible)
+print('PASS map hide and resource stop restore chat visibility')

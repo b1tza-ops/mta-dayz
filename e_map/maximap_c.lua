@@ -50,7 +50,11 @@ local function ensureMapTexture()
  return mapTexture
 end
 addEventHandler("onClientRestore",getRootElement(),function() clearMapTexture() end)
-addEventHandler("onClientResourceStop",getResourceRootElement(),clearMapTexture)
+addEventHandler("onClientResourceStop",getResourceRootElement(),function()
+ clearMapTexture()
+ if mapchat then showChat(true);mapchat=false end
+ toggleControl("radar",true)
+end)
 
 local abs=math.abs
 
@@ -310,8 +314,13 @@ end
 
 function setPlayerMapVisible(newToggle)
 	if type(newToggle)=="boolean" then
+        if newToggle==toggle then return true end
 		toggle=newToggle
-		
+        if toggle and isChatVisible() then
+            mapchat=true;showChat(false)
+        elseif not toggle and mapchat then
+            mapchat=false;showChat(true)
+        end
 		if toggle then
 			triggerEvent("onClientPlayerMapShow",getRootElement(),true)
 		else

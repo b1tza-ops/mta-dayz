@@ -1557,3 +1557,18 @@ end, 4000, 0);
 setTimer(function()
 	playSound("sounds/ambience/dayz"..tostring(math.random(3))..".mp3",false);
 end, 30*60000, 0);
+-- Recovery after interrupted map/login resource restarts.
+addCommandHandler("fixchat",function()
+    if not getElementData(localPlayer,"logedin") then return end
+    local map=getResourceFromName("e_map")
+    if map and getResourceState(map)=="running" then exports.e_map:setPlayerMapVisible(false) end
+    showChat(true)
+    unbindKey("t","down","chatbox")
+    bindKey("t","down","chatbox")
+    unbindKey("x","down","chatbox","globalchat")
+    unbindKey("u","down","chatbox","radiochat")
+    bindKey("x","down","chatbox","globalchat")
+    bindKey("u","down","chatbox","radiochat")
+    outputChatBox("[DayZ] Chat restored. T: local, X: global, U: radio.",100,220,140)
+    outputDebugString("[DayZ chat] Client visibility and channel bindings restored.",3)
+end)
