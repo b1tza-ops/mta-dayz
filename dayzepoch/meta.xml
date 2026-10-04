@@ -46,6 +46,7 @@
     <script src="menu_client.lua" type="client" cache="false"/>
     <script src="inventory.lua" type="client" cache="false"/>
     <script src="scripts/welcome_c.lua" type="client" cache="false"/>
+    <script src="scripts/vehicle_sounds_c.lua" type="client" cache="false"/>
     <script src="core_client.lua" type="client" cache="false"/>
 	<script src="zombies_c.lua" type="client" cache="false"/>
     <script src="scripts/admin_testing_c.lua" type="client" cache="false" />

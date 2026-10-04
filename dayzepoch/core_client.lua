@@ -961,25 +961,6 @@ local counter = 0
 local starttick 
 local fps =0 
 
--- vehicle sounds
-local vehsounds = {
-	{487,"heli.mp3"},
-	{497,"heli.mp3"},
-	{528,"armoredtruck.mp3"},
-	{470,"hmmwv.mp3"},
-	{422,"pickuptruck.mp3"},
-	{468,"motorcycle.mp3"},
-	{433,"uralmilitary.mp3"},
-	{473,"pbx.mp3"},
-	{471,"atv.mp3"},
-	{463,"motorbike.mp3"},
-	{490,"suv.mp3"},
-	{531,"tractor.mp3"},
-	{579,"uaz.mp3"},
-	{421,"golfiw211.mp3"},
-	{456,"modernvan.mp3"},
-};
-
 addEventHandler("onClientRender",root,function()
 	if (getElementData(localPlayer,"logedin")) then
 		if (getElementData(localPlayer,"setting.fps")) then
@@ -993,55 +974,6 @@ addEventHandler("onClientRender",root,function()
 	        end
 		    local text = fps.." FPS | "..getPlayerPing(localPlayer).." PING";
 		    dxDrawText(text, (sW*0.98)-dxGetTextWidth(text),0,0,0,tocolor(255,255,255,180));
-		end
-		-- vehicle custom sounds :D
-		for _,v in pairs(getElementsByType("vehicle")) do
-			local vehicle = v;
-			local vehicleid = getElementModel(vehicle);
-			local vehiclestate = getVehicleEngineState(vehicle)
-			if (vehicleid ~= 509) then
-				for _,v in pairs(vehsounds) do
-					if (v[1] == vehicleid) then
-						local soundpath = "sounds/vehicles/"..v[2];
-						local elements = getAttachedElements(vehicle);
-						for i,e in ipairs(elements) do
-							if (getElementType(e) == "sound") then
-								if (vehicleid == 487 or vehicleid == 497) then
-									local rtr_spd = getVehicleRotorSpeed(vehicle)*4.5;
-									setSoundSpeed(e,rtr_spd);
-									setSoundMaxDistance(e,300);
-									if (rtr_spd == 0) then
-										setSoundPaused(e,true);
-									else
-										setSoundPaused(e,false);
-									end
-								else
-									local vx, vy, vz = getElementVelocity(vehicle);
-									local mph = ((vx^2 + vy^2 + vz^2)^(0.5)) * 180;
-									local soundenginespeed = (mph+20)/50;
-									if soundenginespeed > 2 then soundenginespeed = 2 end
-									setSoundSpeed(e,soundenginespeed);
-									if (not vehiclestate) then
-										setSoundPaused(e,true);
-									else
-										setSoundPaused(e,false);
-									end
-								end
-								if getElementData(vehicle,"isExploded") then
-									destroyElement(e);
-								end
-							elseif not getElementData(vehicle,"soundexists") then
-								local x,y,z = getElementPosition(vehicle);
-								local sound = playSound3D(soundpath,x,y,z,true);
-								setSoundMinDistance(sound,10);
-								setSoundMaxDistance(sound,150);
-								attachElements(sound,vehicle);
-								setElementData(vehicle,"soundexists",true,false);
-							end
-						end
-					end
-				end
-			end
 		end
 	end
 end);
