@@ -1,6 +1,9 @@
 -- Exercise the real panel with lightweight GUI stubs.
 local handlers,controls,requests={}, {},{}
 root={};resourceRoot={};localPlayer={}
+local dayzResource={};local dayzState="running"
+function getResourceFromName() return dayzResource end
+function getResourceState() return dayzState end
 items={Weapons={'weapon11'},Ammo={'mag5'},Food={'fooditem4'}}
 exports={dayzepoch={getLanguageTextClient=function(_,id) return ({weapon11='M4A1 Holo',mag5='STANAG ammo',fooditem4='Baked beans'})[id] end}}
 local function control(kind,text)
@@ -76,3 +79,6 @@ for _,e in ipairs(controls) do
 end
 assert(#requests==before+7)
 print('PASS testing panel opens and sends all seven actions through server requests')
+
+dayzState="stopped";refreshGiveItems();dayzState="running";refreshGiveItems()
+print("PASS item catalogue tolerates DayZ stopping and restarting")

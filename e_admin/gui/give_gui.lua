@@ -1,3 +1,11 @@
+-- Item names remain available while DayZ is starting or restarting.
+local function itemName(id)
+ local resource=getResourceFromName("dayzepoch")
+ if resource and getResourceState(resource)=="running" then
+  return exports.dayzepoch:getLanguageTextClient(id) or id
+ end
+ return id
+end
 -- Readable DayZ catalogue. Item IDs stay in row data for server validation.
 local categories = {"All items"}
 local selfButton, searchEdit, statusLabel
@@ -15,7 +23,7 @@ function refreshGiveItems()
     for group, entries in pairs(items) do
         if category == "All items" or category == group then
             for _,id in ipairs(entries) do
-                local name = exports.dayzepoch:getLanguageTextClient(id) or id
+                local name = itemName(id)
                 if string.find(string.lower(name),query,1,true) or string.find(string.lower(id),query,1,true) then
                     rows[#rows+1]={id=id,name=name,category=group}
                 end
@@ -103,7 +111,11 @@ end)
 addEvent("dayz:adminItemGranted",true)
 addEventHandler("dayz:adminItemGranted",resourceRoot,function(item,quantity,targetName)
     if isElement(statusLabel) then
-        local name=exports.dayzepoch:getLanguageTextClient(item) or item
+        local name=itemName(item)
         guiSetText(statusLabel,"Added "..quantity.." x "..name.." to "..targetName..".")
     end
+end)
+
+addEventHandler("onClientResourceStart",root,function(resource)
+ if resource==getResourceFromName("dayzepoch") then refreshGiveItems() end
 end)

@@ -1270,7 +1270,7 @@ addEventHandler("onClientRender", root, function()
 				if (getDistanceBetweenPoints3D(x, y, z, px, py, pz) <= 3 or getPedTarget(localPlayer) == v) then
 					local sx,sy = getScreenFromWorldPosition(px, py, pz+0.50, 0.06);
 					if (sx and sy) then
-						local tHumanity = getElementData(v,"humanity");
+						local tHumanity = tonumber(getElementData(v,"humanity")) or 0;
 						local text = (getPlayerName(v):gsub("#%x%x%x%x%x%x", ""));
 						local w = dxGetTextWidth(text, 1, "default-bold");
 						if (getElementData(v,"gang") == getElementData(localPlayer,"gang")) then
@@ -1280,10 +1280,10 @@ addEventHandler("onClientRender", root, function()
 						dxDrawText(text, sx-(w/2)+1, sy+1, sx-(w/2)+1, sy+1, tocolor(0, 0, 0, 255), 1, "default-bold");
 						if (tHumanity <= 0) then
 							dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(150, 50, 50, 255), 1, "default-bold");
-						elseif (tHumanity >= 1) then
-							dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(50, 150, 50, 255), 1, "default-bold");
 						elseif (tHumanity >= 5000) then
 							dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(50, 50, 150, 255), 1, "default-bold");
+                        else
+                            dxDrawText(text, sx-(w/2), sy, sx-(w/2), sy, tocolor(50,150,50,255), 1, "default-bold");
 						end
 					end
 				end
