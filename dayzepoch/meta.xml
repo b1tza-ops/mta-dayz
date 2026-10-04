@@ -485,4 +485,5 @@
     <file src="mods/weapons/348.dff" />
     <file src="mods/weapons/349.txd" />
     <file src="mods/weapons/349.dff" />
+    <script src="scripts/world_expansion_s.lua" type="server" />
 </meta>

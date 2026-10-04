@@ -193,3 +193,8 @@ Native spawns roll 75% civilian (10,000 blood), 20% military (18,000 blood) and 
 Cosmetic titles unlock at levels 1/3/7/12/20; Scout/Ranger/Veteran outfits at 3/7/12; wave/cheer/dance at 1/5/10. Use the panel or `/title survivor`, `/outfit scout`, `/emote wave`; `/title none` and `/outfit none` reset selections. Outfits only overlay the player model: underlying clothing inventory, armor, damage and account skin remain unchanged. No gear, health or combat bonuses are granted.
 
 Upload the patch's `dayzepoch` directory over the existing resource, then run `refresh` and `restart dayzepoch`. Do not replace databases or accounts. Smoke test natural zombie kills, logout/login XP, death persistence, locked rewards, outfit reset and variant movement. Client-reported zombie kills retain the existing mode's trust limitations; this is not a replacement anti-cheat.
+
+
+### RedFear custom world expansion
+
+`redfear_world` adds Last Hope Refuge, Checkpoint Vulture and Sector 13 Quarantine, with native buildings/collision structures and 19 DayZ loot points. Upload the separate resource and updated DayZ manifest/bridge, then `refresh`, `restart dayzepoch`, `start redfear_world`. Admin inspection: `/rfmap camp`, `/rfmap military`, `/rfmap quarantine`, `/rfmap back`. See `redfear_world/README.md` for startup configuration and live placement checks. Stop the resource to remove objects and its associated loot. No live engine/terrain validation was available.
