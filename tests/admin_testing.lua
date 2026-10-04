@@ -1,6 +1,6 @@
 -- Server behaviour tests for the admin testing panel; run with texlua.
 unpack=unpack or table.unpack
-local handlers,elements,timers={}, {},{}
+local handlers,elements,timers,commands={}, {},{},{}
 local now,passed=10000,0
 local function E(kind,x,y,z)
  local e={kind=kind,data={},alive=true,x=x or 0,y=y or 0,z=z or 0,dim=0,int=0};elements[#elements+1]=e;return e
@@ -26,6 +26,8 @@ function getPedOccupiedVehicle(e) return e.vehicle end
 function isPedDead(e) return e.dead or false end
 function getTickCount() return now end
 function addEvent() end
+function addCommandHandler(name,fn) commands[name]=fn end
+function outputChatBox() end
 function addEventHandler(name,target,fn) handlers[name]=handlers[name] or {};handlers[name][#handlers[name]+1]=fn end
 function outputDebugString() end
 function triggerClientEvent(target,event,origin,message) target.last={event=event,message=message} end
@@ -61,6 +63,7 @@ function setElementHealth(e,v) e.health=v end
 function setVehicleLocked(e,v) e.locked=v end
 function setVehicleEngineState(e,v) e.engine=v end
 dofile('dayzepoch/scripts/shared/admin_testing_locations.lua')
+dofile('dayzepoch/scripts/airdrop_loot_s.lua')
 dofile('dayzepoch/scripts/admin_testing_s.lua')
 local function action(who,name,value,origin)
  now=now+6000;client=who;source=origin or who;handlers['dayz:testAction'][1](name,value);client=nil;source=nil
@@ -171,5 +174,34 @@ test('removed survivor actions are ignored by the server',function()
  local n=active('ped');local previous=admin.last
  for _,name in ipairs({'survivor','survivorinspect','survivorneeds'}) do action(admin,name);action(ordinary,name) end
  assert(active('ped')==n and admin.last==previous)
+end)
+dofile('dayzepoch/scripts/public_airdrops_s.lua')
+local publicTick=timers[#timers].fn
+local function latestCol() local list=getElementsByType('colshape');return list[#list] end
+test('public drops require Admin or console and cannot overlap',function()
+ action(admin,'cleanup')
+ local n=active('object');commands.airdropnow(ordinary);assert(active('object')==n)
+ commands.airdropnow(admin);assert(active('object')==n+2)
+ local col=latestCol();assert(not col.data.airdrop and col.data.medicine5>=3)
+ commands.airdropnow(admin);assert(active('object')==n+2)
+ runTimer(10000);assert(col.data.airdrop)
+ runTimer(20*60000);assert(not isElement(col) and active('object')==n)
+end)
+test('public timer pauses when empty then schedules online drops',function()
+ admin.data.logedin=false;ordinary.data.logedin=false
+ now=now+31*60000;publicTick();assert(active('object')==0)
+ admin.data.logedin=true
+ now=now+29*60000;publicTick();assert(active('object')==0)
+ now=now+60000;publicTick();assert(active('object')==2)
+ runTimer(10000);runTimer(20*60000);assert(active('object')==0)
+end)
+test('failed public creation leaves no orphan elements',function()
+ local n=active('colshape');failObject=true;commands.airdropnow(admin);failObject=false
+ assert(active('colshape')==n and active('blip')==0)
+end)
+test('resource stop removes public drops and timers',function()
+ commands.airdropnow(nil);local col=latestCol();assert(isElement(col))
+ source=resourceRoot;for _,fn in ipairs(handlers.onResourceStop) do fn() end;source=nil
+ assert(not isElement(col) and active('object')==0 and active('blip')==0)
 end)
 print(passed..' admin testing behaviour checks passed')

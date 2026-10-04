@@ -38,7 +38,9 @@
 	<script src="vehicles.lua" type="server" />
     <script src="accounts.lua" type="server" />
     <script src="scripts/inventory_s.lua" type="server" />
+    <script src="scripts/airdrop_loot_s.lua" type="server" />
     <script src="scripts/admin_testing_s.lua" type="server" />
+    <script src="scripts/public_airdrops_s.lua" type="server" />
 	<!-- Client -->
     <script src="menu_client.lua" type="client" cache="false"/>
     <script src="inventory.lua" type="client" cache="false"/>

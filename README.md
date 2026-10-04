@@ -120,3 +120,18 @@ accounts, masked native password inputs, saved usernames, language selection
 and server authentication events. Enter submits the current form. Errors appear
 inline; repeated requests have a short client cooldown in addition to the server
 rate limit. No password is saved by this panel.
+
+### Automatic public airdrops
+
+While logged-in survivors are online in the main world, a public supply drop
+arrives every 30 minutes with a two-minute warning. Locations rotate randomly
+between the three airports and Area 69, without repeating the previous location.
+An orange map marker guides players to the crate; it lands after 10 seconds and
+expires 20 minutes after landing. Only one public drop can be active. Empty
+servers reset the countdown. Public crates share the admin drop loot generator,
+including its 8% rare military roll. Admin test cleanup does not remove public drops.
+
+Use `/airdrops` for the current status. `/airdropnow` requires an Admin ACL account
+or the server console (`airdropnow` without a slash). Timing and locations are
+configured at the top of `scripts/public_airdrops_s.lua`. Restart the resource
+after editing. Landing positions still require testing in the MTA game engine.
