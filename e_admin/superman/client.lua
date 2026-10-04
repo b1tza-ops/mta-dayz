@@ -67,8 +67,8 @@ local function isPlayerFlying(player)
 end
 
 local function setPlayerFlying(player, state)
-  if state == true then state = true
-  else state = false end
+  -- The client can stop its own visuals, but cannot grant flight.
+  state = false
 
   setElementData(player, "superman:flying", state, false)
 end
@@ -286,6 +286,11 @@ end
 function Superman.onDataChange(dataName, oldValue)
   local self = Superman
 
+  if source==localPlayer and dataName=="superman:flying" and getElementData(source,dataName)==true then
+    self.currentSpeed=0
+    self.extraVelocity={x=0,y=0,z=0}
+    setElementVelocity(localPlayer,0,0,TAKEOFF_VELOCITY)
+  end
   if dataName == "superman:flying" and isElement(source) and getElementType(source) == "player" and
      oldValue ~= getElementData(source, dataName) and oldValue == true and getElementData(source, dataName) == false then
     self:restorePlayer(source)
@@ -298,11 +303,11 @@ end
 function Superman.onJump(key, keyState)
   local self = Superman
 
+  if not getElementData(localPlayer,"superman:allowed") then return end
   local task = getPedSimplestTask(localPlayer)
   if not isPlayerFlying(localPlayer) then
 	if task == "TASK_SIMPLE_IN_AIR" then
-	  setElementVelocity(localPlayer, 0, 0, TAKEOFF_VELOCITY)
-      setTimer(Superman.startFlight, 100, 1)
+	  Superman.startFlight()
 	end
   end
 end
@@ -314,8 +319,7 @@ function Superman.cmdSuperman()
   local self = Superman
 
   if isPedInVehicle(localPlayer) or isPlayerFlying(localPlayer) then return end
-  setElementVelocity(localPlayer, 0, 0, TAKEOFF_VELOCITY)
-  setTimer(Superman.startFlight, TAKEOFF_FLIGHT_DELAY, 1)
+  Superman.startFlight()
 end
 
 function Superman.startFlight()
@@ -324,10 +328,7 @@ function Superman.startFlight()
   if isPlayerFlying(localPlayer) then return end
 
   triggerServerEvent("superman:start", localPlayer)
-  setPlayerFlying(localPlayer, true)
-  setElementVelocity(localPlayer, 0, 0, 0)
-  self.currentSpeed = 0
-  self.extraVelocity = { x = 0, y = 0, z = 0 }
+  -- Wait for the protected server data change before applying flight physics.
 end
 
 
