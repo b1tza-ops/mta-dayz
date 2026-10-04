@@ -81,7 +81,9 @@ Use `/dayztest` while logged in with an Admin ACL account. The panel provides:
   respecting the global zombie limit. The normal five-zombie player cap does not block admin test batches.
 - Trigger a populated test airdrop 7 metres ahead. It falls for 10 seconds,
   appears as an orange radar marker, and uses the normal DayZ loot menu after landing.
-  Contents: M4A1 Holo, 120 rounds of matching ammo, food, bandages and an engine.
+  Contents roll on the server: food, drinks, bandages, healing supplies, a weapon
+  with matching ammunition, a repair/fuel item and useful equipment. An 8% rare
+  military roll upgrades the weapon and adds advanced medicine and premium gear.
 - Inspect the nearest vehicle within 12 metres: health, engine state, fuel,
   inventory capacity and installed/required parts. Inspection does not mutate vehicles.
 - Spawn fully fitted DayZ vehicles with fuel and all required parts.

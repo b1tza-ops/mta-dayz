@@ -105,11 +105,34 @@ test('cleanup removes only callers test spawns and restores counters',function()
 end)
 test('airdrop is populated and cannot be looted until landing',function()
  action(admin,'airdrop');local col=getElementsByType('colshape')[1]
- assert(col.data.weapon11==1 and col.data.mag5==120 and not col.data.airdrop)
+ assert(col.data.medicine5>=3 and col.data.medicine3>=1 and not col.data.airdrop)
  runTimer(10000);assert(col.data.airdrop and active('object')==1)
 end)
+test('airdrop rolls enforce rare boundary matching ammo and valid bounded loot',function()
+ action(admin,'cleanup')
+ dofile('dayzepoch/scripts/shared/inventory_items.lua')
+ local slots={};for _,group in pairs(DayZInventoryItems) do for _,item in ipairs(group) do slots[item[1]]=item[2] end end
+ local random=math.random
+ for _,roll in ipairs({1,8,9,100}) do
+  for _,high in ipairs({false,true}) do
+   local first=true
+   math.random=function(a,b) if first then first=false;return roll end;return high and b or a end
+   action(admin,'airdrop');math.random=random
+   local col=getElementsByType('colshape')[1];local used=0
+   local ammo={weapon7='mag7',weapon9='mag4',weapon10='mag4',weapon11='mag5',weapon12='mag6',weapon2='mag10',weapon5='mag8'}
+   local guns=0
+   for k,v in pairs(col.data) do
+    if slots[k] then assert(v>0 and v%1==0);used=used+slots[k]*v end
+    if ammo[k] then guns=guns+v;assert(col.data[ammo[k]]>0) end
+   end
+   assert(guns==1 and used<=col.data.MAX_Slots)
+   assert((col.data.medicine1==1)==(roll<=8))
+   action(admin,'cleanup')
+  end
+ end
+end)
 test('airdrop cap and cleanup include landing timer and markers',function()
- action(admin,'airdrop');local count=active('object');action(admin,'airdrop');assert(active('object')==count)
+ action(admin,'airdrop');action(admin,'airdrop');local count=active('object');action(admin,'airdrop');assert(active('object')==count)
  action(admin,'cleanup');assert(active('object')==0 and active('blip')==0 and active('colshape')==0)
  for _,t in ipairs(timers) do if t.ms==10000 then assert(not t.fn) end end
 end)
