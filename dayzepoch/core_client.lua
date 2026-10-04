@@ -261,6 +261,7 @@ local bloodsplash = guiCreateStaticImage(0,0,1,1,"images/bloodsplash.png",true)
 guiSetEnabled(bloodsplash,false)
 guiSetVisible(bloodsplash,false)
 
+bindKey("t", "down", "chatbox", "localchat");
 bindKey("x", "down", "chatbox", "globalchat");
 bindKey("u", "down", "chatbox", "radiochat");
 
@@ -1563,8 +1564,8 @@ addCommandHandler("fixchat",function()
     local map=getResourceFromName("e_map")
     if map and getResourceState(map)=="running" then exports.e_map:setPlayerMapVisible(false) end
     showChat(true)
-    unbindKey("t","down","chatbox")
-    bindKey("t","down","chatbox")
+    unbindKey("t","down","chatbox","localchat")
+    bindKey("t","down","chatbox","localchat")
     unbindKey("x","down","chatbox","globalchat")
     unbindKey("u","down","chatbox","radiochat")
     bindKey("x","down","chatbox","globalchat")

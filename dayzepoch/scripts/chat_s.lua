@@ -76,6 +76,10 @@ addEventHandler("onPlayerChat",root,function(message,kind)
         executeCommandHandler("teamchat",source,message)
     end
 end)
+addCommandHandler("localchat",function(player,_,...)
+    local message=DayZPrepareChat(player,table.concat({...}," "))
+    if message then send(player,"LOCAL",message) end
+end)
 addCommandHandler("globalchat",function(player,_,...)
     if not configVar.globalchat then return end
     local message=DayZPrepareChat(player,table.concat({...}," "))

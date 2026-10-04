@@ -51,3 +51,10 @@ function getPlayerGang() return 'Test' end
 function getPlayersInGang() return {owner,regular} end
 assert(load('return function(player,_,...) '..body..' end'))()(owner,'teamchat','team');assert(#output==2 and output[1].s:find('[TEAM]',1,true))
 print('PASS roles, spoof resistance, format, colour stripping, global, local world/range, radio, team, mute, empty messages and throttling')
+
+now=now+2000
+local before=#output
+commands.localchat(players[1],"localchat","local binding test")
+assert(#output>before)
+assert(output[#output].s:find("[LOCAL]",1,true))
+print('PASS explicit localchat command used by T binding')
