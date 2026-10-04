@@ -235,24 +235,14 @@ addEventHandler("creategang", root, function(player,teamname)
 end);
 
 addCommandHandler("teamchat", function(player, _, ...)
-	local team = getPlayerGang(player);
-	local msg = table.concat({...} , " "):gsub("#%x%x%x%x%x%x", "");
-	if (team ~= "None") then
-		if isPlayerMuted(player) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",player), player, 160, 40, 40);
-			return;
-		end
-		if (getElementData(player,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",player), player, 160, 40, 40);
-			return;
-		else
-			setDayZData(player,"antichat",true)
-			setTimer(setElementData, 1000, 1, player, "antichat", false);
-		end
-		for _,v in pairs(getPlayersInGang(team)) do
-			outputChatBox("#008B8B["..getElementData(player, "gang.rank").."]#20B2AA"..getPlayerName(player):gsub("#%x%x%x%x%x%x", "")..": #FFFFFF"..msg, v, 255, 255, 255, true);
-		end
-	end
+    local team = getPlayerGang(player);
+    if team == "None" then return; end
+    local message = DayZPrepareChat(player, table.concat({...}, " "));
+    if not message then return; end
+    local line = DayZFormatChat(player, "TEAM", message);
+    for _,member in pairs(getPlayersInGang(team)) do
+        outputChatBox(line, member, 255, 255, 255, true);
+    end
 end);
 
 addEventHandler("onPlayerLogin", root, function(pa, acc, se)

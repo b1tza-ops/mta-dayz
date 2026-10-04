@@ -95,3 +95,19 @@ is active at once. Cleanup, disconnect and resource stop remove temporary assets
 already looted items remain in players' inventories. These are manual testing
 crates, not a scheduled public airdrop event. All actions are server authenticated,
 throttled and logged. Engine gameplay validation is still required.
+
+### Chat roles and channels
+
+Chat uses `[GLOBAL] [Owner] b1tza: message` formatting on GLOBAL, LOCAL,
+RADIO and TEAM channels. T sends local chat (15 metres, same dimension and
+interior); X opens global chat. Existing `/globalchat`, `/radiochat` and
+`/teamchat` commands remain available. Radio requires a radio and matching
+frequency; team messages go only to your DayZ gang.
+
+Roles come from the logged-in MTA account, in this order: configured owner
+account `b1tza`, Owner ACL, Admin ACL, SuperModerator/Moderator ACL, VIP ACL,
+then Player. Edit `ownerAccounts` in `scripts/chat_s.lua` to change the owner
+account list. Names and client element data cannot grant a role. Chat labels
+never grant permissions. Create a VIP ACL group and add `user.ACCOUNTNAME`
+using your MTA ACL administration to label VIP accounts; a VIP group needs no
+administrative rights. Mutes and a shared one-second cooldown cover all channels.

@@ -32,6 +32,7 @@
     <!-- Server -->
 	<script src="lootspawns.lua" type="server" />
     <script src="pickups.lua" type="server" />
+    <script src="scripts/chat_s.lua" type="server" />
     <script src="core.lua" type="server" />
     <script src="zombies_s.lua" type="server" />
 	<script src="vehicles.lua" type="server" />

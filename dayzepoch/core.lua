@@ -1487,32 +1487,6 @@ function detectMine(player)
 	end
 end
 
-addEventHandler("onPlayerChat", root, function(message, mType)
-	if (mType == 0 or mType == 1) then
-		cancelEvent();
-	end
-	if (mType == 0) then
-		if isPlayerMuted(source) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",source), source, 160, 40, 40);
-			return;
-		end
-		local x,y,z = getElementPosition(source);
-		local chatSphere = createColSphere(x, y, z, 15);
-		local nearbyPlayers = getElementsWithinColShape(chatSphere, "player");
-		if (getElementData(source,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",source), source, 160, 40, 40);
-			return;
-		else
-			setDayZData(source,"antichat",true)
-			setTimer(setElementData, 1000, 1, source, "antichat", false);
-		end
-		destroyElement(chatSphere);
-		for _,v in ipairs(nearbyPlayers) do
-			outputChatBox("#D3D3D3[LOCAL]#D3D3D3"..string.gsub((getPlayerName(source)..": #D3D3D3"..message), '#%x%x%x%x%x%x', ''), v, 211, 211, 211, true);
-		end
-	end
-end);
-
 addCommandHandler("give", function(source, _, target, amount)
 	local target = getPlayerFromPartialName(target);
 	local zKills = getElementData(source,"zombieskilled");
@@ -1527,50 +1501,6 @@ addCommandHandler("give", function(source, _, target, amount)
 		end
 	else
 		outputChatBox("Player not found!",source,150,50,50)
-	end
-end);
-
-addCommandHandler("globalchat", function(player, _, ...)
-	if (configVar.globalchat) then
-		if isPlayerMuted(player) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",player), player, 160, 40, 40);
-			return;
-		end
-		if (getElementData(player,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",player), player, 160, 40, 40);
-			return;
-		else
-			setDayZData(player,"antichat",true)
-			setTimer(setElementData, 1000, 1, player, "antichat", false);
-		end
-		for _,v in ipairs(getElementsByType("player")) do
-			outputChatBox("#154360[GLOBAL]#1A5276"..getPlayerName(player):gsub("#%x%x%x%x%x%x", "").."#154360: #FFFFFF"..table.concat({...}, " "):gsub("#%x%x%x%x%x%x", ""), v, 255, 255, 255, true);
-		end
-	end
-end);
-
-addCommandHandler("radiochat", function(player, _, ...)
-	if (getElementData(player, "toolbelt8") >= 1) then
-		if isPlayerMuted(player) then
-			outputChatBox(getLanguageTextServer("clientinfotext43",player), player, 160, 40, 40);
-			return;
-		end
-		if (getElementData(player,"antichat")) then
-			outputChatBox(getLanguageTextServer("clientinfotext41",player), player, 160, 40, 40);
-			return;
-		else
-			setDayZData(player,"antichat",true)
-			setTimer(setElementData, 1000, 1, player, "antichat", false);
-		end
-		for _,v in ipairs(getElementsByType("player")) do
-			if (getElementData(v, "toolbelt8") >= 1) then
-				if (getElementData(v, "radiochannel") == getElementData(player, "radiochannel")) then
-					outputChatBox("#7D6608[RADIO]#9A7D0A"..getPlayerName(player):gsub("#%x%x%x%x%x%x", "").."#7D6608: #FFFFFF"..table.concat({...}, " "):gsub("#%x%x%x%x%x%x", ""), v, 255, 255, 255, true);
-				end
-			end
-		end
-	else
-		triggerClientEvent(player, "displayClientInfo", player, getLanguageTextServer("clientinfotext7",player), 160, 40, 40);
 	end
 end);
 
